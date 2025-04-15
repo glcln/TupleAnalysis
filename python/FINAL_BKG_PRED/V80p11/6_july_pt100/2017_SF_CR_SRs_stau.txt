@@ -1,0 +1,1 @@
+SR1_2017_ScaleFactor_CR_SR_stau : 0.274145616642
