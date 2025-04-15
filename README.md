@@ -36,32 +36,6 @@ This library needs to be loaded in root macros.
  - In case of issues, you can kill all proof instances
  > ./killproof.sh
 
-## To-do for Eric:
- - [x] remove useless TTreeReader Value/Array (tests seems that it does not improve the execution time)
- - [x] add patterns to add variables
- - [x] add HSCP selection
- - [x] add patterns to change the selection
- - [x] add a selection of a single HSCP candidate per event (most ionizing)
- - [x] write the associated python scripts
- - [x] create a macros directory and move code
- - compile.sh changed into a Makefile
-
-## To-do for Raphael:
- -  Change binning of MassRegionPlots
- -  Add MassRegionPlots for all quantiles
- -  Port all required pieces of code from Dylan's code
- -  Check the code compatibility by running background prediction macros
- -  Clean the code to avoid hard- coded values and becoming configurable (binning, quantiles, ...)
- -  Check #nodes optimization
- -  Update CPlots class to hadd 2D and eventually TProfile
- -  Add configuration for 2D plots & TProfile
- -  If needed: add plots at other level than preselection or for other quantities (event based or cluster based)
- -  fix the storage of TCanvas (duplicate name)
- -  fix issue with K & C global variable
- -  check the usage of references in classes/functions
-
-
-![Exectution time observed running over 33 M evts of 2017 - 93 Go - ~15 Go read](img/Perf.png)
 
 Documentation about parallalization:
  - More documentation about TProof can be found [here](https://root.cern/download/proof.pdf).
