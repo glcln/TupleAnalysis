@@ -16,6 +16,7 @@ RegionMassPlot::RegionMassPlot(std::string suffix,int etabins,int ihbins,int pbi
     ih_ias=0;
     ih_fpix=0;
     eta_fpix=0;
+    p_fpix=0;
     ih_nhits=0;
     ias_nhits=0;
     eta_pt=0;
@@ -67,6 +68,7 @@ RegionMassPlot::~RegionMassPlot(){
     if(!ih_ias) delete ih_ias;
     if(!ih_fpix) delete ih_fpix;
     if(!eta_fpix) delete eta_fpix;
+    if(!p_fpix) delete p_fpix;
     if(!ih_nhits) delete ih_nhits;
     if(!ias_nhits) delete ias_nhits;
     if(!eta_pt) delete eta_pt;
@@ -161,6 +163,7 @@ void RegionMassPlot::initHisto(int& etabins,int& ihbins,int& pbins,int& massbins
     ih_ias = new TH2F(("ias_ih"+suffix).c_str(),";I_{as};I_{h} [MeV/cm]",nias,iaslow,iasup,nih,ihlow,ihup); ih_ias->Sumw2();
     ih_fpix = new TH2F(("fpix_ih"+suffix).c_str(),";F^{pix};I_{h} [MeV/cm]",nfpix,fpixlow,fpixup,nih,ihlow,ihup); ih_fpix->Sumw2();
     eta_fpix = new TH2F(("fpix_eta"+suffix).c_str(),";F^{pix};#eta",nfpix,fpixlow,fpixup,neta,etalow,etaup); eta_fpix->Sumw2();
+    p_fpix = new TH2F(("fpix_p"+suffix).c_str(),";10^{4}/p [GeV];F^{pix}",np,plow,pup,nfpix,fpixlow,fpixup); p_fpix->Sumw2();
 
     ih_nhits = new TH2F(("ih_nhits"+suffix).c_str(),";nhits;I_{h} [MeV/cm]",20,0,20,nih,ihlow,ihup); ih_nhits->Sumw2();
 
@@ -236,6 +239,7 @@ void RegionMassPlot::fill(float eta, float nhits, float p, float pt, float pterr
    ih_ias->Fill(ias,ih,w);
    ih_fpix->Fill(fpix,ih,w);
    eta_fpix->Fill(fpix,eta,w);
+   p_fpix->Fill(p,fpix,w);
    ih_nhits->Fill(nhits,ih,w);
    ias_nhits->Fill(nhits,ias,w);
    eta_pt->Fill(pt,eta,w);
@@ -380,6 +384,7 @@ void RegionMassPlot::write()
     ih_ias->Write();
     ih_fpix->Write();
     eta_fpix->Write();
+    p_fpix->Write();
     ih_nhits->Write();
     ias_nhits->Write();
     eta_pt->Write();
@@ -398,21 +403,21 @@ void RegionMassPlot::write()
     eta_npv->Write();
     p_npv->Write();
     ih_npv->Write();
-    is_ias->Write();
-    is_ih->Write();
+    //is_ias->Write();
+    //is_ih->Write();
     mass->Write();
     mass_p->Write();
     mass_ih->Write();
-    massFrom1DTemplatesEtaBinning->Write();
-    errMass->Write();
-    Mass_errMass->Write();
+    //massFrom1DTemplatesEtaBinning->Write();
+    //errMass->Write();
+    //Mass_errMass->Write();
     ih_pt->ProjectionY()->Write();
     ih_p->ProfileX()->Write();
     ias_p->ProfileX()->Write();
     ih_pt->ProfileX()->Write();
     ias_pt->ProfileX()->Write();
-    momentumDistribM1000->Write();
-    dedxDistribM1000->Write();
+    //momentumDistribM1000->Write();
+    //dedxDistribM1000->Write();
 }
 
 void RegionMassPlot::addToList(TList* list){
@@ -422,6 +427,7 @@ void RegionMassPlot::addToList(TList* list){
     list->Add(ih_ias);
     list->Add(ih_fpix);
     list->Add(eta_fpix);
+    list->Add(p_fpix);
     list->Add(ih_nhits);
     list->Add(ias_nhits);
     list->Add(eta_pt);
@@ -439,21 +445,21 @@ void RegionMassPlot::addToList(TList* list){
     list->Add(eta_npv);
     list->Add(p_npv);
     list->Add(ih_npv);
-    list->Add(is_ias);
-    list->Add(is_ih);
+    //list->Add(is_ias);
+    //list->Add(is_ih);
     list->Add(mass);
     list->Add(mass_p);
     list->Add(mass_ih);
     list->Add(mass_eta);
-    list->Add(massFrom1DTemplatesEtaBinning);
-    list->Add(errMass);
-    list->Add(Mass_errMass);
+    //list->Add(massFrom1DTemplatesEtaBinning);
+    //list->Add(errMass);
+    //list->Add(Mass_errMass);
     list->Add(ih_pt->ProjectionY());
     list->Add(ih_p->ProfileX());
     list->Add(ias_p->ProfileX());
     list->Add(ih_pt->ProfileX());
     list->Add(ias_pt->ProfileX());
-    list->Add(momentumDistribM1000);
-    list->Add(dedxDistribM1000);
+    //list->Add(momentumDistribM1000);
+    //list->Add(dedxDistribM1000);
 }
 

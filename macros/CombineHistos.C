@@ -1089,14 +1089,125 @@ void FpixVSEta()
     return;
 }
 
+void CompareDistwMET()
+{
+    TFile *ofile = new TFile("PlayWithHistos/CompareDistwMET.root", "RECREATE");
+
+    TFile *MET = new TFile("Fpix_V3p0/MET_2017_2018_massCut_0_pT70_V3p0_Fpix_Eta2p4_cutIndex3_rebinEta4_rebinIh4_rebinP2_rebinMass1_EtaReweighting_NewFits.root");
+    TH1F *eta_MET = (TH1F*)MET->Get("ih_eta_regionD_8fp9_ReRunRaph_px");
+    TH1F *p_MET = (TH1F*)MET->Get("eta_p_regionD_8fp9_ReRunRaph_px");
+    TH1F *Ih_MET = (TH1F*)MET->Get("ih_eta_regionD_8fp9_ReRunRaph_py");
+    TFile *METbis = new TFile("MET_2017_2018_massCut_0_pT70_V3p1_Fpix_Eta2p4.root");
+    TH2F *FpixGstripMET = (TH2F*)METbis->Get("ReRunRaph_Fpix_vs_Gstrip");
+    TH1F *FpixMET = (TH1F*)FpixGstripMET->ProjectionX("Fpix");
+
+    TFile *Mu = new TFile("Fpix_V2p18/Mu2018_massCut_0_pT70_V2p18_Fpix_Eta2p4_cutIndex3_rebinEta4_rebinIh4_rebinP2_rebinMass1_EtaReweighting.root");
+    TH1F *eta_Mu = (TH1F*)Mu->Get("ih_eta_regionD_8fp9_ReRunRaph_px");
+    TH1F *p_Mu = (TH1F*)Mu->Get("eta_p_regionD_8fp9_ReRunRaph_px");
+    TH1F *Ih_Mu = (TH1F*)Mu->Get("ih_eta_regionD_8fp9_ReRunRaph_py");
+    TFile *Mubis = new TFile("Mu2018_massCut_0_pT70_V2p18_Fpix_Eta2p4.root");
+    TH2F *FpixGstripMu = (TH2F*)Mubis->Get("ReRunRaph_Fpix_vs_Gstrip");
+    TH1F *FpixMu = (TH1F*)FpixGstripMu->ProjectionX("Fpix");
+
+    eta_MET->Scale(1./eta_MET->Integral());
+    eta_Mu->Scale(1./eta_Mu->Integral());
+    p_MET->Scale(1./p_MET->Integral());
+    p_Mu->Scale(1./p_Mu->Integral());
+    Ih_MET->Scale(1./Ih_MET->Integral());
+    Ih_Mu->Scale(1./Ih_Mu->Integral());
+    FpixMET->Scale(1./FpixMET->Integral());
+    FpixMu->Scale(1./FpixMu->Integral());
+
+    for (int i = 1; i <= FpixMET->GetNbinsX(); i++)
+    {
+        if (FpixMET->GetBinCenter(i) > 0.9) FpixMET->SetBinContent(i, 0);
+        if (FpixMu->GetBinCenter(i) > 0.9) FpixMu->SetBinContent(i, 0);
+    }
+    
+
+    eta_MET->SetLineColor(kRed);
+    eta_MET->SetMarkerColor(kRed);
+    eta_MET->SetMarkerStyle(21);
+    eta_Mu->SetLineColor(kBlue);
+    eta_Mu->SetMarkerColor(kBlue);
+    eta_Mu->SetMarkerStyle(20);
+
+    p_MET->SetLineColor(kRed);
+    p_MET->SetMarkerColor(kRed);
+    p_MET->SetMarkerStyle(21);
+    p_Mu->SetLineColor(kBlue);
+    p_Mu->SetMarkerColor(kBlue);
+    p_Mu->SetMarkerStyle(20);
+
+    Ih_MET->SetLineColor(kRed);
+    Ih_MET->SetMarkerColor(kRed);
+    Ih_MET->SetMarkerStyle(21);
+    Ih_Mu->SetLineColor(kBlue);
+    Ih_Mu->SetMarkerColor(kBlue);
+    Ih_Mu->SetMarkerStyle(20);
+
+    FpixMET->SetLineColor(kRed);
+    FpixMET->SetMarkerColor(kRed);
+    FpixMET->SetMarkerStyle(21);
+    FpixMu->SetLineColor(kBlue);
+    FpixMu->SetMarkerColor(kBlue);
+    FpixMu->SetMarkerStyle(20);
+
+    TCanvas *c1 = new TCanvas("ceta", "c1", 800, 800);
+    c1->cd();
+    eta_MET->Draw("E1");
+    eta_Mu->Draw("E1 same");
+    eta_MET->GetXaxis()->SetTitle("#eta");
+    TLegend *leg = new TLegend(0.6, 0.7, 0.9, 0.9);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->AddEntry(eta_MET, "MET", "lp");
+    leg->AddEntry(eta_Mu, "Mu", "lp");
+    leg->Draw();
+
+    TCanvas *c2 = new TCanvas("cp", "c1", 800, 800);
+    c2->cd();
+    p_MET->Draw("E1");
+    p_Mu->Draw("E1 same");
+    p_MET->GetXaxis()->SetTitle("1/p");
+    c2->SetLogy();
+    leg->Draw();
+
+    TCanvas *c3 = new TCanvas("cih", "c1", 800, 800);
+    c3->cd();
+    Ih_MET->Draw("E1");
+    Ih_Mu->Draw("E1 same");
+    Ih_MET->GetXaxis()->SetTitle("I_{h}");
+    c3->SetLogy();
+    leg->Draw();
+
+    TCanvas *c4 = new TCanvas("cfpix", "c1", 800, 800);
+    c4->cd();
+    FpixMET->Draw("E1");
+    FpixMu->Draw("E1 same");
+    FpixMET->GetXaxis()->SetTitle("F_{pixel}");
+    leg->Draw();
+
+
+    ofile->cd();
+    c1->Write();
+    c2->Write();
+    c3->Write();
+    c4->Write();
+    ofile->Close();
+
+    return;
+}
+
 
 
 void CombineHistos()
 {
     //PlotPredFits();
     //CompareTemplates();
-    EtaInRegions();
+    //EtaInRegions();
     //FpixVSEta();
+    CompareDistwMET();
 
     return;
 }

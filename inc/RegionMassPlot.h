@@ -96,6 +96,7 @@ class RegionMassPlot{
         TH2F* ih_ias;
         TH2F* ih_fpix;
         TH2F* eta_fpix;
+        TH2F* p_fpix;
         TH2F* ih_nhits;
         TH2F* ias_nhits;
         TH2F* eta_pt;
