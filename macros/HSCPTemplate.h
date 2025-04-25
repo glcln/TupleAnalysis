@@ -469,12 +469,17 @@ public :
    */
 
    TTreeReaderValue<Float_t> RecoPFMET = {fReader, "RecoPFMET"};
+   TTreeReaderValue<Float_t> RecoCaloMET = {fReader, "RecoCaloMET"};
+
+
+   //TTreeReaderValue<Bool_t> Flag_HBHENoiseFilter = {fReader, "Flag_HBHENoiseFilter"};
+   //TTreeReaderValue<Bool_t> Flag_HBHENoiseIsoFilter = {fReader, "Flag_HBHENoiseIsoFilter"};
+
    /*
    TTreeReaderValue<Bool_t> HLT_PFMET120_PFMHT120_IDTight = {fReader, "HLT_PFMET120_PFMHT120_IDTight"};
    TTreeReaderValue<Bool_t> HLT_PFHT500_PFMET100_PFMHT100_IDTight = {fReader, "HLT_PFHT500_PFMET100_PFMHT100_IDTight"};
    TTreeReaderValue<Bool_t> HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 = {fReader, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60"};
    TTreeReaderValue<Bool_t> HLT_MET105_IsoTrk50 = {fReader, "HLT_MET105_IsoTrk50"};
-   TTreeReaderValue<Float_t> RecoCaloMET = {fReader, "RecoCaloMET"};
    TTreeReaderValue<Float_t> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};
    TTreeReaderValue<Float_t> RecoCaloMET_sigf = {fReader, "RecoCaloMET_sigf"};
    TTreeReaderValue<Float_t> RecoPFMET_phi = {fReader, "RecoPFMET_phi"};

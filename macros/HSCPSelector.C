@@ -51,7 +51,7 @@ int year(2018);
 //ADD-SELECTION-METHODS
 bool HSCPSelector::PassHSCPpresel_ReRunRaph(int i){
    if (i<0 || i>(int)Pt.GetSize()) return false;
-   return (  ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 2.4) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
+   return (  ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 1) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
 }
 
 bool HSCPSelector::PassPreselection(int hscpIndex){
@@ -935,9 +935,9 @@ void HSCPSelector::SlaveTerminate()
        for(auto obj: vmrp_regionA_6f9) obj.addToList(fOutput);
        for(auto obj: vmrp_regionA_7f8) obj.addToList(fOutput);
        for(auto obj: vmrp_regionA_8f9) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionA_9f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionA_99f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionA_999f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_999f10) obj.addToList(fOutput);
 
        for(auto obj: vmrp_regionB_3f4) obj.addToList(fOutput);
        for(auto obj: vmrp_regionB_3f6) obj.addToList(fOutput);
@@ -949,10 +949,10 @@ void HSCPSelector::SlaveTerminate()
        for(auto obj: vmrp_regionB_6f9) obj.addToList(fOutput);
        for(auto obj: vmrp_regionB_7f8) obj.addToList(fOutput);
        for(auto obj: vmrp_regionB_8f9) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionB_8f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionB_9f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionB_99f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionB_999f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_8f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_999f10) obj.addToList(fOutput);
 
        for(auto obj: vmrp_regionC_3f4) obj.addToList(fOutput);
        for(auto obj: vmrp_regionC_3f6) obj.addToList(fOutput);
@@ -973,10 +973,10 @@ void HSCPSelector::SlaveTerminate()
        for(auto obj: vmrp_regionD_6f9) obj.addToList(fOutput);
        for(auto obj: vmrp_regionD_7f8) obj.addToList(fOutput);
        for(auto obj: vmrp_regionD_8f9) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionD_8f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionD_9f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionD_99f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionD_999f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_8f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_999f10) obj.addToList(fOutput);
    }
 
    if(UseGstrip){ 

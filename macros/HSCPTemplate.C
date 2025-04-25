@@ -924,9 +924,9 @@ void HSCPSelector::SlaveTerminate()
        for(auto obj: vmrp_regionA_6f9) obj.addToList(fOutput);
        for(auto obj: vmrp_regionA_7f8) obj.addToList(fOutput);
        for(auto obj: vmrp_regionA_8f9) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionA_9f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionA_99f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionA_999f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_999f10) obj.addToList(fOutput);
 
        for(auto obj: vmrp_regionB_3f4) obj.addToList(fOutput);
        for(auto obj: vmrp_regionB_3f6) obj.addToList(fOutput);
@@ -938,10 +938,10 @@ void HSCPSelector::SlaveTerminate()
        for(auto obj: vmrp_regionB_6f9) obj.addToList(fOutput);
        for(auto obj: vmrp_regionB_7f8) obj.addToList(fOutput);
        for(auto obj: vmrp_regionB_8f9) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionB_8f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionB_9f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionB_99f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionB_999f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_8f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_999f10) obj.addToList(fOutput);
 
        for(auto obj: vmrp_regionC_3f4) obj.addToList(fOutput);
        for(auto obj: vmrp_regionC_3f6) obj.addToList(fOutput);
@@ -962,10 +962,10 @@ void HSCPSelector::SlaveTerminate()
        for(auto obj: vmrp_regionD_6f9) obj.addToList(fOutput);
        for(auto obj: vmrp_regionD_7f8) obj.addToList(fOutput);
        for(auto obj: vmrp_regionD_8f9) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionD_8f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionD_9f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionD_99f10) obj.addToList(fOutput);
-       //for(auto obj: vmrp_regionD_999f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_8f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_999f10) obj.addToList(fOutput);
    }
 
    if(UseGstrip){ 
