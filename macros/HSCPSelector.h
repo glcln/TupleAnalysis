@@ -28,6 +28,7 @@
 using namespace std;
 #include "../inc/RegionMassPlot.h"
 #include "../inc/CPlots.h"
+#include "../inc/ReverseMass.h"
 
 class HSCPSelector : public TSelector {
 public :

@@ -537,6 +537,10 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
 
       CPlots plots;
 
+      plots.AddHisto1D(selLabels_[i]+"_massATLAS",80,0,4000);
+      plots.AddHisto1D(selLabels_[i]+"_massKandC",80,0,4000);
+      plots.AddHisto2D(selLabels_[i]+"_Ih_VS_p",80,0,4000,50,0,50);
+
       plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
       plots.AddHisto1D(selLabels_[i]+"_eta",48,-2.4,+2.4);
       plots.AddHisto1D(selLabels_[i]+"_cand",10,0,10);
@@ -664,6 +668,13 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
         int i = iCand[s];     // most ionising candidate
 	    if (i<0) continue;
+
+        if (dataset_=="Gluino2400")
+        {
+            vcp[s].FillHisto1D(selLabels_[s]+"_massATLAS", findMass(Pt[i]*cosh(eta[i]), Ih_StripOnly[i]));
+            vcp[s].FillHisto1D(selLabels_[s]+"_massKandC", GetMass(Pt[i]*cosh(eta[i]), Ih_StripOnly[i], K, C));
+            vcp[s].FillHisto2D(selLabels_[s]+"_Ih_VS_p", Pt[i]*cosh(eta[i]), Ih_StripOnly[i]);
+        }
 
         //FILL-CPLOTS-HERE
         if (selections_[s]){

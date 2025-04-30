@@ -166,6 +166,12 @@
 ./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TRandom3.h
 ./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TRandom.h
 ./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/Math/TRandomEngine.h
-./HSCPSelector_C.so: ../inc/MassTools.h ../inc/CPlots.h
+./HSCPSelector_C.so: ../inc/MassTools.h ../inc/CPlots.h ../inc/ReverseMass.h
+./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TF1.h
+./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TFormula.h
+./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TMethodCall.h
+./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/Math/Types.h
+./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TF1AbsComposition.h
+./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/Math/ParamFunctor.h
 ./HSCPSelector_C.so: /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/RVersion.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/RConfig.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TClass.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TDictAttributeMap.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TInterpreter.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TROOT.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TBuffer.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TMemberInspector.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TError.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/RtypesImp.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TIsAProxy.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TFileMergeInfo.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.14.09-pafccj6/include/TCollectionProxyInfo.h /cvmfs/cms.cern.ch/slc7_amd64_gcc700/cms/cmssw/CMSSW_10_6_30/external/slc7_amd64_gcc700/bin/rootcling
 HSCPSelector_C__ROOTBUILDVERSION= 6.14/09

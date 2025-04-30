@@ -51,7 +51,7 @@ int year(2018);
 //ADD-SELECTION-METHODS
 bool HSCPSelector::PassHSCPpresel_ReRunRaph(int i){
    if (i<0 || i>(int)Pt.GetSize()) return false;
-   return (  ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 1) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
+   return (  ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 2.4) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
 }
 
 bool HSCPSelector::PassPreselection(int hscpIndex){
@@ -548,6 +548,10 @@ selLabels_.push_back("ReRunRaph");
 
       CPlots plots;
 
+      plots.AddHisto1D(selLabels_[i]+"_massATLAS",80,0,4000);
+      plots.AddHisto1D(selLabels_[i]+"_massKandC",80,0,4000);
+      plots.AddHisto2D(selLabels_[i]+"_Ih_VS_p",80,0,4000,50,0,50);
+
       plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
       plots.AddHisto1D(selLabels_[i]+"_eta",48,-2.4,+2.4);
       plots.AddHisto1D(selLabels_[i]+"_cand",10,0,10);
@@ -675,6 +679,13 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
         int i = iCand[s];     // most ionising candidate
 	    if (i<0) continue;
+
+        if (dataset_=="Gluino2400")
+        {
+            vcp[s].FillHisto1D(selLabels_[s]+"_massATLAS", findMass(Pt[i]*cosh(eta[i]), Ih_StripOnly[i]));
+            vcp[s].FillHisto1D(selLabels_[s]+"_massKandC", GetMass(Pt[i]*cosh(eta[i]), Ih_StripOnly[i], K, C));
+            vcp[s].FillHisto2D(selLabels_[s]+"_Ih_VS_p", Pt[i]*cosh(eta[i]), Ih_StripOnly[i]);
+        }
 
         //FILL-CPLOTS-HERE
         if (selections_[s]){

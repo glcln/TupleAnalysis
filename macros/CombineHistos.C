@@ -10,6 +10,22 @@
 #include "TGraph.h"
 #include <iostream>
 
+double MyATLASFunc(double *x, double *par)
+{
+  double m = par[0];
+  double p1 = par[1];
+  double p2 = par[2];
+  double p3 = par[3];
+  double p4 = par[4];
+  double p5 = par[5];
+
+  float p = x[0];
+
+  float term1 = pow( ( sqrt(pow(p/m,4) + 4*(p/m)*(p/m)) - (p/m)*(p/m) )/2 , p2/2);
+
+  return p1 * term1 * log(1 + pow(p3 * p/m, p4)) - p5;
+}
+
 TGraph* ConvertToGraph(TH1* histo)
 {
     int nbins = histo->GetNbinsX();
@@ -1169,7 +1185,7 @@ void CompareDistwMET()
     c2->cd();
     p_MET->Draw("E1");
     p_Mu->Draw("E1 same");
-    p_MET->GetXaxis()->SetTitle("1/p");
+    p_MET->GetXaxis()->SetTitle("10^{4}/p");
     c2->SetLogy();
     leg->Draw();
 
@@ -1199,6 +1215,81 @@ void CompareDistwMET()
     return;
 }
 
+void PlotsGluino()
+{
+    TFile *ofile = new TFile("PlayWithHistos/PlotsGluino.root", "RECREATE");
+
+    TFile *Gluino = new TFile("Gluino2400_massCut_0_pT70_V2p20p1_Gstrip_Fpix_Eta2p4.root");
+    TH1F *massATLAS = (TH1F*)Gluino->Get("ReRunRaph_massATLAS");
+    TH1F *massKandC = (TH1F*)Gluino->Get("ReRunRaph_massKandC");
+    TH2F *Ih_VS_p = (TH2F*)Gluino->Get("ReRunRaph_Ih_VS_p");
+
+    Ih_VS_p->GetXaxis()->SetTitle("p [GeV]");
+    Ih_VS_p->GetYaxis()->SetTitle("I_{h}");
+    massATLAS->GetXaxis()->SetTitle("Mass [GeV]");
+    massKandC->GetXaxis()->SetTitle("Mass [GeV]");
+
+
+    TCanvas *c = new TCanvas("c","c",800,600);
+    c->cd();
+    massATLAS->SetLineColor(kRed);
+    massKandC->SetLineColor(kBlue);
+    massKandC->GetXaxis()->SetTitle("Mass [GeV]");
+    massKandC->GetYaxis()->SetTitle("Number of events");
+    massKandC->Draw("HIST");
+    massATLAS->Draw("HIST same");
+    TLegend *leg = new TLegend(0.6,0.7,0.9,0.9);
+    leg->SetFillColor(0);
+    leg->SetBorderSize(0);
+    leg->AddEntry(massATLAS,Form("ATLAS function: #mu=%.0f & #sigma=%.0f",massATLAS->GetMean(),massATLAS->GetRMS()),"l");
+    leg->AddEntry(massKandC,Form("K and C function: #mu=%.0f & #sigma=%.0f",massKandC->GetMean(),massKandC->GetRMS()),"l");
+    leg->Draw("same");
+
+
+    double mgluino = 2400;
+    // K and C
+    TF1 *f1 = new TF1("f1", "[0]/(x*x)+[1]", 300, 4000);
+    f1->FixParameter(0, 2.55*mgluino*mgluino);
+    f1->FixParameter(1, 3.14);
+    f1->SetLineColor(kBlue);
+
+    // ATLAS
+    double params[5] = {0.00669857, -26.6212, 0.989545, 6.88361, -2.84246};
+    //double params[5] = {0.00715155, -29.1616, 0.875561, 6.91718, -2.82801};
+    TF1 *f2 = new TF1("f2", MyATLASFunc, 300, 4000, 6);
+    f2->FixParameter(0, mgluino); // mass
+    f2->FixParameter(1, params[0]);
+    f2->FixParameter(2, params[1]);
+    f2->FixParameter(3, params[2]);
+    f2->FixParameter(4, params[3]);
+    f2->FixParameter(5, params[4]);
+    f2->SetLineColor(kRed);
+
+    TCanvas *c2 = new TCanvas("c2","c2",800,600);
+    c2->cd();
+    Ih_VS_p->Draw("COLZ");
+    Ih_VS_p->GetYaxis()->SetRangeUser(0, 35);
+    f1->Draw("same");
+    f2->Draw("same");
+    TLegend *leg2 = new TLegend(0.6,0.7,0.9,0.9);
+    leg2->SetFillColor(0);
+    leg2->SetBorderSize(0);
+    leg2->AddEntry(f1,"K and C function","l");
+    leg2->AddEntry(f2,"ATLAS function","l");
+    leg2->Draw("same");
+
+
+
+
+    ofile->cd();
+    c->Write();
+    c2->Write();
+    ofile->Close();
+
+    return;
+}
+
+
 
 
 void CombineHistos()
@@ -1207,7 +1298,8 @@ void CombineHistos()
     //CompareTemplates();
     //EtaInRegions();
     //FpixVSEta();
-    CompareDistwMET();
+    //CompareDistwMET();
+    PlotsGluino();
 
     return;
 }
