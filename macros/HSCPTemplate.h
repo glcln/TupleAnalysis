@@ -416,30 +416,6 @@ public :
    TTreeReaderValue<ULong64_t> Event = {fReader, "Event"};
    TTreeReaderValue<UInt_t> Lumi = {fReader, "Lumi"};
    TTreeReaderValue<UInt_t> PileUp = {fReader, "PileUp"};
-   //Systematic weights
-   /*
-   TTreeReaderValue<Float_t> PileUpSystDown = {fReader, "PileUpSystDown"};
-   TTreeReaderValue<Float_t> PileUpSystUp = {fReader, "PileUpSystUp"};
-
-   TTreeReaderValue<Float_t> triggerSystFactorDown = {fReader, "triggerSystFactorDown"};
-   TTreeReaderValue<Float_t> triggerSystFactorUp = {fReader, "triggerSystFactorUp"};
-
-   TTreeReaderValue<Float_t> muonTriggerSFsDownEff = {fReader, "muonTriggerSFsDownEff"};
-   TTreeReaderValue<Float_t> muonTriggerSFsUpEff = {fReader, "muonTriggerSFsUpEff"};
-
-   TTreeReaderValue<Float_t> muonRecoSFsDownEff = {fReader, "muonRecoSFsDownEff"};
-   TTreeReaderValue<Float_t> muonRecoSFsUpEff = {fReader, "muonRecoSFsUpEff"};
-
-   TTreeReaderValue<Float_t> muonIdSFsDownEff = {fReader, "muonIdSFsDownEff"};
-   TTreeReaderValue<Float_t> muonIdSFsUpEff = {fReader, "muonIdSFsUpEff"};
-
-   TTreeReaderArray<float> rescaledPtUpGlobalMuon = {fReader, "rescaledPtUpGlobalMuon"};
-   TTreeReaderArray<float> rescaledPtDownGlobalMuon = {fReader, "rescaledPtDownGlobalMuon"};
-
-   TTreeReaderArray<float> rescaledPtUpInnerMuon = {fReader, "rescaledPtUpInnerMuon"};
-   TTreeReaderArray<float> rescaledPtDownInnerMuon = {fReader, "rescaledPtDownInnerMuon"};
-   */
-
 
    TTreeReaderValue<UInt_t> nofVtx = {fReader, "nofVtx"};
    TTreeReaderValue<UInt_t> nMuons = {fReader, "nMuons"};
@@ -456,30 +432,17 @@ public :
    TTreeReaderArray<int> pvNdof = {fReader, "pvNdof"};
    TTreeReaderArray<float> pvChi2 = {fReader, "pvChi2"};
    TTreeReaderArray<float> pvSumPt2 = {fReader, "pvSumPt2"};
-   /*
-   TTreeReaderValue<UInt_t> njets = {fReader, "njets"};
-   TTreeReaderValue<Float_t> GeneratorWeight = {fReader, "GeneratorWeight"};
-   TTreeReaderValue<Float_t> GeneratorBinningValues = {fReader, "GeneratorBinningValues"};
-   TTreeReaderValue<vector<bool>> triggerDecision = {fReader, "triggerDecision"};
-   TTreeReaderArray<int> triggerHLTPrescale = {fReader, "triggerHLTPrescale"};
-   TTreeReaderArray<vector<float>> triggerObjectE = {fReader, "triggerObjectE"};
-   TTreeReaderArray<vector<float>> triggerObjectPt = {fReader, "triggerObjectPt"};
-   TTreeReaderArray<vector<float>> triggerObjectEta = {fReader, "triggerObjectEta"};
-   TTreeReaderArray<vector<float>> triggerObjectPhi = {fReader, "triggerObjectPhi"};
-   */
 
+      // MET
    TTreeReaderValue<Float_t> RecoPFMET = {fReader, "RecoPFMET"};
    TTreeReaderValue<Float_t> RecoCaloMET = {fReader, "RecoCaloMET"};
-
-
-   //TTreeReaderValue<Bool_t> Flag_HBHENoiseFilter = {fReader, "Flag_HBHENoiseFilter"};
-   //TTreeReaderValue<Bool_t> Flag_HBHENoiseIsoFilter = {fReader, "Flag_HBHENoiseIsoFilter"};
-
-   /*
+   TTreeReaderValue<Bool_t> Flag_allMETFilters = {fReader, "Flag_allMETFilters"};
    TTreeReaderValue<Bool_t> HLT_PFMET120_PFMHT120_IDTight = {fReader, "HLT_PFMET120_PFMHT120_IDTight"};
    TTreeReaderValue<Bool_t> HLT_PFHT500_PFMET100_PFMHT100_IDTight = {fReader, "HLT_PFHT500_PFMET100_PFMHT100_IDTight"};
    TTreeReaderValue<Bool_t> HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 = {fReader, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60"};
    TTreeReaderValue<Bool_t> HLT_MET105_IsoTrk50 = {fReader, "HLT_MET105_IsoTrk50"};
+
+   /*
    TTreeReaderValue<Float_t> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};
    TTreeReaderValue<Float_t> RecoCaloMET_sigf = {fReader, "RecoCaloMET_sigf"};
    TTreeReaderValue<Float_t> RecoPFMET_phi = {fReader, "RecoPFMET_phi"};
@@ -501,6 +464,8 @@ public :
    TTreeReaderValue<Float_t> HLTPFMHT_phi = {fReader, "HLTPFMHT_phi"};
    TTreeReaderValue<Float_t> HLTPFMHT_sigf = {fReader, "HLTPFMHT_sigf"};
    */ 
+
+      // MUON
    TTreeReaderValue<Bool_t> HLT_Mu50 = {fReader, "HLT_Mu50"};
    /*
    TTreeReaderValue<Bool_t> L1_SingleMu22 = {fReader, "L1_SingleMu22"};
@@ -514,57 +479,6 @@ public :
    TTreeReaderArray<float> gParticleBeta = {fReader, "gParticleBeta"};
    TTreeReaderArray<float> gParticlePt = {fReader, "gParticlePt"};
 
-   /*
-   TTreeReaderArray<int> gParticleId = {fReader, "gParticleId"};
-   TTreeReaderArray<int> gParticleStatus = {fReader, "gParticleStatus"};
-   TTreeReaderArray<float> gParticleE = {fReader, "gParticleE"};
-   TTreeReaderArray<float> gParticlePz = {fReader, "gParticlePz"};
-   */
-   /*
-   TTreeReaderArray<int> gParticleCharge = {fReader, "gParticleCharge"};
-   TTreeReaderArray<float> gParticleProdVertexX = {fReader, "gParticleProdVertexX"};
-   TTreeReaderArray<float> gParticleProdVertexY = {fReader, "gParticleProdVertexY"};
-   TTreeReaderArray<float> gParticleProdVertexZ = {fReader, "gParticleProdVertexZ"};
-   TTreeReaderArray<int> gParticleMotherId = {fReader, "gParticleMotherId"};
-   TTreeReaderArray<int> gParticleMotherIndex = {fReader, "gParticleMotherIndex"};
-   
-   
-   TTreeReaderArray<float> eleE = {fReader, "eleE"};
-   TTreeReaderArray<float> elePt = {fReader, "elePt"};
-   TTreeReaderArray<float> eleEta = {fReader, "eleEta"};
-   TTreeReaderArray<float> elePhi = {fReader, "elePhi"};
-   TTreeReaderArray<float> eleCharge = {fReader, "eleCharge"};
-   TTreeReaderArray<float> eleE_SC = {fReader, "eleE_SC"};
-   TTreeReaderArray<float> eleEta_SC = {fReader, "eleEta_SC"};
-   TTreeReaderArray<float> elePhi_SC = {fReader, "elePhi_SC"};
-   TTreeReaderArray<float> eleSigmaIetaIeta = {fReader, "eleSigmaIetaIeta"};
-   TTreeReaderArray<float> eleFull5x5SigmaIetaIeta = {fReader, "eleFull5x5SigmaIetaIeta"};
-   TTreeReaderArray<float> eleR9 = {fReader, "eleR9"};
-   TTreeReaderArray<float> ele_dEta = {fReader, "ele_dEta"};
-   TTreeReaderArray<float> ele_dPhi = {fReader, "ele_dPhi"};
-   TTreeReaderArray<float> ele_HoverE = {fReader, "ele_HoverE"};
-   TTreeReaderArray<float> ele_d0 = {fReader, "ele_d0"};
-   TTreeReaderArray<float> ele_dZ = {fReader, "ele_dZ"};
-   TTreeReaderArray<float> ele_pileupIso = {fReader, "ele_pileupIso"};
-   TTreeReaderArray<float> ele_chargedIso = {fReader, "ele_chargedIso"};
-   TTreeReaderArray<float> ele_photonIso = {fReader, "ele_photonIso"};
-   TTreeReaderArray<float> ele_neutralHadIso = {fReader, "ele_neutralHadIso"};
-   TTreeReaderArray<int> ele_MissHits = {fReader, "ele_MissHits"};
-   TTreeReaderValue<vector<bool>> ele_passCutBasedIDVeto = {fReader, "ele_passCutBasedIDVeto"};
-   TTreeReaderValue<vector<bool>> ele_passCutBasedIDLoose = {fReader, "ele_passCutBasedIDLoose"};
-   TTreeReaderValue<vector<bool>> ele_passCutBasedIDMedium = {fReader, "ele_passCutBasedIDMedium"};
-   TTreeReaderValue<vector<bool>> ele_passCutBasedIDTight = {fReader, "ele_passCutBasedIDTight"};
-   TTreeReaderValue<vector<bool>> ele_passMVAIsoIDWP80 = {fReader, "ele_passMVAIsoIDWP80"};
-   TTreeReaderValue<vector<bool>> ele_passMVAIsoIDWP90 = {fReader, "ele_passMVAIsoIDWP90"};
-   TTreeReaderValue<vector<bool>> ele_passMVAIsoIDWPHZZ = {fReader, "ele_passMVAIsoIDWPHZZ"};
-   TTreeReaderValue<vector<bool>> ele_passMVAIsoIDWPLoose = {fReader, "ele_passMVAIsoIDWPLoose"};
-   TTreeReaderValue<vector<bool>> ele_passMVANoIsoIDWP80 = {fReader, "ele_passMVANoIsoIDWP80"};
-   TTreeReaderValue<vector<bool>> ele_passMVANoIsoIDWP90 = {fReader, "ele_passMVANoIsoIDWP90"};
-   TTreeReaderValue<vector<bool>> ele_passMVANoIsoIDWPLoose = {fReader, "ele_passMVANoIsoIDWPLoose"};
-   TTreeReaderValue<vector<bool>> ele_PassConvVeto = {fReader, "ele_PassConvVeto"};
-   TTreeReaderArray<float> ele_OneOverEminusOneOverP = {fReader, "ele_OneOverEminusOneOverP"};
-   
-   */
    TTreeReaderArray<float> muonE = {fReader, "muonE"};
    TTreeReaderArray<float> muonPt = {fReader, "muonPt"};
    TTreeReaderArray<float> globalTrackMuonPt = {fReader, "globalTrackMuonPt"};
@@ -576,50 +490,7 @@ public :
    TTreeReaderValue<vector<bool>> muonIsLoose = {fReader, "muonIsLoose"};
    TTreeReaderValue<vector<bool>> muonIsMedium = {fReader, "muonIsMedium"};
    TTreeReaderValue<vector<bool>> muonIsTight = {fReader, "muonIsTight"};
-   /*
-   TTreeReaderArray<int> muonCharge = {fReader, "muonCharge"};
-   TTreeReaderArray<float> muon_d0 = {fReader, "muon_d0"};
-   TTreeReaderArray<float> muon_d0Err = {fReader, "muon_d0Err"};
-   TTreeReaderArray<float> muon_dZ = {fReader, "muon_dZ"};
-   TTreeReaderArray<float> muon_ip3d = {fReader, "muon_ip3d"};
-   TTreeReaderArray<float> muon_ip3dSignificance = {fReader, "muon_ip3dSignificance"};
-   TTreeReaderArray<unsigned int> muonType = {fReader, "muonType"};
-   TTreeReaderArray<unsigned int> muonQuality = {fReader, "muonQuality"};
-   TTreeReaderArray<float> muon_pileupIso = {fReader, "muon_pileupIso"};
-   TTreeReaderArray<float> muon_chargedIso = {fReader, "muon_chargedIso"};
-   TTreeReaderArray<float> muon_photonIso = {fReader, "muon_photonIso"};
-   TTreeReaderArray<float> muon_neutralHadIso = {fReader, "muon_neutralHadIso"};
-   TTreeReaderArray<float> muon_validFractionTrackerHits = {fReader, "muon_validFractionTrackerHits"};
-   TTreeReaderArray<float> muTree_muon_normChi2onE = {fReader, "muTree_muon_normChi2onE"};
-   TTreeReaderArray<float> muon_chi2LocalPosition = {fReader, "muon_chi2LocalPosition"};
-   TTreeReaderArray<float> muon_kinkFinder = {fReader, "muon_kinkFinder"};
-   TTreeReaderArray<float> muon_segmentCompatability = {fReader, "muon_segmentCompatability"};
-   TTreeReaderArray<float> muon_trkIso = {fReader, "muon_trkIso"};
-   TTreeReaderArray<float> muon_tuneP_Pt = {fReader, "muon_tuneP_Pt"};
-   TTreeReaderArray<float> muon_tuneP_PtErr = {fReader, "muon_tuneP_PtErr"};
-   TTreeReaderArray<float> muon_tuneP_Eta = {fReader, "muon_tuneP_Eta"};
-   TTreeReaderArray<float> muon_tuneP_Phi = {fReader, "muon_tuneP_Phi"};
-   TTreeReaderArray<int> muon_tuneP_MuonBestTrackType = {fReader, "muon_tuneP_MuonBestTrackType"};
-   TTreeReaderValue<vector<bool>> muon_isHighPtMuon = {fReader, "muon_isHighPtMuon"};
-   TTreeReaderValue<vector<bool>> muon_isTrackerHighPtMuon = {fReader, "muon_isTrackerHighPtMuon"};
-   TTreeReaderArray<float> Jet_pt = {fReader, "Jet_pt"};
-   TTreeReaderArray<float> Jet_eta = {fReader, "Jet_eta"};
-   TTreeReaderArray<float> Jet_phi = {fReader, "Jet_phi"};
-   TTreeReaderArray<float> Jet_mass = {fReader, "Jet_mass"};
-   TTreeReaderArray<float> Jet_energy = {fReader, "Jet_energy"};
-   TTreeReaderArray<float> Jet_pdgId = {fReader, "Jet_pdgId"};
-   TTreeReaderArray<float> Jet_et = {fReader, "Jet_et"};
-   TTreeReaderArray<float> Jet_chargedEmEnergyFraction = {fReader, "Jet_chargedEmEnergyFraction"};
-   TTreeReaderArray<float> Jet_neutralEmEnergyFraction = {fReader, "Jet_neutralEmEnergyFraction"};
-   TTreeReaderArray<float> Jet_chargedHadronEnergyFraction = {fReader, "Jet_chargedHadronEnergyFraction"};
-   TTreeReaderArray<float> Jet_neutralHadronEnergyFraction = {fReader, "Jet_neutralHadronEnergyFraction"};
-   TTreeReaderArray<float> Jet_muonEnergyFraction = {fReader, "Jet_muonEnergyFraction"};
-   TTreeReaderArray<int> Jet_chargedMultiplicity = {fReader, "Jet_chargedMultiplicity"};
-   TTreeReaderArray<int> Jet_neutralMultiplicity = {fReader, "Jet_neutralMultiplicity"};
-   TTreeReaderArray<float> Jet_jetArea = {fReader, "Jet_jetArea"};
-   TTreeReaderArray<float> Jet_pileupE = {fReader, "Jet_pileupE"};
-   TTreeReaderArray<float> mT = {fReader, "mT"};
-   */
+   
    TTreeReaderValue<vector<bool>> passCutPt55 = {fReader, "passCutPt55"};
    TTreeReaderValue<vector<bool>> passPreselection = {fReader, "passPreselection"};
    TTreeReaderArray<bool> passPreselectionSept8 = {fReader, "passPreselectionSept8"};
