@@ -258,4 +258,3 @@ void mapOfDifferences(TH2F* res, TH2F* h1, TH2F* h2)
         }
     }
 }
-

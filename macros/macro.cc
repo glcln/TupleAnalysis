@@ -40,7 +40,7 @@
 
    std::string pathTestMC = "/opt/sbg/cms/ui3_data1/rhaeberl/HSCP_prod/V80p5/";
    //std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V2p11/";
-   std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V3p0/";
+   std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V3p1/";
    std::string pathTest = "/opt/sbg/cms/ui3_data1/rhaeberl/HSCP_prod/V80p9/";
    std::string pathLast2017F = "/opt/sbg/cms/ui3_data1/rhaeberl/HSCP_prod/V80p8/";
 
@@ -121,10 +121,31 @@
        }
    }
    if(dataset == "MET_2017_2018"){
-       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V3p0/";
-       std::string fileNamesMET[] = { (pathData+"MET_Run20172018.txt").c_str()};
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V3p1/";
+       std::string fileNamesMET[] = { (pathData+"MET_2017_2018_notall.txt").c_str()};
 
        for (const std::string& fileName : fileNamesMET) {
+           std::ifstream file(fileName);
+           if (!file.is_open()) {
+               std::cerr << "Failed to open file: " << fileName << std::endl;
+               continue;
+           }
+           std::string line;
+           while (std::getline(file, line)) {
+               if (!line.empty() && line.back() == '\n') {
+                   line.pop_back();  
+               }
+               chain->AddFile(line.c_str());
+           }
+
+           file.close();
+       }
+   }
+   if(dataset == "Gluino2000"){
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V2p23_gluino/";
+       std::string fileNamesGluino2000[] = { (pathData+"Gluino2000.txt").c_str()};
+
+       for (const std::string& fileName : fileNamesGluino2000) {
            std::ifstream file(fileName);
            if (!file.is_open()) {
                std::cerr << "Failed to open file: " << fileName << std::endl;

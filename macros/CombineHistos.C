@@ -1093,12 +1093,12 @@ void CompareDistwMET()
 {
     TFile *ofile = new TFile("PlayWithHistos/CompareDistwMET.root", "RECREATE");
 
-    TFile *MET = new TFile("Fpix_V3p0/MET_2017_2018_massCut_0_pT70_V3p0_Fpix_Eta2p4_cutIndex3_rebinEta4_rebinIh4_rebinP2_rebinMass1_EtaReweighting_NewFits.root");
-    TH1F *eta_MET = (TH1F*)MET->Get("ih_eta_regionD_8fp9_ReRunRaph_px");
-    TH1F *p_MET = (TH1F*)MET->Get("eta_p_regionD_8fp9_ReRunRaph_px");
-    TH1F *Ih_MET = (TH1F*)MET->Get("ih_eta_regionD_8fp9_ReRunRaph_py");
+    TFile *MET = new TFile("Fpix_V3p1/MET_2017_2018_massCut_0_pT70_V3p1_Fpix_Eta2p4_cutIndex3_rebinEta4_rebinIh4_rebinP2_rebinMass1_EtaReweighting_NewFit.root");
+    TH1F *eta_MET = (TH1F*)MET->Get("ih_eta_regionD_8fp9_MET_px");
+    TH1F *p_MET = (TH1F*)MET->Get("eta_p_regionD_8fp9_MET_px");
+    TH1F *Ih_MET = (TH1F*)MET->Get("ih_eta_regionD_8fp9_MET_py");
     TFile *METbis = new TFile("MET_2017_2018_massCut_0_pT70_V3p1_Fpix_Eta2p4.root");
-    TH2F *FpixGstripMET = (TH2F*)METbis->Get("ReRunRaph_Fpix_vs_Gstrip");
+    TH2F *FpixGstripMET = (TH2F*)METbis->Get("MET_Fpix_vs_Gstrip");
     TH1F *FpixMET = (TH1F*)FpixGstripMET->ProjectionX("Fpix");
 
     TFile *Mu = new TFile("Fpix_V2p18/Mu2018_massCut_0_pT70_V2p18_Fpix_Eta2p4_cutIndex3_rebinEta4_rebinIh4_rebinP2_rebinMass1_EtaReweighting.root");
@@ -1199,6 +1199,63 @@ void CompareDistwMET()
     return;
 }
 
+void MyCutFlow()
+{
+    TFile *ofile = new TFile("PlayWithHistos/MyCutFlow.root", "RECREATE");
+
+    TFile *ifile = new TFile("MET_2017_2018_massCut_0_pT70_V3p3_Fpix_Eta2p4.root");
+    TH1F *CutFlow_MET = (TH1F*)ifile->Get("METContaningMu_Cutflow");
+    TH1F *CutFlow_OnlyMET = (TH1F*)ifile->Get("OnlyMET_Cutflow");
+
+    CutFlow_MET->GetXaxis()->SetBinLabel(1, "All events");
+    CutFlow_MET->GetXaxis()->SetBinLabel(2, "MET triggers");
+    CutFlow_MET->GetXaxis()->SetBinLabel(3, "CaloMET > 170 GeV");
+    CutFlow_MET->GetXaxis()->SetBinLabel(4, "MET filters");
+    CutFlow_MET->GetXaxis()->SetBinLabel(5, "p_{T} > 55 GeV");
+    CutFlow_MET->GetXaxis()->SetBinLabel(6, "#eta < 2.4");
+    CutFlow_MET->GetXaxis()->SetBinLabel(7, "NOPH #geq 2");
+    CutFlow_MET->GetXaxis()->SetBinLabel(8, "FOVH > 0.8");
+    CutFlow_MET->GetXaxis()->SetBinLabel(9, "NOM #geq 10");
+    CutFlow_MET->GetXaxis()->SetBinLabel(10, "isHighPurity");
+    CutFlow_MET->GetXaxis()->SetBinLabel(11, "#chi^{2}/ndof < 5.0");
+    CutFlow_MET->GetXaxis()->SetBinLabel(12, "d_{z} < 0.1");
+    CutFlow_MET->GetXaxis()->SetBinLabel(13, "d_{xy} < 0.02");
+    CutFlow_MET->GetXaxis()->SetBinLabel(14, "I_{PF}^{rel} < 0.02");
+    CutFlow_MET->GetXaxis()->SetBinLabel(15, "I_{trk} < 15 GeV");
+    CutFlow_MET->GetXaxis()->SetBinLabel(16, "E/p < 0.3");
+    CutFlow_MET->GetXaxis()->SetBinLabel(17, "p_{T}^{err}/p_{T}^2 < 0.0008");
+    CutFlow_MET->GetXaxis()->SetBinLabel(18, "F_{pixel} > 0.3");
+    CutFlow_MET->GetXaxis()->SetBinLabel(19, "p_{T}^{err}/p_{T} < 1");
+    CutFlow_MET->GetXaxis()->SetBinLabel(20, "I_{h} > C");
+
+    CutFlow_MET->SetLineColor(kRed);
+    CutFlow_OnlyMET->SetLineColor(kBlue);
+
+    TCanvas *c1 = new TCanvas("CutFlow", "CutFlow", 800, 800);
+    c1->cd();
+    CutFlow_MET->Draw("hist");
+    CutFlow_OnlyMET->Draw("hist same");
+    gPad->SetTickx(0);
+    CutFlow_MET->LabelsOption("v", "X");
+    CutFlow_MET->GetXaxis()->SetTitle("");
+    CutFlow_MET->GetYaxis()->SetTitle("Events");
+    CutFlow_MET->GetYaxis()->SetRangeUser(CutFlow_OnlyMET->GetMinimum()/5, CutFlow_MET->GetMaximum()*5);
+    TLegend *leg = new TLegend(0.6, 0.7, 0.9, 0.9);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->AddEntry(CutFlow_MET, "MET", "l");
+    leg->AddEntry(CutFlow_OnlyMET, "Only MET", "l");
+    leg->Draw();
+    c1->SetLogy();
+
+
+    ofile->cd();
+    c1->Write();
+    ofile->Close();
+
+    return;
+}
+
 
 
 void CombineHistos()
@@ -1207,7 +1264,8 @@ void CombineHistos()
     //CompareTemplates();
     //EtaInRegions();
     //FpixVSEta();
-    CompareDistwMET();
+    //CompareDistwMET();
+    MyCutFlow();
 
     return;
 }
