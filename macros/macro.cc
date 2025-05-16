@@ -122,7 +122,7 @@
    }
    if(dataset == "MET_2017_2018"){
        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V3p1/";
-       std::string fileNamesMET[] = { (pathData+"MET_2017_2018_notall.txt").c_str()};
+       std::string fileNamesMET[] = { (pathData+"test.txt").c_str()}; //MET_2017_2018_notall
 
        for (const std::string& fileName : fileNamesMET) {
            std::ifstream file(fileName);

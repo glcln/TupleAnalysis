@@ -28,6 +28,7 @@
 #include <TH2.h>
 #include <TH1.h>
 #include <TStyle.h>
+#include <functional>
 
 
 //K and C values are set based on the config file dataset name (see below)
@@ -292,297 +293,320 @@ selLabels_.push_back("OnlyMET");
    //-------------------------------------
    //create RegionMassPlot for all selection
    //-------------------------------------
-   for(unsigned int i=0;i<selLabels_.size();i++){
-      //The binning has to be changed and to become configurable 
-      if(UseFpixel){
-          //Create names for each plot in each regions (slices in Fpixels)
-          
-          std::string label_FpixAll = regFpixAll + "_" + selLabels_[i]; 
-          
-          std::string label_FpixA_3f4 = regFpixA_3f4 + "_" + selLabels_[i]; 
-          std::string label_FpixA_3f6 = regFpixA_3f6 + "_" + selLabels_[i]; 
-          std::string label_FpixA_3f8 = regFpixA_3f8 + "_" + selLabels_[i]; 
-          std::string label_FpixA_3f9 = regFpixA_3f9 + "_" + selLabels_[i]; 
-          std::string label_FpixA_4f5 = regFpixA_4f5 + "_" + selLabels_[i]; 
-          std::string label_FpixA_5f6 = regFpixA_5f6 + "_" + selLabels_[i]; 
-          std::string label_FpixA_6f7 = regFpixA_6f7 + "_" + selLabels_[i]; 
-          std::string label_FpixA_6f9 = regFpixA_6f9 + "_" + selLabels_[i]; 
-          std::string label_FpixA_7f8 = regFpixA_7f8 + "_" + selLabels_[i]; 
-          std::string label_FpixA_8f9 = regFpixA_8f9 + "_" + selLabels_[i]; 
-          std::string label_FpixA_9f10 = regFpixA_9f10 + "_" + selLabels_[i];
-          std::string label_FpixA_99f10 = regFpixA_99f10 + "_" + selLabels_[i];
-          std::string label_FpixA_999f10 = regFpixA_999f10 + "_" + selLabels_[i];
+    for(unsigned int i=0;i<selLabels_.size();i++){
+    //The binning has to be changed and to become configurable 
+        if(UseFpixel){
+            //Create names for each plot in each regions (slices in Fpixels)
+            
+            std::string label_FpixAll = regFpixAll + "_" + selLabels_[i]; 
+            
+            std::string label_FpixA_3f4 = regFpixA_3f4 + "_" + selLabels_[i]; 
+            std::string label_FpixA_3f6 = regFpixA_3f6 + "_" + selLabels_[i]; 
+            std::string label_FpixA_3f8 = regFpixA_3f8 + "_" + selLabels_[i]; 
+            std::string label_FpixA_3f9 = regFpixA_3f9 + "_" + selLabels_[i]; 
+            std::string label_FpixA_4f5 = regFpixA_4f5 + "_" + selLabels_[i]; 
+            std::string label_FpixA_5f6 = regFpixA_5f6 + "_" + selLabels_[i]; 
+            std::string label_FpixA_6f7 = regFpixA_6f7 + "_" + selLabels_[i]; 
+            std::string label_FpixA_6f9 = regFpixA_6f9 + "_" + selLabels_[i]; 
+            std::string label_FpixA_7f8 = regFpixA_7f8 + "_" + selLabels_[i]; 
+            std::string label_FpixA_8f9 = regFpixA_8f9 + "_" + selLabels_[i]; 
+            std::string label_FpixA_9f10 = regFpixA_9f10 + "_" + selLabels_[i];
+            std::string label_FpixA_99f10 = regFpixA_99f10 + "_" + selLabels_[i];
+            std::string label_FpixA_999f10 = regFpixA_999f10 + "_" + selLabels_[i];
 
-          std::string label_FpixB_3f4 = regFpixB_3f4 + "_" + selLabels_[i]; 
-          std::string label_FpixB_3f6 = regFpixB_3f6 + "_" + selLabels_[i]; 
-          std::string label_FpixB_3f8 = regFpixB_3f8 + "_" + selLabels_[i]; 
-          std::string label_FpixB_3f9 = regFpixB_3f9 + "_" + selLabels_[i]; 
-          std::string label_FpixB_4f5 = regFpixB_4f5 + "_" + selLabels_[i]; 
-          std::string label_FpixB_5f6 = regFpixB_5f6 + "_" + selLabels_[i]; 
-          std::string label_FpixB_6f7 = regFpixB_6f7 + "_" + selLabels_[i]; 
-          std::string label_FpixB_6f9 = regFpixB_6f9 + "_" + selLabels_[i]; 
-          std::string label_FpixB_7f8 = regFpixB_7f8 + "_" + selLabels_[i]; 
-          std::string label_FpixB_8f9 = regFpixB_8f9 + "_" + selLabels_[i]; 
-          std::string label_FpixB_8f10 = regFpixB_8f10 + "_" + selLabels_[i];
-          std::string label_FpixB_9f10 = regFpixB_9f10 + "_" + selLabels_[i];
-          std::string label_FpixB_99f10 = regFpixB_99f10 + "_" + selLabels_[i];
-          std::string label_FpixB_999f10 = regFpixB_999f10 + "_" + selLabels_[i];
+            std::string label_FpixB_3f4 = regFpixB_3f4 + "_" + selLabels_[i]; 
+            std::string label_FpixB_3f6 = regFpixB_3f6 + "_" + selLabels_[i]; 
+            std::string label_FpixB_3f8 = regFpixB_3f8 + "_" + selLabels_[i]; 
+            std::string label_FpixB_3f9 = regFpixB_3f9 + "_" + selLabels_[i]; 
+            std::string label_FpixB_4f5 = regFpixB_4f5 + "_" + selLabels_[i]; 
+            std::string label_FpixB_5f6 = regFpixB_5f6 + "_" + selLabels_[i]; 
+            std::string label_FpixB_6f7 = regFpixB_6f7 + "_" + selLabels_[i]; 
+            std::string label_FpixB_6f9 = regFpixB_6f9 + "_" + selLabels_[i]; 
+            std::string label_FpixB_7f8 = regFpixB_7f8 + "_" + selLabels_[i]; 
+            std::string label_FpixB_8f9 = regFpixB_8f9 + "_" + selLabels_[i]; 
+            std::string label_FpixB_8f10 = regFpixB_8f10 + "_" + selLabels_[i];
+            std::string label_FpixB_9f10 = regFpixB_9f10 + "_" + selLabels_[i];
+            std::string label_FpixB_99f10 = regFpixB_99f10 + "_" + selLabels_[i];
+            std::string label_FpixB_999f10 = regFpixB_999f10 + "_" + selLabels_[i];
 
-          std::string label_FpixC_3f4 = regFpixC_3f4 + "_" + selLabels_[i]; 
-          std::string label_FpixC_3f6 = regFpixC_3f6 + "_" + selLabels_[i]; 
-          std::string label_FpixC_3f8 = regFpixC_3f8 + "_" + selLabels_[i]; 
-          std::string label_FpixC_3f9 = regFpixC_3f9 + "_" + selLabels_[i]; 
-          std::string label_FpixC_4f5 = regFpixC_4f5 + "_" + selLabels_[i]; 
-          std::string label_FpixC_5f6 = regFpixC_5f6 + "_" + selLabels_[i]; 
-          std::string label_FpixC_6f7 = regFpixC_6f7 + "_" + selLabels_[i]; 
-          std::string label_FpixC_6f9 = regFpixC_6f9 + "_" + selLabels_[i]; 
-          std::string label_FpixC_7f8 = regFpixC_7f8 + "_" + selLabels_[i]; 
-          std::string label_FpixC_8f9 = regFpixC_8f9 + "_" + selLabels_[i]; 
+            std::string label_FpixC_3f4 = regFpixC_3f4 + "_" + selLabels_[i]; 
+            std::string label_FpixC_3f6 = regFpixC_3f6 + "_" + selLabels_[i]; 
+            std::string label_FpixC_3f8 = regFpixC_3f8 + "_" + selLabels_[i]; 
+            std::string label_FpixC_3f9 = regFpixC_3f9 + "_" + selLabels_[i]; 
+            std::string label_FpixC_4f5 = regFpixC_4f5 + "_" + selLabels_[i]; 
+            std::string label_FpixC_5f6 = regFpixC_5f6 + "_" + selLabels_[i]; 
+            std::string label_FpixC_6f7 = regFpixC_6f7 + "_" + selLabels_[i]; 
+            std::string label_FpixC_6f9 = regFpixC_6f9 + "_" + selLabels_[i]; 
+            std::string label_FpixC_7f8 = regFpixC_7f8 + "_" + selLabels_[i]; 
+            std::string label_FpixC_8f9 = regFpixC_8f9 + "_" + selLabels_[i]; 
 
-          std::string label_FpixD_3f4 = regFpixD_3f4 + "_" + selLabels_[i];
-          std::string label_FpixD_3f8 = regFpixD_3f8 + "_" + selLabels_[i];
-          std::string label_FpixD_4f5 = regFpixD_4f5 + "_" + selLabels_[i]; 
-          std::string label_FpixD_5f6 = regFpixD_5f6 + "_" + selLabels_[i]; 
-          std::string label_FpixD_6f7 = regFpixD_6f7 + "_" + selLabels_[i]; 
-          std::string label_FpixD_6f9 = regFpixD_6f9 + "_" + selLabels_[i];
-          std::string label_FpixD_7f8 = regFpixD_7f8 + "_" + selLabels_[i]; 
-          std::string label_FpixD_8f9 = regFpixD_8f9 + "_" + selLabels_[i]; 
-          std::string label_FpixD_8f10 = regFpixD_8f10 + "_" + selLabels_[i];
-          std::string label_FpixD_9f10 = regFpixD_9f10 + "_" + selLabels_[i]; 
-          std::string label_FpixD_99f10 = regFpixD_99f10 + "_" + selLabels_[i]; 
-          std::string label_FpixD_999f10 = regFpixD_999f10 + "_" + selLabels_[i]; 
+            std::string label_FpixD_3f4 = regFpixD_3f4 + "_" + selLabels_[i];
+            std::string label_FpixD_3f8 = regFpixD_3f8 + "_" + selLabels_[i];
+            std::string label_FpixD_4f5 = regFpixD_4f5 + "_" + selLabels_[i]; 
+            std::string label_FpixD_5f6 = regFpixD_5f6 + "_" + selLabels_[i]; 
+            std::string label_FpixD_6f7 = regFpixD_6f7 + "_" + selLabels_[i]; 
+            std::string label_FpixD_6f9 = regFpixD_6f9 + "_" + selLabels_[i];
+            std::string label_FpixD_7f8 = regFpixD_7f8 + "_" + selLabels_[i]; 
+            std::string label_FpixD_8f9 = regFpixD_8f9 + "_" + selLabels_[i]; 
+            std::string label_FpixD_8f10 = regFpixD_8f10 + "_" + selLabels_[i];
+            std::string label_FpixD_9f10 = regFpixD_9f10 + "_" + selLabels_[i]; 
+            std::string label_FpixD_99f10 = regFpixD_99f10 + "_" + selLabels_[i]; 
+            std::string label_FpixD_999f10 = regFpixD_999f10 + "_" + selLabels_[i]; 
 
-    
-          //Create objects RegionMassPlot using the names defined above 
-          
-          RegionMassPlot regAll(label_FpixAll.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
 
-          RegionMassPlot regA_3f4(label_FpixA_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          RegionMassPlot regA_3f6(label_FpixA_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regA_3f8(label_FpixA_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regA_3f9(label_FpixA_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regA_4f5(label_FpixA_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regA_5f6(label_FpixA_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regA_6f7(label_FpixA_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          RegionMassPlot regA_6f9(label_FpixA_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          RegionMassPlot regA_7f8(label_FpixA_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          RegionMassPlot regA_8f9(label_FpixA_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regA_9f10(label_FpixA_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regA_99f10(label_FpixA_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regA_999f10(label_FpixA_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            //Create objects RegionMassPlot using the names defined above 
+            
+            RegionMassPlot regAll(label_FpixAll.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
 
-          RegionMassPlot regB_3f4(label_FpixB_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_3f6(label_FpixB_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_3f8(label_FpixB_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_3f9(label_FpixB_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_4f5(label_FpixB_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_5f6(label_FpixB_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_6f7(label_FpixB_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_6f9(label_FpixB_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_7f8(label_FpixB_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);     
-          RegionMassPlot regB_8f9(label_FpixB_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_8f10(label_FpixB_8f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_9f10(label_FpixB_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_99f10(label_FpixB_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regB_999f10(label_FpixB_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_3f4(label_FpixA_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            RegionMassPlot regA_3f6(label_FpixA_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_3f8(label_FpixA_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_3f9(label_FpixA_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_4f5(label_FpixA_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_5f6(label_FpixA_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_6f7(label_FpixA_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            RegionMassPlot regA_6f9(label_FpixA_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            RegionMassPlot regA_7f8(label_FpixA_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            RegionMassPlot regA_8f9(label_FpixA_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_9f10(label_FpixA_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_99f10(label_FpixA_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regA_999f10(label_FpixA_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
 
-          RegionMassPlot regC_3f4(label_FpixC_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_3f6(label_FpixC_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_3f8(label_FpixC_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_3f9(label_FpixC_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_4f5(label_FpixC_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_5f6(label_FpixC_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_6f7(label_FpixC_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_6f9(label_FpixC_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_7f8(label_FpixC_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regC_8f9(label_FpixC_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_3f4(label_FpixB_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_3f6(label_FpixB_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_3f8(label_FpixB_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_3f9(label_FpixB_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_4f5(label_FpixB_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_5f6(label_FpixB_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_6f7(label_FpixB_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_6f9(label_FpixB_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_7f8(label_FpixB_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);     
+            RegionMassPlot regB_8f9(label_FpixB_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_8f10(label_FpixB_8f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_9f10(label_FpixB_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_99f10(label_FpixB_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regB_999f10(label_FpixB_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
 
-          RegionMassPlot regD_3f4(label_FpixD_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_3f8(label_FpixD_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_4f5(label_FpixD_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_5f6(label_FpixD_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_6f7(label_FpixD_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_6f9(label_FpixD_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_7f8(label_FpixD_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);     
-          RegionMassPlot regD_8f9(label_FpixD_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_8f10(label_FpixD_8f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_9f10(label_FpixD_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_99f10(label_FpixD_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-          RegionMassPlot regD_999f10(label_FpixD_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
-       
+            RegionMassPlot regC_3f4(label_FpixC_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_3f6(label_FpixC_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_3f8(label_FpixC_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_3f9(label_FpixC_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_4f5(label_FpixC_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_5f6(label_FpixC_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_6f7(label_FpixC_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_6f9(label_FpixC_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_7f8(label_FpixC_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regC_8f9(label_FpixC_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
 
-          //push the RegionMassPlot objects created in vectors, because you have a set of different plot for each region, for each selection (defined in the configuration file) 
-
-          vmrp_regionFpix_all.push_back(std::move(regAll));
-          
-          vmrp_regionA_3f4.push_back(std::move(regA_3f4));
-          vmrp_regionA_3f6.push_back(std::move(regA_3f6));
-          vmrp_regionA_3f8.push_back(std::move(regA_3f8));
-          vmrp_regionA_3f9.push_back(std::move(regA_3f9));
-          vmrp_regionA_4f5.push_back(std::move(regA_4f5));
-          vmrp_regionA_5f6.push_back(std::move(regA_5f6));
-          vmrp_regionA_6f7.push_back(std::move(regA_6f7));
-          vmrp_regionA_6f9.push_back(std::move(regA_6f9));
-          vmrp_regionA_7f8.push_back(std::move(regA_7f8));
-          vmrp_regionA_8f9.push_back(std::move(regA_8f9));
-          vmrp_regionA_9f10.push_back(std::move(regA_9f10));
-          vmrp_regionA_99f10.push_back(std::move(regA_99f10));
-          vmrp_regionA_999f10.push_back(std::move(regA_999f10));
-    
-          vmrp_regionB_3f4.push_back(std::move(regB_3f4));
-          vmrp_regionB_3f6.push_back(std::move(regB_3f6));
-          vmrp_regionB_3f8.push_back(std::move(regB_3f8));
-          vmrp_regionB_3f9.push_back(std::move(regB_3f9));
-          vmrp_regionB_4f5.push_back(std::move(regB_4f5));
-          vmrp_regionB_5f6.push_back(std::move(regB_5f6));
-          vmrp_regionB_6f7.push_back(std::move(regB_6f7));
-          vmrp_regionB_6f9.push_back(std::move(regB_6f9));
-          vmrp_regionB_7f8.push_back(std::move(regB_7f8));
-          vmrp_regionB_8f9.push_back(std::move(regB_8f9));
-          vmrp_regionB_8f10.push_back(std::move(regB_8f10));
-          vmrp_regionB_9f10.push_back(std::move(regB_9f10));
-          vmrp_regionB_99f10.push_back(std::move(regB_99f10));
-          vmrp_regionB_999f10.push_back(std::move(regB_999f10));
-
-          vmrp_regionC_3f4.push_back(std::move(regC_3f4));
-          vmrp_regionC_3f6.push_back(std::move(regC_3f6));
-          vmrp_regionC_3f8.push_back(std::move(regC_3f8));
-          vmrp_regionC_3f9.push_back(std::move(regC_3f9));    
-          vmrp_regionC_4f5.push_back(std::move(regC_4f5));
-          vmrp_regionC_5f6.push_back(std::move(regC_5f6));
-          vmrp_regionC_6f7.push_back(std::move(regC_6f7));
-          vmrp_regionC_6f9.push_back(std::move(regC_6f9));
-          vmrp_regionC_7f8.push_back(std::move(regC_7f8));
-          vmrp_regionC_8f9.push_back(std::move(regC_8f9));
-    
-          vmrp_regionD_3f4.push_back(std::move(regD_3f4));
-          vmrp_regionD_3f8.push_back(std::move(regD_3f8));
-          vmrp_regionD_4f5.push_back(std::move(regD_4f5));
-          vmrp_regionD_5f6.push_back(std::move(regD_5f6));
-          vmrp_regionD_6f7.push_back(std::move(regD_6f7));
-          vmrp_regionD_6f9.push_back(std::move(regD_6f9));
-          vmrp_regionD_7f8.push_back(std::move(regD_7f8));
-          vmrp_regionD_8f9.push_back(std::move(regD_8f9));
-          vmrp_regionD_8f10.push_back(std::move(regD_8f10));
-          vmrp_regionD_9f10.push_back(std::move(regD_9f10));
-          vmrp_regionD_99f10.push_back(std::move(regD_99f10));
-          vmrp_regionD_999f10.push_back(std::move(regD_999f10));
-      }
-
-      
-      if(UseGstrip){    
-          //Definition of regions A with all quantiles and different names
-          std::string labelA_50ias = rA_med + "_" + selLabels_[i];
-          RegionMassPlot regA_ias50(labelA_50ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelA_80ias = rA_80 + "_" + selLabels_[i];
-          RegionMassPlot regA_ias80(labelA_80ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelA_90ias = rA_90 + "_" + selLabels_[i];
-          RegionMassPlot regA_ias90(labelA_90ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-    
-          //Definition of regions B with all quantiles and different names
-          std::string labelB_50ias60 = rB_50 + "_" + selLabels_[i];
-          RegionMassPlot regB_50ias60(labelB_50ias60.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_50ias90 = rB_50_90 + "_" + selLabels_[i];
-          RegionMassPlot regB_50ias90(labelB_50ias90.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_50ias99 = rB_50_99 + "_" + selLabels_[i];
-          RegionMassPlot regB_50ias99(labelB_50ias99.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_50ias999 = rB_50_999 + "_" + selLabels_[i];
-          RegionMassPlot regB_50ias999(labelB_50ias999.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_50ias100 = rB_50_100 + "_" + selLabels_[i];
-          RegionMassPlot regB_50ias100(labelB_50ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_60ias70 = rB_60 + "_" + selLabels_[i];
-          RegionMassPlot regB_60ias70(labelB_60ias70.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_70ias80 = rB_70 + "_" + selLabels_[i];
-          RegionMassPlot regB_70ias80(labelB_70ias80.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_80ias90 = rB_80 + "_" + selLabels_[i];
-          RegionMassPlot regB_80ias90(labelB_80ias90.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_90ias100 = rB_90_100 + "_" + selLabels_[i];
-          RegionMassPlot regB_90ias100(labelB_90ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_99ias100 = rB_99_100 + "_" + selLabels_[i];
-          RegionMassPlot regB_99ias100(labelB_99ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelB_999ias100 = rB_999_100 + "_" + selLabels_[i];
-          RegionMassPlot regB_999ias100(labelB_999ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-
-          //Definition of regions C with all quantiles and different names
-          std::string labelC_50ias = rC_med + "_" + selLabels_[i];
-          RegionMassPlot regC_ias50(labelC_50ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelC_80ias = rC_80 + "_" + selLabels_[i];
-          RegionMassPlot regC_ias80(labelC_80ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelC_90ias = rC_90 + "_" + selLabels_[i];
-          RegionMassPlot regC_ias90(labelC_90ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-
-          //Definition of regions D with all quantiles and different names
-          std::string labelD_50ias60 = rD_50 + "_" + selLabels_[i];
-          RegionMassPlot regD_50ias60(labelD_50ias60.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_50ias90 = rD_50_90 + "_" + selLabels_[i];
-          RegionMassPlot regD_50ias90(labelD_50ias90.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_50ias99 = rD_50_99 + "_" + selLabels_[i];
-          RegionMassPlot regD_50ias99(labelD_50ias99.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_50ias999 = rD_50_999 + "_" + selLabels_[i];
-          RegionMassPlot regD_50ias999(labelD_50ias999.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_60ias70 = rD_60 + "_" + selLabels_[i];
-          RegionMassPlot regD_60ias70(labelD_60ias70.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_70ias80 = rD_70 + "_" + selLabels_[i];
-          RegionMassPlot regD_70ias80(labelD_70ias80.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_80ias90 = rD_80 + "_" + selLabels_[i];
-          RegionMassPlot regD_80ias90(labelD_80ias90.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_90ias100 = rD_90_100 + "_" + selLabels_[i];
-          RegionMassPlot regD_90ias100(labelD_90ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_99ias100 = rD_99_100 + "_" + selLabels_[i];
-          RegionMassPlot regD_99ias100(labelD_99ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-          std::string labelD_999ias100 = rD_999_100 + "_" + selLabels_[i];
-          RegionMassPlot regD_999ias100(labelD_999ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
-
-    
-          vmrp_regionA_ias50.push_back(std::move(regA_ias50));
-          vmrp_regionA_ias80.push_back(std::move(regA_ias80));
-          vmrp_regionA_ias90.push_back(std::move(regA_ias90));
-    
-          vmrp_regionB_50ias60.push_back(std::move(regB_50ias60));
-          vmrp_regionB_50ias90.push_back(std::move(regB_50ias90));
-          vmrp_regionB_50ias99.push_back(std::move(regB_50ias99));
-          vmrp_regionB_50ias999.push_back(std::move(regB_50ias999));
-          vmrp_regionB_50ias100.push_back(std::move(regB_50ias100));
-          vmrp_regionB_60ias70.push_back(std::move(regB_60ias70));
-          vmrp_regionB_70ias80.push_back(std::move(regB_70ias80));
-          vmrp_regionB_80ias90.push_back(std::move(regB_80ias90));
-          vmrp_regionB_90ias100.push_back(std::move(regB_90ias100));
-          vmrp_regionB_99ias100.push_back(std::move(regB_99ias100));
-          vmrp_regionB_999ias100.push_back(std::move(regB_999ias100));
-
-          vmrp_regionC_ias50.push_back(std::move(regC_ias50));
-          vmrp_regionC_ias80.push_back(std::move(regC_ias80));
-          vmrp_regionC_ias90.push_back(std::move(regC_ias90));
-
-          vmrp_regionD_50ias60.push_back(std::move(regD_50ias60));
-          vmrp_regionD_50ias90.push_back(std::move(regD_50ias90));
-          vmrp_regionD_50ias99.push_back(std::move(regD_50ias99));
-          vmrp_regionD_50ias999.push_back(std::move(regD_50ias999));
-          vmrp_regionD_60ias70.push_back(std::move(regD_60ias70));
-          vmrp_regionD_70ias80.push_back(std::move(regD_70ias80));
-          vmrp_regionD_80ias90.push_back(std::move(regD_80ias90));
-          vmrp_regionD_90ias100.push_back(std::move(regD_90ias100));
-          vmrp_regionD_99ias100.push_back(std::move(regD_99ias100));
-          vmrp_regionD_999ias100.push_back(std::move(regD_999ias100));
-    
-      }
+            RegionMassPlot regD_3f4(label_FpixD_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_3f8(label_FpixD_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_4f5(label_FpixD_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_5f6(label_FpixD_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_6f7(label_FpixD_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_6f9(label_FpixD_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_7f8(label_FpixD_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);     
+            RegionMassPlot regD_8f9(label_FpixD_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_8f10(label_FpixD_8f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_9f10(label_FpixD_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_99f10(label_FpixD_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
+            RegionMassPlot regD_999f10(label_FpixD_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C); 
         
 
-      CPlots plots;
+            //push the RegionMassPlot objects created in vectors, because you have a set of different plot for each region, for each selection (defined in the configuration file) 
 
-      plots.AddHisto1D(selLabels_[i]+"_TrigInfo", 5, 0, 5);
-      plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
-      plots.AddHisto1D(selLabels_[i]+"_eta",48,-2.4,+2.4);
-      plots.AddHisto1D(selLabels_[i]+"_cand",10,0,10);
-      plots.AddHisto2D(selLabels_[i]+"_Fpix_vs_Gstrip",50,0,1,50,0,1);
+            vmrp_regionFpix_all.push_back(std::move(regAll));
+            
+            vmrp_regionA_3f4.push_back(std::move(regA_3f4));
+            vmrp_regionA_3f6.push_back(std::move(regA_3f6));
+            vmrp_regionA_3f8.push_back(std::move(regA_3f8));
+            vmrp_regionA_3f9.push_back(std::move(regA_3f9));
+            vmrp_regionA_4f5.push_back(std::move(regA_4f5));
+            vmrp_regionA_5f6.push_back(std::move(regA_5f6));
+            vmrp_regionA_6f7.push_back(std::move(regA_6f7));
+            vmrp_regionA_6f9.push_back(std::move(regA_6f9));
+            vmrp_regionA_7f8.push_back(std::move(regA_7f8));
+            vmrp_regionA_8f9.push_back(std::move(regA_8f9));
+            vmrp_regionA_9f10.push_back(std::move(regA_9f10));
+            vmrp_regionA_99f10.push_back(std::move(regA_99f10));
+            vmrp_regionA_999f10.push_back(std::move(regA_999f10));
 
-      plots.AddHisto1D(selLabels_[i]+"_Cutflow", 20, 0, 20);
+            vmrp_regionB_3f4.push_back(std::move(regB_3f4));
+            vmrp_regionB_3f6.push_back(std::move(regB_3f6));
+            vmrp_regionB_3f8.push_back(std::move(regB_3f8));
+            vmrp_regionB_3f9.push_back(std::move(regB_3f9));
+            vmrp_regionB_4f5.push_back(std::move(regB_4f5));
+            vmrp_regionB_5f6.push_back(std::move(regB_5f6));
+            vmrp_regionB_6f7.push_back(std::move(regB_6f7));
+            vmrp_regionB_6f9.push_back(std::move(regB_6f9));
+            vmrp_regionB_7f8.push_back(std::move(regB_7f8));
+            vmrp_regionB_8f9.push_back(std::move(regB_8f9));
+            vmrp_regionB_8f10.push_back(std::move(regB_8f10));
+            vmrp_regionB_9f10.push_back(std::move(regB_9f10));
+            vmrp_regionB_99f10.push_back(std::move(regB_99f10));
+            vmrp_regionB_999f10.push_back(std::move(regB_999f10));
+
+            vmrp_regionC_3f4.push_back(std::move(regC_3f4));
+            vmrp_regionC_3f6.push_back(std::move(regC_3f6));
+            vmrp_regionC_3f8.push_back(std::move(regC_3f8));
+            vmrp_regionC_3f9.push_back(std::move(regC_3f9));    
+            vmrp_regionC_4f5.push_back(std::move(regC_4f5));
+            vmrp_regionC_5f6.push_back(std::move(regC_5f6));
+            vmrp_regionC_6f7.push_back(std::move(regC_6f7));
+            vmrp_regionC_6f9.push_back(std::move(regC_6f9));
+            vmrp_regionC_7f8.push_back(std::move(regC_7f8));
+            vmrp_regionC_8f9.push_back(std::move(regC_8f9));
+
+            vmrp_regionD_3f4.push_back(std::move(regD_3f4));
+            vmrp_regionD_3f8.push_back(std::move(regD_3f8));
+            vmrp_regionD_4f5.push_back(std::move(regD_4f5));
+            vmrp_regionD_5f6.push_back(std::move(regD_5f6));
+            vmrp_regionD_6f7.push_back(std::move(regD_6f7));
+            vmrp_regionD_6f9.push_back(std::move(regD_6f9));
+            vmrp_regionD_7f8.push_back(std::move(regD_7f8));
+            vmrp_regionD_8f9.push_back(std::move(regD_8f9));
+            vmrp_regionD_8f10.push_back(std::move(regD_8f10));
+            vmrp_regionD_9f10.push_back(std::move(regD_9f10));
+            vmrp_regionD_99f10.push_back(std::move(regD_99f10));
+            vmrp_regionD_999f10.push_back(std::move(regD_999f10));
+        }
+
+      
+        if(UseGstrip){    
+            //Definition of regions A with all quantiles and different names
+            std::string labelA_50ias = rA_med + "_" + selLabels_[i];
+            RegionMassPlot regA_ias50(labelA_50ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelA_80ias = rA_80 + "_" + selLabels_[i];
+            RegionMassPlot regA_ias80(labelA_80ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelA_90ias = rA_90 + "_" + selLabels_[i];
+            RegionMassPlot regA_ias90(labelA_90ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+
+            //Definition of regions B with all quantiles and different names
+            std::string labelB_50ias60 = rB_50 + "_" + selLabels_[i];
+            RegionMassPlot regB_50ias60(labelB_50ias60.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_50ias90 = rB_50_90 + "_" + selLabels_[i];
+            RegionMassPlot regB_50ias90(labelB_50ias90.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_50ias99 = rB_50_99 + "_" + selLabels_[i];
+            RegionMassPlot regB_50ias99(labelB_50ias99.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_50ias999 = rB_50_999 + "_" + selLabels_[i];
+            RegionMassPlot regB_50ias999(labelB_50ias999.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_50ias100 = rB_50_100 + "_" + selLabels_[i];
+            RegionMassPlot regB_50ias100(labelB_50ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_60ias70 = rB_60 + "_" + selLabels_[i];
+            RegionMassPlot regB_60ias70(labelB_60ias70.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_70ias80 = rB_70 + "_" + selLabels_[i];
+            RegionMassPlot regB_70ias80(labelB_70ias80.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_80ias90 = rB_80 + "_" + selLabels_[i];
+            RegionMassPlot regB_80ias90(labelB_80ias90.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_90ias100 = rB_90_100 + "_" + selLabels_[i];
+            RegionMassPlot regB_90ias100(labelB_90ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_99ias100 = rB_99_100 + "_" + selLabels_[i];
+            RegionMassPlot regB_99ias100(labelB_99ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelB_999ias100 = rB_999_100 + "_" + selLabels_[i];
+            RegionMassPlot regB_999ias100(labelB_999ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+
+            //Definition of regions C with all quantiles and different names
+            std::string labelC_50ias = rC_med + "_" + selLabels_[i];
+            RegionMassPlot regC_ias50(labelC_50ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelC_80ias = rC_80 + "_" + selLabels_[i];
+            RegionMassPlot regC_ias80(labelC_80ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelC_90ias = rC_90 + "_" + selLabels_[i];
+            RegionMassPlot regC_ias90(labelC_90ias.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+
+            //Definition of regions D with all quantiles and different names
+            std::string labelD_50ias60 = rD_50 + "_" + selLabels_[i];
+            RegionMassPlot regD_50ias60(labelD_50ias60.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_50ias90 = rD_50_90 + "_" + selLabels_[i];
+            RegionMassPlot regD_50ias90(labelD_50ias90.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_50ias99 = rD_50_99 + "_" + selLabels_[i];
+            RegionMassPlot regD_50ias99(labelD_50ias99.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_50ias999 = rD_50_999 + "_" + selLabels_[i];
+            RegionMassPlot regD_50ias999(labelD_50ias999.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_60ias70 = rD_60 + "_" + selLabels_[i];
+            RegionMassPlot regD_60ias70(labelD_60ias70.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_70ias80 = rD_70 + "_" + selLabels_[i];
+            RegionMassPlot regD_70ias80(labelD_70ias80.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_80ias90 = rD_80 + "_" + selLabels_[i];
+            RegionMassPlot regD_80ias90(labelD_80ias90.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_90ias100 = rD_90_100 + "_" + selLabels_[i];
+            RegionMassPlot regD_90ias100(labelD_90ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_99ias100 = rD_99_100 + "_" + selLabels_[i];
+            RegionMassPlot regD_99ias100(labelD_99ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
+            std::string labelD_999ias100 = rD_999_100 + "_" + selLabels_[i];
+            RegionMassPlot regD_999ias100(labelD_999ias100.c_str(),etabins_,ihbins_,pbins_,massbins_,tofbins_,fpixbins_, C);
 
 
-      //Need to add plots here
-      //ADD-CPLOTS-HERE
+            vmrp_regionA_ias50.push_back(std::move(regA_ias50));
+            vmrp_regionA_ias80.push_back(std::move(regA_ias80));
+            vmrp_regionA_ias90.push_back(std::move(regA_ias90));
 
-      vcp.push_back(std::move(plots));
+            vmrp_regionB_50ias60.push_back(std::move(regB_50ias60));
+            vmrp_regionB_50ias90.push_back(std::move(regB_50ias90));
+            vmrp_regionB_50ias99.push_back(std::move(regB_50ias99));
+            vmrp_regionB_50ias999.push_back(std::move(regB_50ias999));
+            vmrp_regionB_50ias100.push_back(std::move(regB_50ias100));
+            vmrp_regionB_60ias70.push_back(std::move(regB_60ias70));
+            vmrp_regionB_70ias80.push_back(std::move(regB_70ias80));
+            vmrp_regionB_80ias90.push_back(std::move(regB_80ias90));
+            vmrp_regionB_90ias100.push_back(std::move(regB_90ias100));
+            vmrp_regionB_99ias100.push_back(std::move(regB_99ias100));
+            vmrp_regionB_999ias100.push_back(std::move(regB_999ias100));
+
+            vmrp_regionC_ias50.push_back(std::move(regC_ias50));
+            vmrp_regionC_ias80.push_back(std::move(regC_ias80));
+            vmrp_regionC_ias90.push_back(std::move(regC_ias90));
+
+            vmrp_regionD_50ias60.push_back(std::move(regD_50ias60));
+            vmrp_regionD_50ias90.push_back(std::move(regD_50ias90));
+            vmrp_regionD_50ias99.push_back(std::move(regD_50ias99));
+            vmrp_regionD_50ias999.push_back(std::move(regD_50ias999));
+            vmrp_regionD_60ias70.push_back(std::move(regD_60ias70));
+            vmrp_regionD_70ias80.push_back(std::move(regD_70ias80));
+            vmrp_regionD_80ias90.push_back(std::move(regD_80ias90));
+            vmrp_regionD_90ias100.push_back(std::move(regD_90ias100));
+            vmrp_regionD_99ias100.push_back(std::move(regD_99ias100));
+            vmrp_regionD_999ias100.push_back(std::move(regD_999ias100));
+
+        }
+        
+
+        CPlots plots;
+
+        cout << "before sel plot" << endl;
+        plots.AddHisto1D(selLabels_[i]+"_TrigInfo", 5, 0, 5);
+        plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
+        plots.AddHisto1D(selLabels_[i]+"_eta",48,-2.4,+2.4);
+        plots.AddHisto1D(selLabels_[i]+"_cand",10,0,10);
+        plots.AddHisto2D(selLabels_[i]+"_Fpix_vs_Gstrip",50,0,1,50,0,1);
+
+
+        plots.AddHisto1D(selLabels_[i]+"_Cutflow", 20, 0, 20);
+
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_trigger", 2, 0, 2);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_METfilters", 2, 0, 2);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_CaloMET", 100, 0, 1000);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_Pt", 200, 0, 2000);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_eta", 50, -2.5, +2.5);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_NOPH", 15, 0, 15);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_FOVH", 100, 0.5, 1.01);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_NOM", 35, 0, 35);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_HighPurity", 2, 0, 2);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_Chi2", 100, 0, 10);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_dZ", 50, 0, 0.5);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_dXY", 50, 0, 0.2);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_PFMiniIso", 200, 0, 1);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_TrkIso", 200, 0, 200);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_EoverP", 100, 0, 2);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_PtErr_over_PtPt", 100, 0, 0.005);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_Fpix", 20, 0, 1.01);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_PtErr_over_Pt", 100, 0, 0.5);
+        plots.AddHisto1D(selLabels_[i]+"_Nm1_Ih_StripOnly", 100, 0, 8);
+
+        cout << "after sel plot" << endl;
+
+        //Need to add plots here
+        //ADD-CPLOTS-HERE
+
+        vcp.push_back(std::move(plots));
       
    }
    std::cout << "Got ouf of loop on selections_" <<std::endl;
@@ -625,7 +649,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
    vector<bool> foundOneGlobal(selLabels_.size(),false); 
    vector<bool> passedThisSel(selLabels_.size(),false); 
 
-
+    cout << "before cutflow"    << endl;
    for(unsigned int i=0;i<Pt.GetSize();i++){
       
             //TAKE MOST IONIZING CANDIDATE
@@ -643,11 +667,9 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
         // CUTFLOW
         for(unsigned int s=0;s<selections_.size();s++){ 
-            if (selLabels_[s] == "OnlyMET" || selLabels_[s] == "METContaningMu"){
+            if (selLabels_[s] == "OnlyMET" || selLabels_[s] == "METContainingMu"){
                 
-                std::string cutflowName = selLabels_[s] + "_Cutflow";
                 bool trigger = true;
-                
                 if (selLabels_[s] == "OnlyMET") trigger = (*HLT_Mu50.Get() == false) && (
                     *HLT_PFMET120_PFMHT120_IDTight.Get() ||
                     *HLT_PFHT500_PFMET100_PFMHT100_IDTight.Get() ||
@@ -657,70 +679,74 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                     *HLT_PFHT500_PFMET100_PFMHT100_IDTight.Get() ||
                     *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60.Get() ||
                     *HLT_MET105_IsoTrk50.Get();
+
+
+                std::vector<std::function<bool(int)>> cuts;
+                cuts.push_back([&](int i){ return trigger; });
+                cuts.push_back([&](int i){ return (*Flag_allMETFilters.Get()); });
+                cuts.push_back([&](int i){ return (*RecoCaloMET.Get() > 170); });
+                cuts.push_back([&](int i){ return Pt[i] > 55.0; });
+                cuts.push_back([&](int i){ return fabs(eta[i]) < 2.4; });
+                cuts.push_back([&](int i){ return NOPH[i] >= 2; });
+                cuts.push_back([&](int i){ return FOVH[i] > 0.8; });
+                cuts.push_back([&](int i){ return NOM[i] >= 10; });
+                cuts.push_back([&](int i){ return (*isHighPurity.Get())[i]; });
+                cuts.push_back([&](int i){ return Chi2[i]/Ndof[i] < 5.0; });
+                cuts.push_back([&](int i){ return fabs(dZ[i]) < 0.1; });
+                cuts.push_back([&](int i){ return fabs(dXY[i]) < 0.02; });
+                cuts.push_back([&](int i){ return PFMiniIso_relative[i] < 0.02; });
+                cuts.push_back([&](int i){ return track_genTrackIsoSumPt_dr03[i] < 15; });
+                cuts.push_back([&](int i){ return EoverP[i] < 0.3; });
+                cuts.push_back([&](int i){ return (PtErr[i]/(Pt[i] * Pt[i])) > 0 && (PtErr[i]/(Pt[i] * Pt[i])) < 0.0008; });
+                cuts.push_back([&](int i){ return ProbQ_noL1[i] > 0 && ProbQ_noL1[i] < 0.7; });
+                cuts.push_back([&](int i){ return PtErr[i]/Pt[i] < 1; });
+                cuts.push_back([&](int i){ return Ih_StripOnly[i] > 3.14; });
                 
 
-                vcp[s].FillHisto1D(cutflowName, 0.5); // All events
-
-                while (true) {
-                    if (!trigger) break;
-                    vcp[s].FillHisto1D(cutflowName, 1.5);
-
-                    if (!(*Flag_allMETFilters.Get())) break;
-                    vcp[s].FillHisto1D(cutflowName, 2.5);
-
-                    if (!(*RecoCaloMET.Get() > 170)) break;
-                    vcp[s].FillHisto1D(cutflowName, 3.5);
-
-                    if (!(Pt[i] > 55.0)) break;
-                    vcp[s].FillHisto1D(cutflowName, 4.5);
-
-                    if (!(fabs(eta[i]) < 2.4)) break;
-                    vcp[s].FillHisto1D(cutflowName, 5.5);
-
-                    if (!(NOPH[i] >= 2)) break;
-                    vcp[s].FillHisto1D(cutflowName, 6.5);
-
-                    if (!(FOVH[i] > 0.8)) break;
-                    vcp[s].FillHisto1D(cutflowName, 7.5);
-
-                    if (!(NOM[i] >= 10)) break;
-                    vcp[s].FillHisto1D(cutflowName, 8.5);
-
-                    if (!(*isHighPurity.Get())[i]) break;
-                    vcp[s].FillHisto1D(cutflowName, 9.5);
-
-                    if (!(Chi2[i]/Ndof[i] < 5.0)) break;
-                    vcp[s].FillHisto1D(cutflowName, 10.5);
-
-                    if (!(fabs(dZ[i]) < 0.1)) break;
-                    vcp[s].FillHisto1D(cutflowName, 11.5);
-
-                    if (!(fabs(dXY[i]) < 0.02)) break;
-                    vcp[s].FillHisto1D(cutflowName, 12.5);
-
-                    if (!(PFMiniIso_relative[i] < 0.02)) break;
-                    vcp[s].FillHisto1D(cutflowName, 13.5);
-
-                    if (!(track_genTrackIsoSumPt_dr03[i] < 15)) break;
-                    vcp[s].FillHisto1D(cutflowName, 14.5);
-
-                    if (!(EoverP[i] < 0.3)) break;
-                    vcp[s].FillHisto1D(cutflowName, 15.5);
-
-                    double relPtErr2 = PtErr[i] / (Pt[i] * Pt[i]);
-                    if (!(relPtErr2 > 0 && relPtErr2 < 0.0008)) break;
-                    vcp[s].FillHisto1D(cutflowName, 16.5);
-
-                    if (!(ProbQ_noL1[i] > 0 && ProbQ_noL1[i] < 0.7)) break;
-                    vcp[s].FillHisto1D(cutflowName, 17.5);
-                    if (!(PtErr[i]/Pt[i] < 1)) break;
-                    vcp[s].FillHisto1D(cutflowName, 18.5);
-
-                    if (!(Ih_StripOnly[i] > 3.14)) break;
-                    vcp[s].FillHisto1D(cutflowName, 19.5);
-
-                    break;
+                    // Cumulative CUTFLOW
+                bool passed = true;
+                vcp[s].FillHisto1D(selLabels_[s]+"_Cutflow", 0.5); // All events
+                for (unsigned int j = 0; j < cuts.size(); ++j) {
+                    if (!cuts[j](i)) {
+                        passed = false;
+                        break;
+                    }
+                    vcp[s].FillHisto1D(selLabels_[s]+"_Cutflow", j+1.5);
                 }
+                    
+
+                    // N-1 CUTFLOW
+                std::vector <bool> passedCuts(cuts.size(), true);
+                for (unsigned int icut = 0; icut < cuts.size(); ++icut) {
+                    for (unsigned int j = 0; j < cuts.size(); ++j) {
+                        if (j == icut) continue;
+                        if (!cuts[j](i)) {
+                            passedCuts[icut] = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (passedCuts[0]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_trigger", trigger);
+                if (passedCuts[1]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_METfilters", (*Flag_allMETFilters.Get()));
+                if (passedCuts[2]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_CaloMET", *RecoCaloMET.Get());
+                if (passedCuts[3]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Pt", Pt[i]);
+                if (passedCuts[4]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_eta", eta[i]);
+                if (passedCuts[5]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_NOPH", NOPH[i]);
+                if (passedCuts[6]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_FOVH", FOVH[i]);
+                if (passedCuts[7]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_NOM", NOM[i]);
+                if (passedCuts[8]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_HighPurity", (*isHighPurity.Get())[i]);
+                if (passedCuts[9]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Chi2", Chi2[i]/Ndof[i]);
+                if (passedCuts[10]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_dZ", fabs(dZ[i]));
+                if (passedCuts[11]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_dXY", fabs(dXY[i]));
+                if (passedCuts[12]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PFMiniIso", PFMiniIso_relative[i]);
+                if (passedCuts[13]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_TrkIso", track_genTrackIsoSumPt_dr03[i]);
+                if (passedCuts[14]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_EoverP", EoverP[i]);
+                if (passedCuts[15]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_PtPt", PtErr[i]/(Pt[i]*Pt[i]));
+                if (passedCuts[16]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Fpix", 1-ProbQ_noL1[i]);
+                if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
+                if (passedCuts[18]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Ih_StripOnly", Ih_StripOnly[i]);
+
             }
         }
 
@@ -745,6 +771,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         */
    }
 
+    cout << "after cutflow"    << endl;
    tot += 1;
    if(passedThisSel[2]) passedSel += 1;
    if(foundOnePF[2]) PFMu += 1;
@@ -813,7 +840,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         }*/
 
 
-
+        cout << "before region" << endl;
         if(UseFpixel){           
             //vmrp_regionFpix_all[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
 
@@ -884,6 +911,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                if( (Fpix > fpix999) && (Fpix <= fpix10) ) vmrp_regionD_999f10[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
             }
         }
+        cout << "after region" << endl;
      
         if(UseGstrip){
 
