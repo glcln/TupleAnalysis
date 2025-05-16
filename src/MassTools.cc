@@ -275,12 +275,12 @@ void crossHistos(TH2F* res, TH1F* h1, TH1F* h2)
 
 // Function doing the crossing between 1D-histograms of dEdx and momentum and returning a 2D-histogram (p,ih),
 // and respecting the eta binning as in the mass distribution calculation 
-void crossHistosEtaBinning(TH2F* res, TH2F* eta_p, TH2F* ih_eta)
+void crossHistosEtaBinning(TH2F* res, TH2F* eta_1oP, TH2F* ih_eta)
 {
     TH1F* eta = (TH1F*) ih_eta->ProjectionX();
     for(int i=0;i<eta->GetNbinsX()+1;i++)
     {
-        TH1F* p = (TH1F*) eta_p->ProjectionX("proj_p",i,i+1);
+        TH1F* p = (TH1F*) eta_1oP->ProjectionX("proj_p",i,i+1);
         TH1F* ih = (TH1F*) ih_eta->ProjectionY("proj_ih",i,i+1);
         scale(p);
         for(int j=0;j<p->GetNbinsX()+1;j++)

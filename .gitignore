@@ -1,3 +1,4 @@
 output/*.root
+macros/*.root
 output/DebugSynchroTupleVSFramework/*.root
 output/Ih_ihlow3_ihdown8/*.root
