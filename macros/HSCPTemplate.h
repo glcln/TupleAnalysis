@@ -37,8 +37,6 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-   bool PassPreselection(int hscpIndex);
-   bool PassPreselectionSept8(int hscpIndex);
 
    bool do1Dplots;
    bool do2Dplots;
@@ -493,8 +491,6 @@ public :
    TTreeReaderValue<vector<bool>> muonIsTight = {fReader, "muonIsTight"};
    
    TTreeReaderValue<vector<bool>> passCutPt55 = {fReader, "passCutPt55"};
-   TTreeReaderValue<vector<bool>> passPreselection = {fReader, "passPreselection"};
-   TTreeReaderArray<bool> passPreselectionSept8 = {fReader, "passPreselectionSept8"};
    TTreeReaderValue<vector<bool>> passSelection = {fReader, "passSelection"};
    TTreeReaderValue<vector<bool>> isPFMuon = {fReader, "isPFMuon"};
    TTreeReaderValue<vector<bool>> PFMuonPt = {fReader, "PFMuonPt"};

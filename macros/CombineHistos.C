@@ -10,7 +10,8 @@
 #include "TGraph.h"
 #include <iostream>
 
-TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, std::string OptionDraw, bool logy) {
+TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, std::string RatioTitle, std::string OptionDraw, bool logy)
+{
     TCanvas* c_new = new TCanvas(CanvasTitle.c_str(), CanvasTitle.c_str(), 800, 800);
 
     // Define pads
@@ -45,7 +46,7 @@ TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, s
     h_ratio->Divide(h1);
 
     h_ratio->SetTitle("");
-    h_ratio->GetYaxis()->SetTitle("Ratio");
+    h_ratio->GetYaxis()->SetTitle(RatioTitle.c_str());
     h_ratio->GetYaxis()->SetRangeUser(0, 2);
     h_ratio->SetMarkerStyle(8);
     h_ratio->GetYaxis()->SetNdivisions(505);
@@ -90,7 +91,8 @@ void etaReweighingP(TH2F* nabla_eta_C, const TH1F* eta_B_, const TH1F* eta_A_)
 }
 
 // Switch X and Y axis
-TH2F* TransposeTH2(const TH2F* h_in) {
+TH2F* TransposeTH2(const TH2F* h_in)
+{
     int nx = h_in->GetNbinsX();
     int ny = h_in->GetNbinsY();
 
@@ -138,10 +140,9 @@ void ExtractDist_CandD(std::string ext)
     TH2F *D_pt_eta = (TH2F*)ifile->Get(Form("eta_pt_regionD_8fp9_%s", ext.c_str()));
 
     TH2F *A_eta_ih = (TH2F*)ifile->Get(Form("ih_eta_regionA_3fp8_%s", ext.c_str()));
-    TH2F *B_eta_ih = (TH2F*)ifile->Get(Form("ih_eta_regionB_3fp8_%s", ext.c_str()));
+    TH2F *B_eta_ih = (TH2F*)ifile->Get(Form("ih_eta_regionB_8fp9_%s", ext.c_str()));
     TH1F *a_eta = (TH1F*)A_eta_ih->ProjectionX();
     TH1F *b_eta = (TH1F*)B_eta_ih->ProjectionX();
-
 
     // Reweighting
     etaReweighingP(C_eta_ih, b_eta, a_eta);     // Ih
@@ -150,7 +151,7 @@ void ExtractDist_CandD(std::string ext)
     etaReweighingP(C_eta_1oP, b_eta, a_eta);    // 1/p
 
     TH2F* C_eta_fpix = TransposeTH2(C_fpix_eta);
-    etaReweighingP(C_eta_fpix, b_eta, a_eta);
+    etaReweighingP(C_eta_fpix, b_eta, a_eta);   // Fpix
 
     TH2F* C_eta_p = TransposeTH2(C_p_eta);
     etaReweighingP(C_eta_p, b_eta, a_eta);      // p
@@ -167,6 +168,7 @@ void ExtractDist_CandD(std::string ext)
     C_eta_p->ProjectionY()->Write("C_p");
     C_eta_pt->ProjectionY()->Write("C_pt");
     C_eta_pt->ProjectionX()->Write("C_eta");
+    TransposeTH2(C_pt_eta)->ProjectionX()->Write("C_eta_noReweighting");
     D_eta_ih->ProjectionY()->Write("D_ih");
     D_1oP_eta->ProjectionX()->Write("D_1oP");
     D_fpix_eta->ProjectionX()->Write("D_fpix");
@@ -331,11 +333,11 @@ void CompareDist_CandD(std::string ext)
 
 
     // ratio plots
-    TCanvas *cIhratio = DrawWithRatio(C_ih, D_ih, cih, "IhWratio", "E1 same", true);
-    TCanvas *c1oPratio = DrawWithRatio(C_1oP, D_1oP, c1oP, "1oPWratio", "E1 same", true);
-    TCanvas *cPratio = DrawWithRatio(C_p, D_p, cp, "PWratio", "E1 same", true);
-    TCanvas *cptratio = DrawWithRatio(C_pt, D_pt, cpt, "PtWratio", "E1 same", true);
-    TCanvas *cetaratio = DrawWithRatio(C_eta, D_eta, ceta, "EtaWratio", "E1 same", false);
+    TCanvas *cIhratio = DrawWithRatio(C_ih, D_ih, cih, "IhWratio", "D/C", "E1 same", true);
+    TCanvas *c1oPratio = DrawWithRatio(C_1oP, D_1oP, c1oP, "1oPWratio", "D/C", "E1 same", true);
+    TCanvas *cPratio = DrawWithRatio(C_p, D_p, cp, "PWratio", "D/C", "E1 same", true);
+    TCanvas *cptratio = DrawWithRatio(C_pt, D_pt, cpt, "PtWratio", "D/C", "E1 same", true);
+    TCanvas *cetaratio = DrawWithRatio(C_eta, D_eta, ceta, "EtaWratio", "D/C", "E1 same", false);
 
 
 
@@ -1548,18 +1550,18 @@ void CompareDistwMET()
     return;
 }
 
-void MyCutFlow()
+void Cutflow(std::string EventOrCandidate)
 {
-    TFile *ofile = new TFile("PlayWithHistos/MyCutFlow.root", "RECREATE");
+    TFile *ofile = new TFile(Form("PlayWithHistos/%sCutflow.root", EventOrCandidate.c_str()), "RECREATE");
 
-    TFile *ifile = new TFile("../output/MET_2017_2018_massCut_0_pT70_V3p3_Fpix_Eta2p4.root");
-    TH1F *CutFlow_MET = (TH1F*)ifile->Get("METContainingMu_Cutflow");
-    TH1F *CutFlow_OnlyMET = (TH1F*)ifile->Get("OnlyMET_Cutflow");
+    TFile *ifile = new TFile("../output/MET_2017_2018_massCut_0_pT70_V3p4_Fpix_Eta2p4.root");
+    TH1F *CutFlow_MET = (TH1F*)ifile->Get(Form("METContainingMu_%sCutflow", EventOrCandidate.c_str()));
+    TH1F *CutFlow_OnlyMET = (TH1F*)ifile->Get(Form("OnlyMET_%sCutflow", EventOrCandidate.c_str()));
 
-    CutFlow_MET->GetXaxis()->SetBinLabel(1, "All events");
-    CutFlow_MET->GetXaxis()->SetBinLabel(2, "MET triggers");
-    CutFlow_MET->GetXaxis()->SetBinLabel(3, "CaloMET > 170 GeV");
-    CutFlow_MET->GetXaxis()->SetBinLabel(4, "MET filters");
+    CutFlow_MET->GetXaxis()->SetBinLabel(1, "Selected candidates");
+    CutFlow_MET->GetXaxis()->SetBinLabel(2, "MET filters");
+    CutFlow_MET->GetXaxis()->SetBinLabel(3, "MET triggers");
+    CutFlow_MET->GetXaxis()->SetBinLabel(4, "CaloMET > 170 GeV");
     CutFlow_MET->GetXaxis()->SetBinLabel(5, "p_{T} > 55 GeV");
     CutFlow_MET->GetXaxis()->SetBinLabel(6, "#eta < 2.4");
     CutFlow_MET->GetXaxis()->SetBinLabel(7, "NOPH #geq 2");
@@ -1570,12 +1572,33 @@ void MyCutFlow()
     CutFlow_MET->GetXaxis()->SetBinLabel(12, "d_{z} < 0.1");
     CutFlow_MET->GetXaxis()->SetBinLabel(13, "d_{xy} < 0.02");
     CutFlow_MET->GetXaxis()->SetBinLabel(14, "I_{PF}^{rel} < 0.02");
-    CutFlow_MET->GetXaxis()->SetBinLabel(15, "I_{trk} < 15 GeV");
-    CutFlow_MET->GetXaxis()->SetBinLabel(16, "E/p < 0.3");
-    CutFlow_MET->GetXaxis()->SetBinLabel(17, "p_{T}^{err}/p_{T}^2 < 0.0008");
+    CutFlow_MET->GetXaxis()->SetBinLabel(15, "E/p < 0.3");
+    CutFlow_MET->GetXaxis()->SetBinLabel(16, "I_{trk} < 15 GeV");
+    CutFlow_MET->GetXaxis()->SetBinLabel(17, "p_{T}^{err}/p_{T}^{2} < 0.0008");
     CutFlow_MET->GetXaxis()->SetBinLabel(18, "F_{pixel} > 0.3");
     CutFlow_MET->GetXaxis()->SetBinLabel(19, "p_{T}^{err}/p_{T} < 1");
     CutFlow_MET->GetXaxis()->SetBinLabel(20, "I_{h} > C");
+
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(1, "Selected candidates");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(2, "MET filters");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(3, "MET triggers");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(4, "CaloMET > 170 GeV");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(5, "p_{T} > 55 GeV");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(6, "#eta < 2.4");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(7, "NOPH #geq 2");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(8, "FOVH > 0.8");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(9, "NOM #geq 10");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(10, "isHighPurity");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(11, "#chi^{2}/ndof < 5.0");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(12, "d_{z} < 0.1");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(13, "d_{xy} < 0.02");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(14, "I_{PF}^{rel} < 0.02");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(15, "E/p < 0.3");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(16, "I_{trk} < 15 GeV");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(17, "p_{T}^{err}/p_{T}^{2} < 0.0008");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(18, "F_{pixel} > 0.3");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(19, "p_{T}^{err}/p_{T} < 1");
+    CutFlow_OnlyMET->GetXaxis()->SetBinLabel(20, "I_{h} > C");
 
     // scale par rapport au premier bin
     CutFlow_MET->Scale(1./CutFlow_MET->GetBinContent(1));
@@ -1592,6 +1615,10 @@ void MyCutFlow()
     CutFlow_MET->GetXaxis()->SetTitle("");
     CutFlow_MET->GetYaxis()->SetTitle("Events");
     CutFlow_MET->GetYaxis()->SetRangeUser(CutFlow_OnlyMET->GetMinimum()/5, CutFlow_MET->GetMaximum()*5);
+    CutFlow_OnlyMET->LabelsOption("v", "X");
+    CutFlow_OnlyMET->GetXaxis()->SetTitle("");
+    CutFlow_OnlyMET->GetYaxis()->SetTitle("Events");
+    CutFlow_OnlyMET->GetYaxis()->SetRangeUser(CutFlow_OnlyMET->GetMinimum()/5, CutFlow_MET->GetMaximum()*5);
     TLegend *leg = new TLegend(0.6, 0.7, 0.9, 0.9);
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
@@ -1601,84 +1628,87 @@ void MyCutFlow()
     c1->SetLogy();
 
 
+    TCanvas* cWratio = DrawWithRatio(CutFlow_MET, CutFlow_OnlyMET, c1, "CutflowWratio", "OnlyMET/MET", "hist same", true);
+
     ofile->cd();
-    c1->Write();
+    cWratio->Write();
     ofile->Close();
 
     return;
 }
 
-void Nm1CutFlow()
+void Nm1Cutflow(std::string OnlyMET_or_MET)
 {
-    TFile *ofile = new TFile("PlayWithHistos/Nm1CutFlow.root", "RECREATE");
+    TFile *ofile = new TFile(Form("PlayWithHistos/%sNm1Cutflow.root", OnlyMET_or_MET.c_str()), "RECREATE");
 
-    TFile *ifile = new TFile("MET_2017_2018_massCut_0_pT70_V3p3_Fpix_Eta2p4.root");
-    TH1F *OnlyMET_Nm1_trigger = (TH1F*)ifile->Get("OnlyMET_Nm1_trigger");
-    TH1F *OnlyMET_Nm1_METfilters = (TH1F*)ifile->Get("OnlyMET_Nm1_METfilters");
-    TH1F *OnlyMET_Nm1_CaloMET = (TH1F*)ifile->Get("OnlyMET_Nm1_CaloMET");
-    TH1F *OnlyMET_Nm1_Pt = (TH1F*)ifile->Get("OnlyMET_Nm1_Pt");
-    TH1F *OnlyMET_Nm1_eta = (TH1F*)ifile->Get("OnlyMET_Nm1_eta");
-    TH1F *OnlyMET_Nm1_NOPH = (TH1F*)ifile->Get("OnlyMET_Nm1_NOPH");
-    TH1F *OnlyMET_Nm1_FOVH = (TH1F*)ifile->Get("OnlyMET_Nm1_FOVH");
-    TH1F *OnlyMET_Nm1_NOM = (TH1F*)ifile->Get("OnlyMET_Nm1_NOM");
-    TH1F *OnlyMET_Nm1_HighPurity = (TH1F*)ifile->Get("OnlyMET_Nm1_HighPurity");
-    TH1F *OnlyMET_Nm1_Chi2 = (TH1F*)ifile->Get("OnlyMET_Nm1_Chi2");
-    TH1F *OnlyMET_Nm1_dZ = (TH1F*)ifile->Get("OnlyMET_Nm1_dZ");
-    TH1F *OnlyMET_Nm1_dXY = (TH1F*)ifile->Get("OnlyMET_Nm1_dXY");
-    TH1F *OnlyMET_Nm1_PFMiniIso = (TH1F*)ifile->Get("OnlyMET_Nm1_PFMiniIso");
-    TH1F *OnlyMET_Nm1_TrkIso = (TH1F*)ifile->Get("OnlyMET_Nm1_TrkIso");
-    TH1F *OnlyMET_Nm1_EoverP = (TH1F*)ifile->Get("OnlyMET_Nm1_EoverP");
-    TH1F *OnlyMET_Nm1_PtErr_over_PtPt = (TH1F*)ifile->Get("OnlyMET_Nm1_PtErr_over_PtPt");
-    TH1F *OnlyMET_Nm1_Fpix = (TH1F*)ifile->Get("OnlyMET_Nm1_Fpix");
-    TH1F *OnlyMET_Nm1_PtErr_over_Pt = (TH1F*)ifile->Get("OnlyMET_Nm1_PtErr_over_Pt");
-    TH1F *OnlyMET_Nm1_Ih_StripOnly = (TH1F*)ifile->Get("OnlyMET_Nm1_Ih_StripOnly");
+    TFile *ifile = new TFile("../output/MET_2017_2018_massCut_0_pT70_V3p4_Fpix_Eta2p4.root");
+    TH1F *Nm1_METfilters = (TH1F*)ifile->Get(Form("%s_Nm1_METfilters", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_trigger = (TH1F*)ifile->Get(Form("%s_Nm1_trigger", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_CaloMET = (TH1F*)ifile->Get(Form("%s_Nm1_CaloMET", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_Pt = (TH1F*)ifile->Get(Form("%s_Nm1_Pt", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_eta = (TH1F*)ifile->Get(Form("%s_Nm1_eta", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_NOPH = (TH1F*)ifile->Get(Form("%s_Nm1_NOPH", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_FOVH = (TH1F*)ifile->Get(Form("%s_Nm1_FOVH", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_NOM = (TH1F*)ifile->Get(Form("%s_Nm1_NOM", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_HighPurity = (TH1F*)ifile->Get(Form("%s_Nm1_HighPurity", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_Chi2 = (TH1F*)ifile->Get(Form("%s_Nm1_Chi2", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_dZ = (TH1F*)ifile->Get(Form("%s_Nm1_dZ", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_dXY = (TH1F*)ifile->Get(Form("%s_Nm1_dXY", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_PFMiniIso = (TH1F*)ifile->Get(Form("%s_Nm1_PFMiniIso", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_TrkIso = (TH1F*)ifile->Get(Form("%s_Nm1_TrkIso", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_EoverP = (TH1F*)ifile->Get(Form("%s_Nm1_EoverP", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_PtErr_over_PtPt = (TH1F*)ifile->Get(Form("%s_Nm1_PtErr_over_PtPt", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_Fpix = (TH1F*)ifile->Get(Form("%s_Nm1_Fpix", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_PtErr_over_Pt = (TH1F*)ifile->Get(Form("%s_Nm1_PtErr_over_Pt", OnlyMET_or_MET.c_str()));
+    TH1F *Nm1_Ih_StripOnly = (TH1F*)ifile->Get(Form("%s_Nm1_Ih_StripOnly", OnlyMET_or_MET.c_str()));
+
 
     std::vector<std::function<bool(double)>> cuts;
-    cuts.push_back([&](int trigger){ return trigger; });
-    cuts.push_back([&](int Flag_allMETFilters){ return Flag_allMETFilters; });
+    cuts.push_back([&](float Flag_allMETFilters){ return int(Flag_allMETFilters - 0.5); });
+    cuts.push_back([&](float trigger){ return int(trigger - 0.5); });
     cuts.push_back([&](float RecoCaloMET){ return RecoCaloMET > 170; });
     cuts.push_back([&](float Pt){ return Pt > 55.0; });
     cuts.push_back([&](float eta){ return fabs(eta) < 2.4; });
     cuts.push_back([&](float NOPH){ return NOPH >= 2; });
     cuts.push_back([&](float FOVH){ return FOVH > 0.8; });
     cuts.push_back([&](float NOM){ return NOM >= 10; });
-    cuts.push_back([&](int isHighPurity){ return isHighPurity; });
+    cuts.push_back([&](float isHighPurity){ return int(isHighPurity - 0.5); });
     cuts.push_back([&](float Chi2_over_ndof){ return Chi2_over_ndof < 5.0; });
     cuts.push_back([&](float dZ){ return fabs(dZ) < 0.1; });
     cuts.push_back([&](float dXY){ return fabs(dXY) < 0.02; });
     cuts.push_back([&](float PFMiniIso_relative){ return PFMiniIso_relative < 0.02; });
-    cuts.push_back([&](float track_genTrackIsoSumPt_dr03){ return track_genTrackIsoSumPt_dr03 < 15; });
     cuts.push_back([&](float EoverP){ return EoverP < 0.3; });
+    cuts.push_back([&](float track_genTrackIsoSumPt_dr03){ return track_genTrackIsoSumPt_dr03 < 15; });
     cuts.push_back([&](float PtErr_over_PtPt){ return (PtErr_over_PtPt > 0 && PtErr_over_PtPt < 0.0008); });
     cuts.push_back([&](float Fpix){ return Fpix > 0.3; });
     cuts.push_back([&](float PtErr_over_Pt){ return PtErr_over_Pt < 1; });
     cuts.push_back([&](float Ih_StripOnly){ return Ih_StripOnly > 3.14; });
 
     std::vector<TH1F*> originalHistos = {
-    OnlyMET_Nm1_trigger,
-    OnlyMET_Nm1_METfilters,
-    OnlyMET_Nm1_CaloMET,
-    OnlyMET_Nm1_Pt,
-    OnlyMET_Nm1_eta,
-    OnlyMET_Nm1_NOPH,
-    OnlyMET_Nm1_FOVH,
-    OnlyMET_Nm1_NOM,
-    OnlyMET_Nm1_HighPurity,
-    OnlyMET_Nm1_Chi2,
-    OnlyMET_Nm1_dZ,
-    OnlyMET_Nm1_dXY,
-    OnlyMET_Nm1_PFMiniIso,
-    OnlyMET_Nm1_TrkIso,
-    OnlyMET_Nm1_EoverP,
-    OnlyMET_Nm1_PtErr_over_PtPt,
-    OnlyMET_Nm1_Fpix,
-    OnlyMET_Nm1_PtErr_over_Pt,
-    OnlyMET_Nm1_Ih_StripOnly
+    Nm1_METfilters,
+    Nm1_trigger,
+    Nm1_CaloMET,
+    Nm1_Pt,
+    Nm1_eta,
+    Nm1_NOPH,
+    Nm1_FOVH,
+    Nm1_NOM,
+    Nm1_HighPurity,
+    Nm1_Chi2,
+    Nm1_dZ,
+    Nm1_dXY,
+    Nm1_PFMiniIso,
+    Nm1_EoverP,
+    Nm1_TrkIso,
+    Nm1_PtErr_over_PtPt,
+    Nm1_Fpix,
+    Nm1_PtErr_over_Pt,
+    Nm1_Ih_StripOnly
     };
 
     std::vector<std::string> Xlabels = {
-    "Trigger",
     "MET filters",
+    "Trigger",
     "CaloMET",
     "p_{T}",
     "#eta",
@@ -1690,23 +1720,23 @@ void Nm1CutFlow()
     "|d_{z}|",
     "|d_{xy}|",
     "I_{PF}^{rel}",
-    "I_{trk}",
     "E/p",
-    "p_{T}^{err}/p_{T}^2",
+    "I_{trk}",
+    "p_{T}^{err}/p_{T}^{2}",
     "F_{pixel}",
     "p_{T}^{err}/p_{T}",
     "I_{h}"
     };
 
     std::vector<TH1F*> cutHistos;
-    for (size_t i = 0; i < originalHistos.size(); ++i) {
+    for (unsigned int i = 0; i < originalHistos.size(); ++i) {
         TH1F* h_clone = (TH1F*)originalHistos[i]->Clone((std::string(originalHistos[i]->GetName()) + "_cut").c_str());
         h_clone->Reset();
         cutHistos.push_back(h_clone);
     }
 
-    for (size_t j = 0; j < cuts.size(); ++j) {
-        for (int i=1; i<cutHistos[j]->GetNbinsX(); i++) {
+    for (unsigned int j = 0; j < cuts.size(); ++j) {
+        for (int i=1; i<=cutHistos[j]->GetNbinsX(); i++) {
             double binCenter = originalHistos[j]->GetXaxis()->GetBinCenter(i);
             double binContent = originalHistos[j]->GetBinContent(i);
 
@@ -1714,7 +1744,7 @@ void Nm1CutFlow()
         }
     }
 
-    for (size_t i = 0; i < cutHistos.size(); ++i) {
+    for (unsigned int i = 0; i < cutHistos.size(); ++i) {
         cutHistos[i]->SetLineColor(kRed);
         originalHistos[i]->SetLineColor(kBlue);
         cutHistos[i]->GetXaxis()->SetTitle(Xlabels[i].c_str());
@@ -1722,13 +1752,13 @@ void Nm1CutFlow()
     }
 
     ofile->cd();
-    for (size_t i = 0; i < cutHistos.size(); ++i) {
-        TCanvas *c = new TCanvas(Form("Nm1CutFlow_%zu", i), Form("Nm1CutFlow_%zu", i), 800, 800);
+    for (unsigned int i = 0; i < cutHistos.size(); ++i) {
+        TCanvas *c = new TCanvas(Form("Nm1CutFlow_%u", i), Form("Nm1CutFlow_%u", i), 800, 800);
         c->cd();
         cutHistos[i]->Draw("hist");
         originalHistos[i]->Draw("hist same");
         cutHistos[i]->Draw("hist same");
-        cutHistos[i]->GetYaxis()->SetRangeUser(0, cutHistos[i]->GetMaximum()*5);
+        cutHistos[i]->GetYaxis()->SetRangeUser(0, originalHistos[i]->GetMaximum()*5);
         TLegend *leg = new TLegend(0.6, 0.7, 0.9, 0.9);
         leg->SetFillStyle(0);
         leg->SetBorderSize(0);
@@ -1784,7 +1814,6 @@ void EtaSignalVSData()
     ofile->Close();
 
     return;
-
 }
 
 void FpixSignalVSData()
@@ -1960,7 +1989,7 @@ void CutFlowDataSignal_SingleMu()
     Cutflow_SingleMu_NEW->GetXaxis()->SetBinLabel(12, "I_{PF}^{rel} < 0.02");
     Cutflow_SingleMu_NEW->GetXaxis()->SetBinLabel(13, "I_{trk} < 15 GeV");
     Cutflow_SingleMu_NEW->GetXaxis()->SetBinLabel(14, "E/p < 0.3");
-    Cutflow_SingleMu_NEW->GetXaxis()->SetBinLabel(15, "p_{T}^{err}/p_{T}^2 < 0.0008");
+    Cutflow_SingleMu_NEW->GetXaxis()->SetBinLabel(15, "p_{T}^{err}/p_{T}^{2} < 0.0008");
     Cutflow_SingleMu_NEW->GetXaxis()->SetBinLabel(16, "F_{pixel} > 0.3");
     Cutflow_SingleMu_NEW->GetXaxis()->SetBinLabel(17, "p_{T}^{err}/p_{T} < 1");
     Cutflow_SingleMu_NEW->GetXaxis()->SetBinLabel(18, "I_{h} > C");
@@ -1979,7 +2008,7 @@ void CutFlowDataSignal_SingleMu()
     Cutflow_Signal_NEW->GetXaxis()->SetBinLabel(12, "I_{PF}^{rel} < 0.02");
     Cutflow_Signal_NEW->GetXaxis()->SetBinLabel(13, "I_{trk} < 15 GeV");
     Cutflow_Signal_NEW->GetXaxis()->SetBinLabel(14, "E/p < 0.3");
-    Cutflow_Signal_NEW->GetXaxis()->SetBinLabel(15, "p_{T}^{err}/p_{T}^2 < 0.0008");
+    Cutflow_Signal_NEW->GetXaxis()->SetBinLabel(15, "p_{T}^{err}/p_{T}^{2} < 0.0008");
     Cutflow_Signal_NEW->GetXaxis()->SetBinLabel(16, "F_{pixel} > 0.3");
     Cutflow_Signal_NEW->GetXaxis()->SetBinLabel(17, "p_{T}^{err}/p_{T} < 1");
     Cutflow_Signal_NEW->GetXaxis()->SetBinLabel(18, "I_{h} > C");
@@ -2006,7 +2035,7 @@ void CutFlowDataSignal_SingleMu()
     leg->Draw();
     c1->SetLogy();
 
-    TCanvas* cWratio = DrawWithRatio(Cutflow_SingleMu_NEW, Cutflow_Signal_NEW, c1, "CutflowWratio", "hist same", true);
+    TCanvas* cWratio = DrawWithRatio(Cutflow_SingleMu_NEW, Cutflow_Signal_NEW, c1, "CutflowWratio", "Signal/SingleMu", "hist same", true);
 
 
     ofile->cd();
@@ -2090,7 +2119,7 @@ void CutFlowDataSignal_MET()
     leg->Draw();
     c1->SetLogy();
 
-    TCanvas* cWratio = DrawWithRatio(Cutflow_MET, Cutflow_Signal, c1, "CutflowWratio", "hist same", true);
+    TCanvas* cWratio = DrawWithRatio(Cutflow_MET, Cutflow_Signal, c1, "CutflowWratio", "Signal/MET", "hist same", true);
 
     ofile->cd();
     c1->Write();
@@ -2100,6 +2129,54 @@ void CutFlowDataSignal_MET()
     return;
 }
 
+void Eta_OnlyMET_MET_SingleMu()
+{
+    TFile *ofile = new TFile("PlayWithHistos/Eta_OnlyMET_MET_SingleMu.root","RECREATE");
+    
+    TFile *MET = new TFile("../output/MET_2017_2018_massCut_0_pT70_V3p4_Fpix_Eta2p4.root");
+    TH1F *etaMET = (TH1F*)MET->Get("METContainingMu_eta");
+    TH1F *etaOnlyMET = (TH1F*)MET->Get("OnlyMET_eta");
+    TFile *Mu = new TFile("../output/Mu2018_massCut_0_pT70_V2p21_Gstrip_Fpix_Eta2p4.root");
+    TH1F *etaMu = (TH1F*)Mu->Get("ReRunRaph_eta");
+
+    etaMu->Scale(1./etaMu->Integral());
+    etaMET->Scale(1./etaMET->Integral());
+    etaOnlyMET->Scale(1./etaOnlyMET->Integral());
+
+    etaMET->SetLineColor(kRed);
+    etaMET->SetMarkerColor(kRed);
+    etaMET->SetMarkerStyle(21);
+    etaMu->SetLineColor(kBlue);
+    etaMu->SetMarkerColor(kBlue);
+    etaMu->SetMarkerStyle(20);
+    etaOnlyMET->SetLineColor(kGreen+2);
+    etaOnlyMET->SetMarkerColor(kGreen+2);
+    etaOnlyMET->SetMarkerStyle(22);
+
+    TCanvas *c = new TCanvas("c", "c", 1080, 720);
+    c->cd();
+    etaMET->Draw("E0");
+    etaMu->Draw("E0 same");
+    etaOnlyMET->Draw("E0 same");
+    etaMET->GetYaxis()->SetTitle("Events normalized");
+    etaMET->GetXaxis()->SetTitle("#eta");
+    TLegend *leg = new TLegend(0.7, 0.75, 0.85, 0.85);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->AddEntry(etaMu, "SingleMu", "PE1");
+    leg->AddEntry(etaMET, "METContainingMu", "PE1");
+    leg->AddEntry(etaOnlyMET, "OnlyMET", "PE1");
+    leg->Draw();
+    gStyle->SetOptStat(0);
+
+    ofile->cd();
+    c->Write();
+    ofile->Close();
+
+    return;
+}
+
+
 void CombineHistos()
 {
     //PlotPredFits();
@@ -2107,19 +2184,22 @@ void CombineHistos()
     //EtaInRegions();
     //FpixVSEta();
     //CompareDistwMET();
-    //MyCutFlow();
-    //Nm1CutFlow();
+    //Cutflow("Event");
+    //Cutflow("Candidate");
+    //Nm1Cutflow("METContainingMu");
+    //Nm1Cutflow("OnlyMET");
 
     //ExtractDist_CandD("METContainingMu");
     //ExtractDist_CandD("OnlyMET");
-    //CompareDist_CandD("METContainingMu");
-    //CompareDist_CandD("OnlyMET");
+    CompareDist_CandD("METContainingMu");
+    CompareDist_CandD("OnlyMET");
     
     //FpixSignalVSData();
-    pTSignalVSData();
+    //pTSignalVSData();
     //EtaSignalVSData();
     //CutFlowDataSignal_SingleMu();
     //CutFlowDataSignal_MET();
+    //Eta_OnlyMET_MET_SingleMu();
 
     return;
 }
