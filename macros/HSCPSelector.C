@@ -62,15 +62,7 @@ bool HSCPSelector::PassHSCPpresel_OnlyMET(int i){
    return ( ( (*HLT_Mu50.Get() == false) && (*HLT_PFMET120_PFMHT120_IDTight.Get()==true || *HLT_PFHT500_PFMET100_PFMHT100_IDTight.Get()==true || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60.Get()==true || *HLT_MET105_IsoTrk50.Get()==true) && (*RecoCaloMET.Get() > 170) && (*Flag_allMETFilters.Get() == true) && (Pt[i] > 55.0) && (abs(eta[i]) < 2.4) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
 }
 
-bool HSCPSelector::PassPreselection(int hscpIndex){
-  if (hscpIndex<0 || hscpIndex>(int)Pt.GetSize()) return false;
-  return passPreselection->at(hscpIndex);
-}
 
-bool HSCPSelector::PassPreselectionSept8(int hscpIndex){
-  if (hscpIndex<0 || hscpIndex>(int)Pt.GetSize()) return false;
-  return passPreselectionSept8[hscpIndex];
-}
 
 
 
@@ -109,10 +101,6 @@ selLabels_.push_back("METContainingMu");
 selections_.push_back(&HSCPSelector::PassHSCPpresel_OnlyMET);
 selLabels_.push_back("OnlyMET");
 
-    //selections_.push_back(&HSCPSelector::PassPreselection);
-    //selections_.push_back(&HSCPSelector::PassPreselectionSept8);
-    //selLabels_.push_back("PassPreselection");
-    //selLabels_.push_back("PassPreselectionSept8");
 
     //https://root-forum.cern.ch/t/proof-session-tselector-how-to-pass-object-to-slaves/25502
 
@@ -273,11 +261,6 @@ selections_.push_back(&HSCPSelector::PassHSCPpresel_OnlyMET);
 selLabels_.push_back("OnlyMET");
 
    //-------------------------------------
-   //selections_.push_back(&HSCPSelector::PassPreselection);
-   //selections_.push_back(&HSCPSelector::PassPreselectionSept8);
-   //selLabels_.push_back("PassPreselection");
-   //selLabels_.push_back("PassPreselectionSept8");
-   //Change here the naming of the hists to be compatible with old way 
    
    //-------------------------------------
    //create RegionMassPlot for all selection
@@ -567,7 +550,8 @@ selLabels_.push_back("OnlyMET");
         plots.AddHisto2D(selLabels_[i]+"_Fpix_vs_Gstrip",50,0,1,50,0,1);
 
 
-        plots.AddHisto1D(selLabels_[i]+"_Cutflow", 20, 0, 20);
+        plots.AddHisto1D(selLabels_[i]+"_CandidateCutflow", 20, 0, 20);
+        plots.AddHisto1D(selLabels_[i]+"_EventCutflow", 20, 0, 20);
 
         plots.AddHisto1D(selLabels_[i]+"_Nm1_trigger", 2, 0, 2);
         plots.AddHisto1D(selLabels_[i]+"_Nm1_METfilters", 2, 0, 2);
@@ -602,41 +586,43 @@ selLabels_.push_back("OnlyMET");
 
 Bool_t HSCPSelector::Process(Long64_t entry)
 {
-   // The Process() function is called for each entry in the tree (or possibly
-   // keyed object in the case of PROOF) to be processed. The entry argument
-   // specifies which entry in the currently loaded tree is to be processed.
-   // When processing keyed objects with PROOF, the object is already loaded
-   // and is available via the fObject pointer.
-   //
-   // This function should contain the \"body\" of the analysis. It can contain
-   // simple or elaborate selection criteria, run algorithms on the data
-   // of the event and typically fill histograms.
-   //
-   // The processing can be stopped by calling Abort().
-   //
-   // Use fStatus to set the return value of TTree::Process().
-   //
-   // The return value is currently not used.
-   //std::cout << "Entering Process" << std::endl; 
-   
-   fReader.SetLocalEntry(entry);
-   //----------------------------------
-   //Loop over all HSCP candidates
-   //----------------------------------
-   
-   //Use the size of any array such as Pt
-   
-   //Store the index (in iCand) of the most ionizing candidate (maxIh) 
-   //passing the preselection
-   //int iCand = -1; // index on the selected candidate per event
+    // The Process() function is called for each entry in the tree (or possibly
+    // keyed object in the case of PROOF) to be processed. The entry argument
+    // specifies which entry in the currently loaded tree is to be processed.
+    // When processing keyed objects with PROOF, the object is already loaded
+    // and is available via the fObject pointer.
+    //
+    // This function should contain the \"body\" of the analysis. It can contain
+    // simple or elaborate selection criteria, run algorithms on the data
+    // of the event and typically fill histograms.
+    //
+    // The processing can be stopped by calling Abort().
+    //
+    // Use fStatus to set the return value of TTree::Process().
+    //
+    // The return value is currently not used.
+    //std::cout << "Entering Process" << std::endl; 
+    
+    fReader.SetLocalEntry(entry);
+    //----------------------------------
+    //Loop over all HSCP candidates
+    //----------------------------------
+    
+    //Use the size of any array such as Pt
+    
+    //Store the index (in iCand) of the most ionizing candidate (maxIh) 
+    //passing the preselection
+    //int iCand = -1; // index on the selected candidate per event
 
-   vector<int> iCand(selLabels_.size(),-1);
-   vector<float> maxIh(selLabels_.size(),-1);
-   vector<bool> foundOnePF(selLabels_.size(),false); 
-   vector<bool> foundOneGlobal(selLabels_.size(),false); 
-   vector<bool> passedThisSel(selLabels_.size(),false); 
+    vector<int> iCand(selLabels_.size(),-1);
+    vector<float> maxIh(selLabels_.size(),-1);
+    vector<bool> foundOnePF(selLabels_.size(),false); 
+    vector<bool> foundOneGlobal(selLabels_.size(),false); 
+    vector<bool> passedThisSel(selLabels_.size(),false); 
 
-   for(unsigned int i=0;i<Pt.GetSize();i++){
+
+    std::vector<std::vector<bool>> eventCuts(selections_.size(), std::vector<bool>(19, false));
+    for(unsigned int i=0;i<Pt.GetSize();i++){
       
             //TAKE MOST IONIZING CANDIDATE
         for(unsigned int s=0;s<selections_.size();s++){
@@ -675,19 +661,22 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 cuts.push_back([&](int i){ return Ih_StripOnly[i] > 3.14; });
                 
 
-                    // Cumulative CUTFLOW
-                bool passed = true;
-                vcp[s].FillHisto1D(selLabels_[s]+"_Cutflow", 0.5); // All events
+                    // Event CUTFLOW setup
+                bool allPassed = true;
                 for (unsigned int j = 0; j < cuts.size(); ++j) {
-                    if (!cuts[j](i)) {
-                        passed = false;
-                        break;
-                    }
-                    vcp[s].FillHisto1D(selLabels_[s]+"_Cutflow", j+1.5);
+                    if (allPassed && cuts[j](i)) eventCuts[s][j] = true;
+                    else allPassed = false;
+                }
+
+                    // candidate CUTFLOW
+                vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", 0.5); // All events
+                for (unsigned int j = 0; j < cuts.size(); ++j) {
+                    if (!cuts[j](i)) break;
+                    vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", j+1.5);
                 }
                     
 
-                    // N-1 CUTFLOW
+                    // N-1 candidate CUTFLOW
                 std::vector <bool> passedCuts(cuts.size(), true);
                 for (unsigned int icut = 0; icut < cuts.size(); ++icut) {
                     for (unsigned int j = 0; j < cuts.size(); ++j) {
@@ -712,8 +701,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (passedCuts[10]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_dZ", fabs(dZ[i]));
                 if (passedCuts[11]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_dXY", fabs(dXY[i]));
                 if (passedCuts[12]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PFMiniIso", PFMiniIso_relative[i]);
-                if (passedCuts[13]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_TrkIso", track_genTrackIsoSumPt_dr03[i]);
-                if (passedCuts[14]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_EoverP", EoverP[i]);
+                if (passedCuts[13]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_EoverP", EoverP[i]);
+                if (passedCuts[14]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_TrkIso", track_genTrackIsoSumPt_dr03[i]);
                 if (passedCuts[15]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_PtPt", PtErr[i]/(Pt[i]*Pt[i]));
                 if (passedCuts[16]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Fpix", 1-ProbQ_noL1[i]);
                 if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
@@ -735,8 +724,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
 
                 std::vector<std::function<bool(int)>> cuts;
-                cuts.push_back([&](int i){ return trigger; });
                 cuts.push_back([&](int i){ return (*Flag_allMETFilters.Get()); });
+                cuts.push_back([&](int i){ return trigger; });
                 cuts.push_back([&](int i){ return (*RecoCaloMET.Get() > 170); });
                 cuts.push_back([&](int i){ return Pt[i] > 55.0; });
                 cuts.push_back([&](int i){ return fabs(eta[i]) < 2.4; });
@@ -748,27 +737,30 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 cuts.push_back([&](int i){ return fabs(dZ[i]) < 0.1; });
                 cuts.push_back([&](int i){ return fabs(dXY[i]) < 0.02; });
                 cuts.push_back([&](int i){ return PFMiniIso_relative[i] < 0.02; });
-                cuts.push_back([&](int i){ return track_genTrackIsoSumPt_dr03[i] < 15; });
                 cuts.push_back([&](int i){ return EoverP[i] < 0.3; });
+                cuts.push_back([&](int i){ return track_genTrackIsoSumPt_dr03[i] < 15; });
                 cuts.push_back([&](int i){ return (PtErr[i]/(Pt[i] * Pt[i])) > 0 && (PtErr[i]/(Pt[i] * Pt[i])) < 0.0008; });
                 cuts.push_back([&](int i){ return ProbQ_noL1[i] > 0 && ProbQ_noL1[i] < 0.7; });
                 cuts.push_back([&](int i){ return PtErr[i]/Pt[i] < 1; });
                 cuts.push_back([&](int i){ return Ih_StripOnly[i] > 3.14; });
                 
-
-                    // Cumulative CUTFLOW
-                bool passed = true;
-                vcp[s].FillHisto1D(selLabels_[s]+"_Cutflow", 0.5); // All events
+                    // Event CUTFLOW setup
+                bool allPassed = true;
                 for (unsigned int j = 0; j < cuts.size(); ++j) {
-                    if (!cuts[j](i)) {
-                        passed = false;
-                        break;
-                    }
-                    vcp[s].FillHisto1D(selLabels_[s]+"_Cutflow", j+1.5);
+                    if (allPassed && cuts[j](i)) eventCuts[s][j] = true;
+                    else allPassed = false;
+                }
+
+
+                    // candidate CUTFLOW
+                vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", 0.5); // All events
+                for (unsigned int j = 0; j < cuts.size(); ++j) {
+                    if (!cuts[j](i)) break;
+                    vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", j+1.5);
                 }
                     
 
-                    // N-1 CUTFLOW
+                    // N-1 candidate CUTFLOW
                 std::vector <bool> passedCuts(cuts.size(), true);
                 for (unsigned int icut = 0; icut < cuts.size(); ++icut) {
                     for (unsigned int j = 0; j < cuts.size(); ++j) {
@@ -780,8 +772,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                     }
                 }
 
-                if (passedCuts[0]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_trigger", trigger);
-                if (passedCuts[1]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_METfilters", (*Flag_allMETFilters.Get()));
+                if (passedCuts[0]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_METfilters", (*Flag_allMETFilters.Get()));
+                if (passedCuts[1]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_trigger", trigger);
                 if (passedCuts[2]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_CaloMET", *RecoCaloMET.Get());
                 if (passedCuts[3]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Pt", Pt[i]);
                 if (passedCuts[4]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_eta", eta[i]);
@@ -793,8 +785,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (passedCuts[10]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_dZ", fabs(dZ[i]));
                 if (passedCuts[11]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_dXY", fabs(dXY[i]));
                 if (passedCuts[12]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PFMiniIso", PFMiniIso_relative[i]);
-                if (passedCuts[13]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_TrkIso", track_genTrackIsoSumPt_dr03[i]);
-                if (passedCuts[14]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_EoverP", EoverP[i]);
+                if (passedCuts[13]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_EoverP", EoverP[i]);
+                if (passedCuts[14]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_TrkIso", track_genTrackIsoSumPt_dr03[i]);
                 if (passedCuts[15]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_PtPt", PtErr[i]/(Pt[i]*Pt[i]));
                 if (passedCuts[16]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Fpix", 1-ProbQ_noL1[i]);
                 if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
@@ -823,6 +815,17 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         }
         */
    }
+
+    // Event CUTFLOW
+    for (unsigned int s = 0; s < selections_.size(); ++s) {
+        vcp[s].FillHisto1D(selLabels_[s]+"_EventCutflow", 0.5); // All events
+        for (unsigned int j = 0; j < 19; ++j) {
+            if (eventCuts[s][j]) vcp[s].FillHisto1D(selLabels_[s]+"_EventCutflow", j+1.5);
+        }
+    }
+
+
+
 
    tot += 1;
    if(passedThisSel[2]) passedSel += 1;
