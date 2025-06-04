@@ -731,7 +731,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
 
                     // candidate CUTFLOW
-                vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", 0.5); // All events
+                vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", 0.5); // All candidates
                 for (unsigned int j = 0; j < cuts.size(); ++j) {
                     if (!cuts[j](i)) break;
                     vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", j+1.5);
@@ -797,12 +797,10 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     // Event CUTFLOW
     for (unsigned int s = 0; s < selections_.size(); ++s) {
         vcp[s].FillHisto1D(selLabels_[s]+"_EventCutflow", 0.5); // All events
-        for (unsigned int j = 0; j < 19; ++j) {
+        for (unsigned int j = 0; j < 19; ++j) { // cuts length
             if (eventCuts[s][j]) vcp[s].FillHisto1D(selLabels_[s]+"_EventCutflow", j+1.5);
         }
     }
-
-
 
 
    tot += 1;
