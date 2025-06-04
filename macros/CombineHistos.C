@@ -1559,6 +1559,7 @@ void Cutflow(std::string EventOrCandidate)
     TH1F *CutFlow_OnlyMET = (TH1F*)ifile->Get(Form("OnlyMET_%sCutflow", EventOrCandidate.c_str()));
 
     CutFlow_MET->GetXaxis()->SetBinLabel(1, "Selected candidates");
+    if (EventOrCandidate == "Event") CutFlow_MET->GetXaxis()->SetBinLabel(1, "All events");
     CutFlow_MET->GetXaxis()->SetBinLabel(2, "MET filters");
     CutFlow_MET->GetXaxis()->SetBinLabel(3, "MET triggers");
     CutFlow_MET->GetXaxis()->SetBinLabel(4, "CaloMET > 170 GeV");
@@ -1580,6 +1581,7 @@ void Cutflow(std::string EventOrCandidate)
     CutFlow_MET->GetXaxis()->SetBinLabel(20, "I_{h} > C");
 
     CutFlow_OnlyMET->GetXaxis()->SetBinLabel(1, "Selected candidates");
+    if (EventOrCandidate == "Event") CutFlow_OnlyMET->GetXaxis()->SetBinLabel(1, "All events");
     CutFlow_OnlyMET->GetXaxis()->SetBinLabel(2, "MET filters");
     CutFlow_OnlyMET->GetXaxis()->SetBinLabel(3, "MET triggers");
     CutFlow_OnlyMET->GetXaxis()->SetBinLabel(4, "CaloMET > 170 GeV");
@@ -2191,8 +2193,8 @@ void CombineHistos()
 
     //ExtractDist_CandD("METContainingMu");
     //ExtractDist_CandD("OnlyMET");
-    CompareDist_CandD("METContainingMu");
-    CompareDist_CandD("OnlyMET");
+    //CompareDist_CandD("METContainingMu");
+    //CompareDist_CandD("OnlyMET");
     
     //FpixSignalVSData();
     //pTSignalVSData();
