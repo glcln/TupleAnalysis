@@ -101,7 +101,7 @@
        //std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/macros/";
        //std::string fileNamesMu2018[] = { (pathData+"HistosLocal.txt").c_str()};
        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V2p11/";
-       std::string fileNamesMu2018[] = { (pathData+"SingleMuon_Run2018.txt").c_str()};
+       std::string fileNamesMu2018[] = { (pathData+"SingleMuon_Run2018.txt").c_str()}; //test.txt
 
        for (const std::string& fileName : fileNamesMu2018) {
            std::ifstream file(fileName);

@@ -521,12 +521,17 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
 
         CPlots plots;
 
+
+        plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_pT", 200, 0, 1.1, 5000, 0, 5000);
+        plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_Ih", 200, 0, 1.1, 300, 0, 15);
+        plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_1oP", 200, 0, 1.1, 1000, 0, 1000);
+
         plots.AddHisto1D(selLabels_[i]+"_TrigInfo", 5, 0, 5);
         plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
         plots.AddHisto1D(selLabels_[i]+"_eta",48,-2.4,+2.4);
+        plots.AddHisto1D(selLabels_[i]+"_etaWithoutMuonCandidate",48,-2.4,+2.4);
         plots.AddHisto1D(selLabels_[i]+"_cand",10,0,10);
         plots.AddHisto2D(selLabels_[i]+"_Fpix_vs_Gstrip",50,0,1,50,0,1);
-
 
         plots.AddHisto1D(selLabels_[i]+"_CandidateCutflow", 20, 0, 20);
         plots.AddHisto1D(selLabels_[i]+"_EventCutflow", 20, 0, 20);
@@ -550,6 +555,10 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
         plots.AddHisto1D(selLabels_[i]+"_Nm1_Fpix", 20, 0, 1.01);
         plots.AddHisto1D(selLabels_[i]+"_Nm1_PtErr_over_Pt", 100, 0, 0.5);
         plots.AddHisto1D(selLabels_[i]+"_Nm1_Ih_StripOnly", 100, 0, 8);
+
+        plots.AddHisto2D(selLabels_[i]+"_Fpix_vs_Gstrip_pT70",500,0,1,500,0,1);
+        plots.AddHisto1D(selLabels_[i]+"_Fpix_pT70_SR",500,0,1);
+        plots.AddHisto1D(selLabels_[i]+"_Gstrip_pT70_SR",500,0,1);
 
 
         //Need to add plots here
@@ -617,7 +626,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
         // CUTFLOW
         for(unsigned int s=0;s<selections_.size();s++){
-            if (selLabels_[s] == "SingleMu"){
+
+            if (selLabels_[s].find("SingleMu") != std::string::npos){
 
                 std::vector<std::function<bool(int)>> cuts;
                 cuts.push_back([&](int i){ return (*HLT_Mu50.Get()); });
@@ -686,8 +696,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
                 if (passedCuts[18]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Ih_StripOnly", Ih_StripOnly[i]);
             }
-
-            if (selLabels_[s] == "OnlyMET" || selLabels_[s] == "METContainingMu"){
+            /*
+            if (selLabels_[s].find("MET") != std::string::npos) {
                 
                 bool trigger = true;
                 if (selLabels_[s] == "OnlyMET") trigger = (*HLT_Mu50.Get() == false) && (
@@ -770,7 +780,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
                 if (passedCuts[18]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Ih_StripOnly", Ih_StripOnly[i]);
 
-            }
+            }*/
         }
 
             //TAKE MOST IONIZING PF AND GLOBAL MUON CANDIDATE
@@ -824,10 +834,20 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             vcp[s].FillHisto1D(selLabels_[s]+"_TrigInfo", *Trig.Get());
             vcp[s].FillHisto1D(selLabels_[s]+"_p",Pt[i]*cosh(eta[i]));
             vcp[s].FillHisto1D(selLabels_[s]+"_eta",eta[i]);
+            if ( !((*isMuon.Get())[i]) && !((*isGlobalMuon.Get())[i]) ) vcp[s].FillHisto1D(selLabels_[s]+"_etaWithoutMuonCandidate",eta[i]);
             vcp[s].FillHisto1D(selLabels_[s]+"_cand",HSCP_cand[i]);
+            
             vcp[s].FillHisto2D(selLabels_[s]+"_Fpix_vs_Gstrip", float(1.0 - ProbQ_noL1[i]), Ias_StripOnly[i]);
+            if (Pt[i] > 70){
+                vcp[s].FillHisto2D(selLabels_[s]+"_Fpix_vs_Gstrip_pT70", float(1.0 - ProbQ_noL1[i]), Ias_StripOnly[i]);
+                if (Ias_StripOnly[i] >= quan999) vcp[s].FillHisto1D(selLabels_[s]+"_Gstrip_pT70_SR", Ias_StripOnly[i]);
+                if (float(1.0 - ProbQ_noL1[i]) >= fpix9) vcp[s].FillHisto1D(selLabels_[s]+"_Fpix_pT70_SR", float(1.0 - ProbQ_noL1[i]));
+            }
+                // Correlation plots
+            vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_pT", float(1.0 - ProbQ_noL1[i]), Pt[i]);
+            vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_Ih", float(1.0 - ProbQ_noL1[i]), Ih_StripOnly[i]);
+            vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_1oP", float(1.0 - ProbQ_noL1[i]), 10000./(Pt[i]*cosh(eta[i])));
         }
-
 
         double Ias = Ias_StripOnly[i];
         float P = 10000./(Pt[i]*cosh(eta[i]));

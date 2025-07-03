@@ -52,14 +52,9 @@ int year(2018);
 
 
 //ADD-SELECTION-METHODS
-bool HSCPSelector::PassHSCPpresel_METContainingMu(int i){
+bool HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4(int i){
    if (i<0 || i>(int)Pt.GetSize()) return false;
-   return ( ( (*HLT_PFMET120_PFMHT120_IDTight.Get()==true || *HLT_PFHT500_PFMET100_PFMHT100_IDTight.Get()==true || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60.Get()==true || *HLT_MET105_IsoTrk50.Get()==true) && (*RecoCaloMET.Get() > 170) && (*Flag_allMETFilters.Get() == true) && (Pt[i] > 55.0) && (abs(eta[i]) < 2.4) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
-}
-
-bool HSCPSelector::PassHSCPpresel_OnlyMET(int i){
-   if (i<0 || i>(int)Pt.GetSize()) return false;
-   return ( ( (*HLT_Mu50.Get() == false) && (*HLT_PFMET120_PFMHT120_IDTight.Get()==true || *HLT_PFHT500_PFMET100_PFMHT100_IDTight.Get()==true || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60.Get()==true || *HLT_MET105_IsoTrk50.Get()==true) && (*RecoCaloMET.Get() > 170) && (*Flag_allMETFilters.Get() == true) && (Pt[i] > 55.0) && (abs(eta[i]) < 2.4) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
+   return ( ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 2.4) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
 }
 
 
@@ -95,11 +90,8 @@ void HSCPSelector::Begin(TTree * /*tree*/)
     // Add selections into a vector
 
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METContainingMu);
-selLabels_.push_back("METContainingMu");
-
-selections_.push_back(&HSCPSelector::PassHSCPpresel_OnlyMET);
-selLabels_.push_back("OnlyMET");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4);
+selLabels_.push_back("SingleMu_Eta2p4");
 
 
     //https://root-forum.cern.ch/t/proof-session-tselector-how-to-pass-object-to-slaves/25502
@@ -254,11 +246,8 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
    //-------------------------------------
    //Add selections into a vector - to be updated
    //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METContainingMu);
-selLabels_.push_back("METContainingMu");
-
-selections_.push_back(&HSCPSelector::PassHSCPpresel_OnlyMET);
-selLabels_.push_back("OnlyMET");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4);
+selLabels_.push_back("SingleMu_Eta2p4");
 
    //-------------------------------------
    
@@ -543,12 +532,17 @@ selLabels_.push_back("OnlyMET");
 
         CPlots plots;
 
+
+        plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_pT", 200, 0, 1.1, 5000, 0, 5000);
+        plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_Ih", 200, 0, 1.1, 300, 0, 15);
+        plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_1oP", 200, 0, 1.1, 1000, 0, 1000);
+
         plots.AddHisto1D(selLabels_[i]+"_TrigInfo", 5, 0, 5);
         plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
         plots.AddHisto1D(selLabels_[i]+"_eta",48,-2.4,+2.4);
+        plots.AddHisto1D(selLabels_[i]+"_etaWithoutMuonCandidate",48,-2.4,+2.4);
         plots.AddHisto1D(selLabels_[i]+"_cand",10,0,10);
         plots.AddHisto2D(selLabels_[i]+"_Fpix_vs_Gstrip",50,0,1,50,0,1);
-
 
         plots.AddHisto1D(selLabels_[i]+"_CandidateCutflow", 20, 0, 20);
         plots.AddHisto1D(selLabels_[i]+"_EventCutflow", 20, 0, 20);
@@ -572,6 +566,10 @@ selLabels_.push_back("OnlyMET");
         plots.AddHisto1D(selLabels_[i]+"_Nm1_Fpix", 20, 0, 1.01);
         plots.AddHisto1D(selLabels_[i]+"_Nm1_PtErr_over_Pt", 100, 0, 0.5);
         plots.AddHisto1D(selLabels_[i]+"_Nm1_Ih_StripOnly", 100, 0, 8);
+
+        plots.AddHisto2D(selLabels_[i]+"_Fpix_vs_Gstrip_pT70",500,0,1,500,0,1);
+        plots.AddHisto1D(selLabels_[i]+"_Fpix_pT70_SR",500,0,1);
+        plots.AddHisto1D(selLabels_[i]+"_Gstrip_pT70_SR",500,0,1);
 
 
         //Need to add plots here
@@ -639,7 +637,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
         // CUTFLOW
         for(unsigned int s=0;s<selections_.size();s++){
-            if (selLabels_[s] == "SingleMu"){
+
+            if (selLabels_[s].find("SingleMu") != std::string::npos){
 
                 std::vector<std::function<bool(int)>> cuts;
                 cuts.push_back([&](int i){ return (*HLT_Mu50.Get()); });
@@ -708,8 +707,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
                 if (passedCuts[18]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Ih_StripOnly", Ih_StripOnly[i]);
             }
-
-            if (selLabels_[s] == "OnlyMET" || selLabels_[s] == "METContainingMu"){
+            /*
+            if (selLabels_[s].find("MET") != std::string::npos) {
                 
                 bool trigger = true;
                 if (selLabels_[s] == "OnlyMET") trigger = (*HLT_Mu50.Get() == false) && (
@@ -753,7 +752,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
 
                     // candidate CUTFLOW
-                vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", 0.5); // All events
+                vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", 0.5); // All candidates
                 for (unsigned int j = 0; j < cuts.size(); ++j) {
                     if (!cuts[j](i)) break;
                     vcp[s].FillHisto1D(selLabels_[s]+"_CandidateCutflow", j+1.5);
@@ -792,7 +791,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
                 if (passedCuts[18]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Ih_StripOnly", Ih_StripOnly[i]);
 
-            }
+            }*/
         }
 
             //TAKE MOST IONIZING PF AND GLOBAL MUON CANDIDATE
@@ -819,12 +818,10 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     // Event CUTFLOW
     for (unsigned int s = 0; s < selections_.size(); ++s) {
         vcp[s].FillHisto1D(selLabels_[s]+"_EventCutflow", 0.5); // All events
-        for (unsigned int j = 0; j < 19; ++j) {
+        for (unsigned int j = 0; j < 19; ++j) { // cuts length
             if (eventCuts[s][j]) vcp[s].FillHisto1D(selLabels_[s]+"_EventCutflow", j+1.5);
         }
     }
-
-
 
 
    tot += 1;
@@ -848,10 +845,20 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             vcp[s].FillHisto1D(selLabels_[s]+"_TrigInfo", *Trig.Get());
             vcp[s].FillHisto1D(selLabels_[s]+"_p",Pt[i]*cosh(eta[i]));
             vcp[s].FillHisto1D(selLabels_[s]+"_eta",eta[i]);
+            if ( !((*isMuon.Get())[i]) && !((*isGlobalMuon.Get())[i]) ) vcp[s].FillHisto1D(selLabels_[s]+"_etaWithoutMuonCandidate",eta[i]);
             vcp[s].FillHisto1D(selLabels_[s]+"_cand",HSCP_cand[i]);
+            
             vcp[s].FillHisto2D(selLabels_[s]+"_Fpix_vs_Gstrip", float(1.0 - ProbQ_noL1[i]), Ias_StripOnly[i]);
+            if (Pt[i] > 70){
+                vcp[s].FillHisto2D(selLabels_[s]+"_Fpix_vs_Gstrip_pT70", float(1.0 - ProbQ_noL1[i]), Ias_StripOnly[i]);
+                if (Ias_StripOnly[i] >= quan999) vcp[s].FillHisto1D(selLabels_[s]+"_Gstrip_pT70_SR", Ias_StripOnly[i]);
+                if (float(1.0 - ProbQ_noL1[i]) >= fpix9) vcp[s].FillHisto1D(selLabels_[s]+"_Fpix_pT70_SR", float(1.0 - ProbQ_noL1[i]));
+            }
+                // Correlation plots
+            vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_pT", float(1.0 - ProbQ_noL1[i]), Pt[i]);
+            vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_Ih", float(1.0 - ProbQ_noL1[i]), Ih_StripOnly[i]);
+            vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_1oP", float(1.0 - ProbQ_noL1[i]), 10000./(Pt[i]*cosh(eta[i])));
         }
-
 
         double Ias = Ias_StripOnly[i];
         float P = 10000./(Pt[i]*cosh(eta[i]));
