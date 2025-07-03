@@ -125,9 +125,9 @@ TH2F* TransposeTH2(const TH2F* h_in)
 
 void ExtractDist_CandD(std::string ext)
 {
-    TFile *ofile = new TFile(Form("PlayWithHistos/ExtractDist_CandD_%s.root", ext.c_str()),"RECREATE");
+    TFile *ofile = new TFile(Form("PlayWithHistos/ExtractDist_CandD_%s_Eta1.root", ext.c_str()),"RECREATE");
     
-    TFile *ifile = new TFile("../output/MET_2017_2018_massCut_0_pT70_V3p3_Fpix_Eta2p4.root");
+    TFile *ifile = new TFile("../output/MET_2017_2018_massCut_0_pT70_V3p5_Fpix_Eta1.root");
     TH2F *C_fpix_eta = (TH2F*)ifile->Get(Form("fpix_eta_regionC_3fp8_%s", ext.c_str()));
     TH2F *C_1oP_eta = (TH2F*)ifile->Get(Form("eta_1oP_regionC_3fp8_%s", ext.c_str()));
     TH2F *C_p_eta = (TH2F*)ifile->Get(Form("eta_p_regionC_3fp8_%s", ext.c_str()));
@@ -182,9 +182,9 @@ void ExtractDist_CandD(std::string ext)
 
 void CompareDist_CandD(std::string ext)
 {
-    TFile *ofile = new TFile(Form("PlayWithHistos/CompareDist_CandD_%s.root", ext.c_str()),"RECREATE");
+    TFile *ofile = new TFile(Form("PlayWithHistos/CompareDist_CandD_%s_Eta1.root", ext.c_str()),"RECREATE");
     
-    TFile *ifile = new TFile(Form("PlayWithHistos/ExtractDist_CandD_%s.root", ext.c_str()));
+    TFile *ifile = new TFile(Form("PlayWithHistos/ExtractDist_CandD_%s_Eta1.root", ext.c_str()));
     TH1F *C_ih = (TH1F*)ifile->Get("C_ih");
     TH1F *C_1oP = (TH1F*)ifile->Get("C_1oP");
     TH1F *C_fpix = (TH1F*)ifile->Get("C_fpix");
@@ -1213,18 +1213,42 @@ void WriteSF(TH2F* h2A, TH2F* h2D, const char *nameFile)
     return;
 }
 
+void Write_EtaWeight(TH2F* h2A, TH2F* h2B, const char *nameFile)
+{
+    // Setup
+    TH1D *etaA = h2A->ProjectionY("etaA");
+    TH1D *etaB = h2B->ProjectionY("etaB");
+    
+    etaA->Scale(1./etaA->Integral());
+    etaB->Scale(1./etaB->Integral());
+
+    // weight = B/A : to be multiplied later by a given dist. in C
+    etaA->Divide(etaB);
+
+    // SF saved
+    ofstream file;
+    file.open(nameFile);
+    for (int i = 1; i <= etaA->GetNbinsX(); i++) file << etaA->GetBinContent(i) << endl;
+    file.close();
+
+    return;
+}
+
 TCanvas* SF_Eta(TH2F* h2A, TH2F* h2B, TH2F* h2C, TH2F* h2D, const char *nameEta, const char *nameCanvas)
 {
+    // Projections
     TH1D *hA = h2A->ProjectionY(Form("%s_SFA", nameCanvas));
     TH1D *hB = h2B->ProjectionY(Form("%s_SFB", nameCanvas));
     TH1D *hC = h2C->ProjectionY(Form("%s_SFC", nameCanvas));
     TH1D *hD = h2D->ProjectionY(Form("%s_SFD", nameCanvas));
 
+    // Normalisation
     hA->Scale(1./hA->Integral());
     hB->Scale(1./hB->Integral());
     hC->Scale(1./hC->Integral());
     hD->Scale(1./hD->Integral());
 
+    // Couleurs et styles
     hA->SetLineColor(kRed);
     hA->SetMarkerColor(kRed);
     hA->SetMarkerStyle(21);
@@ -1232,23 +1256,157 @@ TCanvas* SF_Eta(TH2F* h2A, TH2F* h2B, TH2F* h2C, TH2F* h2D, const char *nameEta,
     hD->SetMarkerColor(kBlack);
     hD->SetMarkerStyle(22);
 
-    for (int i = 1; i <= hA->GetNbinsX(); i++) hA->SetBinContent(i, hB->GetBinContent(i)*hC->GetBinContent(i)/hA->GetBinContent(i));
+    // Application de la formule B*C/A
+    for (int i = 1; i <= hA->GetNbinsX(); i++) {
+        double valA = hA->GetBinContent(i);
+        double valB = hB->GetBinContent(i);
+        double valC = hC->GetBinContent(i);
+        hA->SetBinContent(i, (valA != 0) ? valB * valC / valA : 0);
+    }
 
+    // Création du canvas et des pads
     TCanvas *c1 = new TCanvas(nameCanvas, nameCanvas, 800, 800);
-    c1->cd();
-    hA->Draw("E1");
-    hD->Draw("hist same");
-    hA->GetXaxis()->SetTitle("#eta");
+    TPad *pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
+    pad1->SetBottomMargin(0.1);
+    pad1->Draw();
+    pad1->cd();
+
+    // Affichage des histos
     hA->GetXaxis()->SetRangeUser(-2.6, 2.6);
     hA->GetYaxis()->SetRangeUser(0, 0.02);
+    hA->GetYaxis()->SetTitle("Entries (normalized)");
+    hA->GetXaxis()->SetTitle("#eta");
+    hA->Draw("E1");
+    hD->Draw("hist same");
 
     TLegend *leg = new TLegend(0.6, 0.7, 0.9, 0.9);
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     leg->SetHeader(nameEta,"C");
     leg->AddEntry(hA, "B*C/A", "p");
-    leg->AddEntry(hD, "D", "p");
+    leg->AddEntry(hD, "D", "l");
     leg->Draw();
+
+    // Ratio plot
+    c1->cd();
+    TPad *pad2 = new TPad("pad2", "pad2", 0, 0, 1, 0.3);
+    pad2->SetTopMargin(0);
+    pad2->SetBottomMargin(0.25);
+    pad2->Draw();
+    pad2->cd();
+
+    TH1D *hRatio = (TH1D*)hD->Clone(Form("%s_ratio", nameCanvas));
+    hRatio->Divide(hA);
+    hRatio->SetMarkerStyle(20);
+    hRatio->SetMarkerColor(kBlack);
+    hRatio->SetLineColor(kBlack);
+
+    hRatio->Draw("E1");
+    TLine *line = new TLine(hRatio->GetXaxis()->GetXmin(), 1, hRatio->GetXaxis()->GetXmax(), 1);
+    line->SetLineStyle(2);
+    line->Draw("same");
+    hRatio->GetYaxis()->SetTitle("D / (B*C/A)");
+    hRatio->GetYaxis()->SetNdivisions(505);
+    hRatio->GetYaxis()->SetTitleSize(0.08);
+    hRatio->GetYaxis()->SetTitleOffset(0.5);
+    hRatio->GetYaxis()->SetLabelSize(0.07);
+    hRatio->GetXaxis()->SetTitle("#eta");
+    hRatio->GetXaxis()->SetTitleSize(0.1);
+    hRatio->GetXaxis()->SetLabelSize(0.08);
+    hRatio->GetXaxis()->SetLabelOffset(0.02);
+    hRatio->SetMinimum(0.5);
+    hRatio->SetMaximum(1.5);
+
+    return c1;
+}
+
+TCanvas* SF_1oP(TH2F* h2A, TH2F* h2B, TH2F* h2C, TH2F* h2D, const char *nameEta, const char *nameCanvas)
+{
+    // Projections
+    TH1D *etaA = h2A->ProjectionY(Form("%s_SFA", nameCanvas));
+    TH1D *etaB = h2B->ProjectionY(Form("%s_SFB", nameCanvas));
+    TH1D *D_1oP = h2D->ProjectionX("D_1oP");
+
+    etaA->Scale(1./etaA->Integral());
+    etaB->Scale(1./etaB->Integral());
+    etaB->Divide(etaA);
+    D_1oP->Scale(1./D_1oP->Integral());
+
+    // B*C/A
+    for(int i=0; i<h2C->GetNbinsX()+2; i++)  // 1oP bins
+    {
+        for(int j=0; j<h2C->GetNbinsY()+2; j++)  // eta bins
+        {
+            h2C->SetBinContent(i, j, h2C->GetBinContent(i, j)*etaB->GetBinContent(j));
+            h2C->SetBinError(i, j, h2C->GetBinError(i, j)*etaB->GetBinContent(j));
+        }
+    }
+
+    TH1D *C_1oP = h2C->ProjectionX("C_1oP");
+    C_1oP->Scale(1./C_1oP->Integral());
+
+    C_1oP->Rebin(8);
+    D_1oP->Rebin(8);
+    double range_max = 5000;
+
+    C_1oP->SetLineColor(kRed);
+    C_1oP->SetMarkerColor(kRed);
+    C_1oP->SetMarkerStyle(21);
+    D_1oP->SetLineColor(kBlack);
+    D_1oP->SetMarkerColor(kBlack);
+    D_1oP->SetMarkerStyle(22);
+
+    TCanvas *c1 = new TCanvas(nameCanvas, nameCanvas, 800, 800);
+    TPad *pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
+    pad1->SetBottomMargin(0.1);
+    pad1->Draw();
+    pad1->cd();
+
+    C_1oP->Draw("E1");
+    C_1oP->GetXaxis()->SetRangeUser(0, range_max);
+    C_1oP->GetXaxis()->SetTitle("10^{4} / p (GeV^{-1})");
+    C_1oP->GetYaxis()->SetTitle("Entries (normalized)");
+    D_1oP->Draw("hist same");
+    pad1->SetLogy();
+
+    TLegend *leg = new TLegend(0.6, 0.7, 0.9, 0.9);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->SetHeader(nameEta,"C");
+    leg->AddEntry(C_1oP, "B*C/A", "p");
+    leg->AddEntry(D_1oP, "D", "l");
+    leg->Draw();
+
+    // Ratio plot
+    c1->cd();
+    TPad *pad2 = new TPad("pad2", "pad2", 0, 0, 1, 0.3);
+    pad2->SetTopMargin(0);
+    pad2->SetBottomMargin(0.25);
+    pad2->Draw();
+    pad2->cd();
+
+    TH1D *hRatio = (TH1D*)D_1oP->Clone(Form("%s_ratio", nameCanvas));
+    hRatio->Divide(C_1oP);
+    hRatio->SetMarkerStyle(20);
+    hRatio->SetMarkerColor(kBlack);
+    hRatio->SetLineColor(kBlack);
+
+    hRatio->Draw("E1");
+    TLine *line = new TLine(hRatio->GetXaxis()->GetXmin(), 1, range_max, 1);
+    line->SetLineStyle(2);
+    line->Draw("same");
+    hRatio->GetXaxis()->SetRangeUser(0, range_max);
+    hRatio->GetYaxis()->SetTitle("D / (B*C/A)");
+    hRatio->GetYaxis()->SetNdivisions(505);
+    hRatio->GetYaxis()->SetTitleSize(0.08);
+    hRatio->GetYaxis()->SetTitleOffset(0.5);
+    hRatio->GetYaxis()->SetLabelSize(0.07);
+    hRatio->GetXaxis()->SetTitle("10^{4} / p (GeV^{-1})");
+    hRatio->GetXaxis()->SetTitleSize(0.1);
+    hRatio->GetXaxis()->SetLabelSize(0.08);
+    hRatio->GetXaxis()->SetLabelOffset(0.02);
+    hRatio->SetMinimum(0.5);
+    hRatio->SetMaximum(1.5);
 
     return c1;
 }
@@ -2157,17 +2315,17 @@ void Eta_OnlyMET_MET_SingleMu()
 
     TCanvas *c = new TCanvas("c", "c", 1080, 720);
     c->cd();
-    etaMET->Draw("E0");
+    etaOnlyMET->Draw("hist");
     etaMu->Draw("E0 same");
-    etaOnlyMET->Draw("E0 same");
-    etaMET->GetYaxis()->SetTitle("Events normalized");
-    etaMET->GetXaxis()->SetTitle("#eta");
+    etaMET->Draw("E0 same");
+    etaOnlyMET->GetYaxis()->SetTitle("Events normalized");
+    etaOnlyMET->GetXaxis()->SetTitle("#eta");
     TLegend *leg = new TLegend(0.7, 0.75, 0.85, 0.85);
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     leg->AddEntry(etaMu, "SingleMu", "PE1");
     leg->AddEntry(etaMET, "METContainingMu", "PE1");
-    leg->AddEntry(etaOnlyMET, "OnlyMET", "PE1");
+    leg->AddEntry(etaOnlyMET, "OnlyMET", "l");
     leg->Draw();
     gStyle->SetOptStat(0);
 
@@ -2177,6 +2335,363 @@ void Eta_OnlyMET_MET_SingleMu()
 
     return;
 }
+
+void ExtractCorrelations(std::string samples)
+{
+    TFile *ofile = new TFile(Form("PlayWithHistos/ExtractCorrelations_%s.root", samples.c_str()), "RECREATE");
+
+    std::string ifileName;
+    if (samples == "MET") ifileName = "../output/MET_2017_2018_massCut_0_pT70_V3p7_Fpix.root";
+    else if (samples == "SingleMu") ifileName = "../output/Mu2018_massCut_0_pT70_V2p31_Fpix.root";
+
+    TFile *ifile = new TFile(ifileName.c_str(), "READ");
+    TH2F *Fpix_vs_1oP_Eta1 = (TH2F*)ifile->Get(Form("%s_Eta1_AfterSel_Fpix_vs_1oP", samples.c_str()));
+    TH2F *Fpix_vs_1oP_Eta1_2p4 = (TH2F*)ifile->Get(Form("%s_Eta1_2p4_AfterSel_Fpix_vs_1oP", samples.c_str()));
+    TH2F *Fpix_vs_1oP_Eta2p4 = (TH2F*)ifile->Get(Form("%s_Eta2p4_AfterSel_Fpix_vs_1oP", samples.c_str()));
+    TH2F *Fpix_vs_Ih_Eta1 = (TH2F*)ifile->Get(Form("%s_Eta1_AfterSel_Fpix_vs_Ih", samples.c_str()));
+    TH2F *Fpix_vs_Ih_Eta1_2p4 = (TH2F*)ifile->Get(Form("%s_Eta1_2p4_AfterSel_Fpix_vs_Ih", samples.c_str()));
+    TH2F *Fpix_vs_Ih_Eta2p4 = (TH2F*)ifile->Get(Form("%s_Eta2p4_AfterSel_Fpix_vs_Ih", samples.c_str()));
+    TH2F *Fpix_vs_pT_Eta1 = (TH2F*)ifile->Get(Form("%s_Eta1_AfterSel_Fpix_vs_pT", samples.c_str()));
+    TH2F *Fpix_vs_pT_Eta1_2p4 = (TH2F*)ifile->Get(Form("%s_Eta1_2p4_AfterSel_Fpix_vs_pT", samples.c_str()));
+    TH2F *Fpix_vs_pT_Eta2p4 = (TH2F*)ifile->Get(Form("%s_Eta2p4_AfterSel_Fpix_vs_pT", samples.c_str()));
+    
+
+    // Do the profile of each TH2
+    TProfile *Fpix_vs_1oP_Eta1_profile = (TProfile*)Fpix_vs_1oP_Eta1->ProfileX("Fpix_vs_1oP_Eta1_profile");
+    TProfile *Fpix_vs_1oP_Eta1_2p4_profile = (TProfile*)Fpix_vs_1oP_Eta1_2p4->ProfileX("Fpix_vs_1oP_Eta1_2p4_profile");
+    TProfile *Fpix_vs_1oP_Eta2p4_profile = (TProfile*)Fpix_vs_1oP_Eta2p4->ProfileX("Fpix_vs_1oP_Eta2p4_profile");
+    TProfile *Fpix_vs_Ih_Eta1_profile = (TProfile*)Fpix_vs_Ih_Eta1->ProfileX("Fpix_vs_Ih_Eta1_profile");
+    TProfile *Fpix_vs_Ih_Eta1_2p4_profile = (TProfile*)Fpix_vs_Ih_Eta1_2p4->ProfileX("Fpix_vs_Ih_Eta1_2p4_profile");
+    TProfile *Fpix_vs_Ih_Eta2p4_profile = (TProfile*)Fpix_vs_Ih_Eta2p4->ProfileX("Fpix_vs_Ih_Eta2p4_profile");
+    TProfile *Fpix_vs_pT_Eta1_profile = (TProfile*)Fpix_vs_pT_Eta1->ProfileX("Fpix_vs_pT_Eta1_profile");
+    TProfile *Fpix_vs_pT_Eta1_2p4_profile = (TProfile*)Fpix_vs_pT_Eta1_2p4->ProfileX("Fpix_vs_pT_Eta1_2p4_profile");
+    TProfile *Fpix_vs_pT_Eta2p4_profile = (TProfile*)Fpix_vs_pT_Eta2p4->ProfileX("Fpix_vs_pT_Eta2p4_profile");
+    Fpix_vs_1oP_Eta1_profile->Rebin(4);
+    Fpix_vs_1oP_Eta1_profile->SetLineColor(kRed);
+    Fpix_vs_1oP_Eta1_profile->SetMarkerStyle(20);
+    Fpix_vs_1oP_Eta1_profile->SetMarkerColor(kRed);
+    Fpix_vs_1oP_Eta1_2p4_profile->Rebin(4);
+    Fpix_vs_1oP_Eta1_2p4_profile->SetLineColor(kBlue);
+    Fpix_vs_1oP_Eta1_2p4_profile->SetMarkerStyle(21);
+    Fpix_vs_1oP_Eta1_2p4_profile->SetMarkerColor(kBlue);
+    Fpix_vs_1oP_Eta2p4_profile->Rebin(4);
+    Fpix_vs_1oP_Eta2p4_profile->SetLineColor(kGreen+2);
+    Fpix_vs_1oP_Eta2p4_profile->SetMarkerStyle(22);
+    Fpix_vs_1oP_Eta2p4_profile->SetMarkerColor(kGreen+2);
+    Fpix_vs_Ih_Eta1_profile->Rebin(4);
+    Fpix_vs_Ih_Eta1_profile->SetLineColor(kRed);
+    Fpix_vs_Ih_Eta1_profile->SetMarkerStyle(20);
+    Fpix_vs_Ih_Eta1_profile->SetMarkerColor(kRed);
+    Fpix_vs_Ih_Eta1_2p4_profile->Rebin(4);
+    Fpix_vs_Ih_Eta1_2p4_profile->SetLineColor(kBlue);
+    Fpix_vs_Ih_Eta1_2p4_profile->SetMarkerStyle(21);
+    Fpix_vs_Ih_Eta1_2p4_profile->SetMarkerColor(kBlue);
+    Fpix_vs_Ih_Eta2p4_profile->Rebin(4);
+    Fpix_vs_Ih_Eta2p4_profile->SetLineColor(kGreen+2);
+    Fpix_vs_Ih_Eta2p4_profile->SetMarkerStyle(22);
+    Fpix_vs_Ih_Eta2p4_profile->SetMarkerColor(kGreen+2);
+    Fpix_vs_pT_Eta1_profile->Rebin(4);
+    Fpix_vs_pT_Eta1_profile->SetLineColor(kRed);
+    Fpix_vs_pT_Eta1_profile->SetMarkerStyle(20);
+    Fpix_vs_pT_Eta1_profile->SetMarkerColor(kRed);
+    Fpix_vs_pT_Eta1_2p4_profile->Rebin(4);
+    Fpix_vs_pT_Eta1_2p4_profile->SetLineColor(kBlue);
+    Fpix_vs_pT_Eta1_2p4_profile->SetMarkerStyle(21);
+    Fpix_vs_pT_Eta1_2p4_profile->SetMarkerColor(kBlue);
+    Fpix_vs_pT_Eta2p4_profile->Rebin(4);
+    Fpix_vs_pT_Eta2p4_profile->SetLineColor(kGreen+2);
+    Fpix_vs_pT_Eta2p4_profile->SetMarkerStyle(22);
+    Fpix_vs_pT_Eta2p4_profile->SetMarkerColor(kGreen+2);
+    
+
+    // Plot it
+    TCanvas *c1 = new TCanvas("c1oP", "c1", 800, 800);
+    c1->cd();
+    Fpix_vs_1oP_Eta1_profile->GetXaxis()->SetTitle("F_{pixel}");
+    Fpix_vs_1oP_Eta1_profile->GetYaxis()->SetTitle("10^{4}/p (GeV^{-1})");
+    Fpix_vs_1oP_Eta1_profile->Draw("E1");
+    Fpix_vs_1oP_Eta1_2p4_profile->Draw("E1 same");
+    Fpix_vs_1oP_Eta2p4_profile->Draw("E1 same");
+    TLegend *leg1 = new TLegend(0.2, 0.2, 0.4, 0.4);
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->AddEntry(Fpix_vs_1oP_Eta1_profile, "|#eta|<1", "lp");
+    leg1->AddEntry(Fpix_vs_1oP_Eta1_2p4_profile, "1#leq|#eta|<2.4", "lp");
+    leg1->AddEntry(Fpix_vs_1oP_Eta2p4_profile, "|#eta|<2.4", "lp");
+    leg1->Draw();
+
+    TCanvas *c2 = new TCanvas("cIh", "c2", 800, 800);
+    c2->cd();
+    Fpix_vs_Ih_Eta1_profile->GetXaxis()->SetTitle("F_{pixel}");
+    Fpix_vs_Ih_Eta1_profile->GetYaxis()->SetTitle("I_{h}");
+    Fpix_vs_Ih_Eta1_profile->Draw("E1");
+    Fpix_vs_Ih_Eta1_2p4_profile->Draw("E1 same");
+    Fpix_vs_Ih_Eta2p4_profile->Draw("E1 same");
+    leg1->Draw();
+
+    TCanvas *c3 = new TCanvas("cpT", "c3", 800, 800);
+    c3->cd();
+    Fpix_vs_pT_Eta1_profile->GetXaxis()->SetTitle("F_{pixel}");
+    Fpix_vs_pT_Eta1_profile->GetYaxis()->SetTitle("p_{T} (GeV)");
+    Fpix_vs_pT_Eta1_profile->Draw("E1");
+    Fpix_vs_pT_Eta1_2p4_profile->Draw("E1 same");
+    Fpix_vs_pT_Eta2p4_profile->Draw("E1 same");
+    leg1->Draw();
+
+    ofile->cd();
+    c1->Write();
+    c2->Write();
+    c3->Write();
+    ofile->Close();
+
+    return;
+}
+
+void ExtractWeight_BoA()
+{
+    TFile *MET = new TFile("../output/MET_2017_2018_massCut_0_pT70_V3p7_Fpix.root", "READ");
+    TFile *SingleMu = new TFile("../output/Mu2018_massCut_0_pT70_V2p31_Fpix.root", "READ");
+    
+
+    // Write the eta weight B/A for 1<=|eta|<2.4 and |eta|>2.4
+    TH2F *MET_A_Eta2p4 = (TH2F*)MET->Get("eta_p_regionA_3fp8_MET_Eta2p4");
+    TH2F *MET_B_Eta2p4 = (TH2F*)MET->Get("eta_p_regionB_8fp9_MET_Eta2p4");
+    TH2F *SingleMu_A_Eta2p4 = (TH2F*)SingleMu->Get("eta_p_regionA_3fp8_SingleMu_Eta2p4");
+    TH2F *SingleMu_B_Eta2p4 = (TH2F*)SingleMu->Get("eta_p_regionB_8fp9_SingleMu_Eta2p4");
+    
+    TH2F *MET_A_Eta1_2p4 = (TH2F*)MET->Get("eta_p_regionA_3fp8_MET_Eta1_2p4");
+    TH2F *MET_B_Eta1_2p4 = (TH2F*)MET->Get("eta_p_regionB_8fp9_MET_Eta1_2p4");
+    TH2F *SingleMu_A_Eta1_2p4 = (TH2F*)SingleMu->Get("eta_p_regionA_3fp8_SingleMu_Eta1_2p4");
+    TH2F *SingleMu_B_Eta1_2p4 = (TH2F*)SingleMu->Get("eta_p_regionB_8fp9_SingleMu_Eta1_2p4");
+
+    Write_EtaWeight(MET_A_Eta2p4, MET_B_Eta2p4, "PlayWithHistos/EtaWeight_BoA_MET_Eta2p4.txt");
+    Write_EtaWeight(SingleMu_A_Eta2p4, SingleMu_B_Eta2p4, "PlayWithHistos/EtaWeight_BoA_SingleMu_Eta2p4.txt");
+    Write_EtaWeight(MET_A_Eta1_2p4, MET_B_Eta1_2p4, "PlayWithHistos/EtaWeight_BoA_MET_Eta1_2p4.txt");
+    Write_EtaWeight(SingleMu_A_Eta1_2p4, SingleMu_B_Eta1_2p4, "PlayWithHistos/EtaWeight_BoA_SingleMu_Eta1_2p4.txt");
+
+    return;
+}
+
+void CorrectBias_1oP(std::string samples)
+{
+    TFile *ofile = new TFile(Form("PlayWithHistos/CorrectBias_1oP_%s.root", samples.c_str()), "RECREATE");
+
+    std::string ifileName;
+    if (samples == "MET") ifileName = "../output/MET_2017_2018_massCut_0_pT70_V3p7_Fpix.root";
+    else if (samples == "SingleMu") ifileName = "../output/Mu2018_massCut_0_pT70_V2p31_Fpix.root";
+
+    TFile *ifile = new TFile(ifileName.c_str(), "READ");
+    TH2F *Fpix_vs_1oP_Eta1 = (TH2F*)ifile->Get(Form("%s_Eta1_AfterSel_Fpix_vs_1oP", samples.c_str()));
+    TH2F *Fpix_vs_1oP_Eta1_2p4 = (TH2F*)ifile->Get(Form("%s_Eta1_2p4_AfterSel_Fpix_vs_1oP", samples.c_str()));
+    TH2F *Fpix_vs_1oP_Eta2p4 = (TH2F*)ifile->Get(Form("%s_Eta2p4_AfterSel_Fpix_vs_1oP", samples.c_str()));
+
+    TProfile *Fpix_vs_1oP_Eta1_profile = (TProfile*)Fpix_vs_1oP_Eta1->ProfileX("Fpix_vs_1oP_Eta1_profile");
+    TProfile *Fpix_vs_1oP_Eta1_2p4_profile = (TProfile*)Fpix_vs_1oP_Eta1_2p4->ProfileX("Fpix_vs_1oP_Eta1_2p4_profile");
+    TProfile *Fpix_vs_1oP_Eta2p4_profile = (TProfile*)Fpix_vs_1oP_Eta2p4->ProfileX("Fpix_vs_1oP_Eta2p4_profile");
+    Fpix_vs_1oP_Eta1_profile->Rebin(4);
+    Fpix_vs_1oP_Eta1_profile->SetLineColor(kRed);
+    Fpix_vs_1oP_Eta1_profile->SetMarkerStyle(20);
+    Fpix_vs_1oP_Eta1_profile->SetMarkerColor(kRed);
+    Fpix_vs_1oP_Eta1_2p4_profile->Rebin(4);
+    Fpix_vs_1oP_Eta1_2p4_profile->SetLineColor(kBlue);
+    Fpix_vs_1oP_Eta1_2p4_profile->SetMarkerStyle(21);
+    Fpix_vs_1oP_Eta1_2p4_profile->SetMarkerColor(kBlue);
+    Fpix_vs_1oP_Eta2p4_profile->Rebin(4);
+    Fpix_vs_1oP_Eta2p4_profile->SetLineColor(kGreen+2);
+    Fpix_vs_1oP_Eta2p4_profile->SetMarkerStyle(22);
+    Fpix_vs_1oP_Eta2p4_profile->SetMarkerColor(kGreen+2);
+
+
+    // Bias evaluation
+    TF1 *fit1oP_Eta1_2p4 = new TF1("fit1oP_Eta1_2p4", "pol1", 0.28, 1.02);
+    Fpix_vs_1oP_Eta1_2p4_profile->Fit(fit1oP_Eta1_2p4, "REMIQS");
+    fit1oP_Eta1_2p4->SetLineColor(kBlue);
+    TF1 *fit1oP_Eta2p4 = new TF1("fit1oP_Eta2p4", "pol1", 0.28, 1.02);
+    Fpix_vs_1oP_Eta2p4_profile->Fit(fit1oP_Eta2p4, "REMIQS");
+    fit1oP_Eta2p4->SetLineColor(kGreen+2);
+
+    cout << "1 <= |eta| < 2.4 : " << fit1oP_Eta1_2p4->GetParameter(0) << " + " << fit1oP_Eta1_2p4->GetParameter(1) << " * F_{pixel}" << endl;
+    cout << "                   chi2/ndof = " << fit1oP_Eta1_2p4->GetChisquare()/fit1oP_Eta1_2p4->GetNDF() << endl;
+    cout << "|eta| > 2.4 : " << fit1oP_Eta2p4->GetParameter(0) << " + " << fit1oP_Eta2p4->GetParameter(1) << " * F_{pixel}" << endl;
+    cout << "                   chi2/ndof = " << fit1oP_Eta2p4->GetChisquare()/fit1oP_Eta2p4->GetNDF() << endl;
+
+    TCanvas *c1 = new TCanvas("c1oP", "c1", 800, 800);
+    c1->cd();
+    Fpix_vs_1oP_Eta1_profile->GetXaxis()->SetTitle("F_{pixel}");
+    Fpix_vs_1oP_Eta1_profile->GetYaxis()->SetTitle("10^{4}/p (GeV^{-1})");
+    Fpix_vs_1oP_Eta1_profile->Draw("E1");
+    Fpix_vs_1oP_Eta1_2p4_profile->Draw("E1 same");
+    fit1oP_Eta1_2p4->Draw("same");
+    Fpix_vs_1oP_Eta2p4_profile->Draw("E1 same");
+    fit1oP_Eta2p4->Draw("same");
+    TLegend *leg1 = new TLegend(0.2, 0.2, 0.4, 0.4);
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->AddEntry(Fpix_vs_1oP_Eta1_profile, "|#eta|<1", "lp");
+    leg1->AddEntry(Fpix_vs_1oP_Eta1_2p4_profile, "1#leq|#eta|<2.4", "lp");
+    leg1->AddEntry(Fpix_vs_1oP_Eta2p4_profile, "|#eta|>2.4", "lp");
+    leg1->Draw();
+
+
+    // Bias correction 
+    TH1F *bias_1oP_Eta1_2p4 = (TH1F*)Fpix_vs_1oP_Eta1_2p4_profile->Clone("bias_1oP_Eta1_2p4");
+    for (int i = 1; i <= bias_1oP_Eta1_2p4->GetNbinsX(); ++i)
+    {
+        double Fpix = bias_1oP_Eta1_2p4->GetBinCenter(i);
+        double original = bias_1oP_Eta1_2p4->GetBinContent(i);
+        double bias = fit1oP_Eta1_2p4->Eval(Fpix);
+        bias_1oP_Eta1_2p4->SetBinContent(i, original - bias);
+    }
+    TH1F *bias_1oP_Eta2p4 = (TH1F*)Fpix_vs_1oP_Eta2p4_profile->Clone("bias_1oP_Eta2p4");
+    for (int i = 1; i <= bias_1oP_Eta2p4->GetNbinsX(); ++i)
+    {
+        double Fpix = bias_1oP_Eta2p4->GetBinCenter(i);
+        double original = bias_1oP_Eta2p4->GetBinContent(i);
+        double bias = fit1oP_Eta2p4->Eval(Fpix);
+        bias_1oP_Eta2p4->SetBinContent(i, original - bias);
+    }
+
+    TCanvas *c2 = new TCanvas("c1oP_corr", "c2", 800, 800);
+    c2->cd();
+    Fpix_vs_1oP_Eta1_profile->Draw("E1");
+    bias_1oP_Eta1_2p4->Draw("E1 same");
+    bias_1oP_Eta2p4->Draw("E1 same");
+    leg1->Draw();
+
+
+    ofile->cd();
+    c1->Write();
+    c2->Write();
+    ofile->Close();
+
+    return;
+}
+
+void EtaIn8fp9()
+{
+    TFile *ofile = new TFile("PlayWithHistos/EtaIn8fp9.root","RECREATE");
+    
+    TFile *Mu = new TFile("../output/Mu2018_massCut_0_pT70_V2p31_Fpix.root");
+    TH2F *A_Eta2p4 = (TH2F*)Mu->Get("eta_p_regionA_3fp8_SingleMu_Eta2p4");
+    TH2F *B_Eta2p4 = (TH2F*)Mu->Get("eta_p_regionB_8fp9_SingleMu_Eta2p4");
+    TH2F *C_Eta2p4 = (TH2F*)Mu->Get("eta_p_regionC_3fp8_SingleMu_Eta2p4");
+    TH2F *D_Eta2p4 = (TH2F*)Mu->Get("eta_p_regionD_8fp9_SingleMu_Eta2p4");
+
+
+    // Eta plots in all regions
+    TCanvas *cEta2p4 = EtaPlots(A_Eta2p4, B_Eta2p4, C_Eta2p4, D_Eta2p4, "|#eta| < 2.4", "Eta2p4");
+    TCanvas *cEta2p4Ratio = RatioEta(A_Eta2p4, B_Eta2p4, C_Eta2p4, D_Eta2p4, "|#eta| < 2.4", "Eta2p4_RatioToD");
+    TCanvas *cEta2p4_SF = SF_Eta(A_Eta2p4, B_Eta2p4, C_Eta2p4, D_Eta2p4, "|#eta| < 2.4", "SF_Eta");
+    TCanvas *c1oP_SF = SF_1oP(A_Eta2p4, B_Eta2p4, C_Eta2p4, D_Eta2p4, "|#eta| < 2.4", "SF_1oP");
+
+    ofile->cd();
+    cEta2p4->Write();
+    cEta2p4Ratio->Write();
+    cEta2p4_SF->Write();
+    c1oP_SF->Write();
+    ofile->Close();
+
+    return;
+}
+
+void GstripFpix_Signal()
+{
+    TFile *ofile = new TFile("PlayWithHistos/GstripFpix_Signal.root","RECREATE");
+    
+    TFile *Gluino2000_Eta2p4 = new TFile("../output/Gluino2000_massCut_0_pT70_V5p5_Gstrip_Fpix_Eta2p4.root");
+    TH2F *Fpix_vs_Gstrip = (TH2F*)Gluino2000_Eta2p4->Get("SingleMu_Eta2p4_Fpix_vs_Gstrip");
+    TH2F *Fpix_vs_Gstrip_pT70 = (TH2F*)Gluino2000_Eta2p4->Get("SingleMu_Eta2p4_Fpix_vs_Gstrip_pT70");
+    TH1F *Fpix_pT70_SR = (TH1F*)Gluino2000_Eta2p4->Get("SingleMu_Eta2p4_Fpix_pT70_SR");
+    TH1F *Gstrip_pT70_SR = (TH1F*)Gluino2000_Eta2p4->Get("SingleMu_Eta2p4_Gstrip_pT70_SR");
+
+    TH1F *Gstrip = (TH1F*)Fpix_vs_Gstrip->ProjectionY("Gstrip", 1, Fpix_vs_Gstrip->GetNbinsX());
+    TH1F *Fpix = (TH1F*)Fpix_vs_Gstrip->ProjectionX("Fpix", 1, Fpix_vs_Gstrip->GetNbinsY());
+    TH1F *Gstrip_pT70 = (TH1F*)Fpix_vs_Gstrip_pT70->ProjectionY("Gstrip_pT70", 1, Fpix_vs_Gstrip_pT70->GetNbinsX());
+    TH1F *Fpix_pT70 = (TH1F*)Fpix_vs_Gstrip_pT70->ProjectionX("Fpix_pT70", 1, Fpix_vs_Gstrip_pT70->GetNbinsY());
+
+    Gstrip_pT70->Rebin(10);
+    Fpix_pT70->Rebin(10);
+    Gstrip_pT70_SR->Rebin(10);
+    Fpix_pT70_SR->Rebin(10);
+
+    Gstrip->SetLineColor(kBlack);
+    Gstrip->SetMarkerColor(kBlack);
+    Gstrip->SetMarkerStyle(20);
+    Fpix->SetLineColor(kBlack);
+    Fpix->SetMarkerColor(kBlack);
+    Fpix->SetMarkerStyle(20);
+    Gstrip_pT70->SetLineColor(kRed);
+    Gstrip_pT70->SetMarkerColor(kRed);
+    Gstrip_pT70->SetMarkerStyle(21);
+    Fpix_pT70->SetLineColor(kRed);
+    Fpix_pT70->SetMarkerColor(kRed);
+    Fpix_pT70->SetMarkerStyle(21);
+    Gstrip_pT70_SR->SetLineColor(kBlue);
+    Gstrip_pT70_SR->SetMarkerColor(kBlue);
+    Gstrip_pT70_SR->SetMarkerStyle(22);
+    Fpix_pT70_SR->SetLineColor(kBlue);
+    Fpix_pT70_SR->SetMarkerColor(kBlue);
+    Fpix_pT70_SR->SetMarkerStyle(22);
+
+    TLine *line = new TLine(0.9, 0, 0.9, 1.05*Fpix->GetMaximum());
+    line->SetLineColor(kBlue);
+    line->SetLineStyle(2);
+    TLine *line2 = new TLine(0.22, 0, 0.22, 1.1*Gstrip->GetMaximum());
+    line2->SetLineColor(kBlue);
+    line2->SetLineStyle(2);
+    TLatex *text = new TLatex(0.92, 0.9*Fpix->GetMaximum(), "SR");
+    TLatex *text2 = new TLatex(0.6, 0.3*Gstrip->GetMaximum(), "SR");
+    text->SetTextSize(0.04);
+    text->SetTextColor(kBlue);
+    text2->SetTextSize(0.04);
+    text2->SetTextColor(kBlue);
+
+    TCanvas *cGstrip_Eta2p4 = new TCanvas("cGstrip_Eta2p4", "cGstrip_Eta2p4", 800, 800);
+    cGstrip_Eta2p4->cd();
+    Gstrip->GetXaxis()->SetTitle("G_{strip}");
+    Gstrip->GetYaxis()->SetTitle("Events");
+    Gstrip->Draw("hist");
+    Gstrip->GetYaxis()->SetRangeUser(0, 1.1*Gstrip->GetMaximum());
+    Gstrip_pT70->Draw("E1 same");
+    Gstrip_pT70_SR->Draw("E1 same");
+    line2->Draw("same");
+    text2->Draw("same");
+    TLegend *leg1 = new TLegend(0.2, 0.7, 0.6, 0.9);
+    leg1->SetFillStyle(0);
+    leg1->SetBorderSize(0);
+    leg1->SetHeader("Number of events","C");
+    leg1->AddEntry(Gstrip, Form("PostSelection: %4.0f",Gstrip->GetEntries()), "l");
+    leg1->AddEntry(Gstrip_pT70, Form("PostSelection && p_{T}#geq70: %4.0f",Gstrip_pT70->GetEntries()), "lp");
+    leg1->AddEntry(Gstrip_pT70_SR, Form("PostSelection && p_{T}#geq70 && SR: %4.0f",Gstrip_pT70_SR->GetEntries()), "lp");
+    leg1->Draw();
+
+    TCanvas *cFpix_Eta2p4 = new TCanvas("cFpix_Eta2p4", "cFpix_Eta2p4", 800, 800);
+    cFpix_Eta2p4->cd();
+    Fpix->GetXaxis()->SetTitle("F_{pixel}");
+    Fpix->GetYaxis()->SetTitle("Events");
+    Fpix->Draw("hist");
+    Fpix_pT70->Draw("E1 same");
+    Fpix_pT70_SR->Draw("E1 same");
+    line->Draw("same");
+    text->Draw("same");
+    TLegend *leg2 = new TLegend(0.2, 0.7, 0.6, 0.9);
+    leg2->SetFillStyle(0);
+    leg2->SetBorderSize(0);
+    leg2->SetHeader("Number of events","C");
+    leg2->AddEntry(Fpix, Form("PostSelection: %4.0f",Fpix->GetEntries()), "l");
+    leg2->AddEntry(Fpix_pT70, Form("PostSelection && p_{T}#geq70: %4.0f",Fpix_pT70->GetEntries()), "lp");
+    leg2->AddEntry(Fpix_pT70_SR, Form("PostSelection && p_{T}#geq70 && SR: %4.0f",Fpix_pT70_SR->GetEntries()), "lp");
+    leg2->Draw();
+
+
+    ofile->cd();
+    cGstrip_Eta2p4->Write();
+    cFpix_Eta2p4->Write();
+    ofile->Close();
+
+    return;
+}
+
 
 
 void CombineHistos()
@@ -2202,6 +2717,14 @@ void CombineHistos()
     //CutFlowDataSignal_SingleMu();
     //CutFlowDataSignal_MET();
     //Eta_OnlyMET_MET_SingleMu();
+
+    //ExtractCorrelations("MET");
+    //ExtractCorrelations("SingleMu");
+    //CorrectBias_1oP("MET");
+
+    //EtaIn8fp9();
+    GstripFpix_Signal();
+    //ExtractWeight_BoA();
 
     return;
 }
