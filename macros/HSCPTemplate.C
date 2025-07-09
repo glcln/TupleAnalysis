@@ -525,6 +525,7 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
         plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_pT", 200, 0, 1.1, 5000, 0, 5000);
         plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_Ih", 200, 0, 1.1, 300, 0, 15);
         plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_1oP", 200, 0, 1.1, 1000, 0, 1000);
+        plots.AddHisto2D(selLabels_[i]+"_AfterSel_eta_vs_Fpix", 80, -2.5, 2.5, 200, 0, 1.1);
 
         plots.AddHisto1D(selLabels_[i]+"_TrigInfo", 5, 0, 5);
         plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
@@ -696,7 +697,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
                 if (passedCuts[18]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Ih_StripOnly", Ih_StripOnly[i]);
             }
-            /*
+            
             if (selLabels_[s].find("MET") != std::string::npos) {
                 
                 bool trigger = true;
@@ -780,7 +781,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (passedCuts[17]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_PtErr_over_Pt", PtErr[i]/Pt[i]);
                 if (passedCuts[18]) vcp[s].FillHisto1D(selLabels_[s]+"_Nm1_Ih_StripOnly", Ih_StripOnly[i]);
 
-            }*/
+            }
         }
 
             //TAKE MOST IONIZING PF AND GLOBAL MUON CANDIDATE
@@ -828,13 +829,14 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
         int i = iCand[s];     // most ionising candidate
 	    if (i<0) continue;
+        //std::cout << "here ?" << std::endl;
 
         //FILL-CPLOTS-HERE
         if (selections_[s]){
             vcp[s].FillHisto1D(selLabels_[s]+"_TrigInfo", *Trig.Get());
             vcp[s].FillHisto1D(selLabels_[s]+"_p",Pt[i]*cosh(eta[i]));
             vcp[s].FillHisto1D(selLabels_[s]+"_eta",eta[i]);
-            if ( !((*isMuon.Get())[i]) && !((*isGlobalMuon.Get())[i]) ) vcp[s].FillHisto1D(selLabels_[s]+"_etaWithoutMuonCandidate",eta[i]);
+            //if ( !((*isMuon.Get())[i]) && !((*isGlobalMuon.Get())[i]) ) vcp[s].FillHisto1D(selLabels_[s]+"_etaWithoutMuonCandidate",eta[i]);
             vcp[s].FillHisto1D(selLabels_[s]+"_cand",HSCP_cand[i]);
             
             vcp[s].FillHisto2D(selLabels_[s]+"_Fpix_vs_Gstrip", float(1.0 - ProbQ_noL1[i]), Ias_StripOnly[i]);
@@ -847,6 +849,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_pT", float(1.0 - ProbQ_noL1[i]), Pt[i]);
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_Ih", float(1.0 - ProbQ_noL1[i]), Ih_StripOnly[i]);
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_1oP", float(1.0 - ProbQ_noL1[i]), 10000./(Pt[i]*cosh(eta[i])));
+            vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_eta_vs_Fpix", eta[i], float(1.0 - ProbQ_noL1[i]));
         }
 
         double Ias = Ias_StripOnly[i];

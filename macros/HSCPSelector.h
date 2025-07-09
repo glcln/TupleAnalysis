@@ -37,6 +37,8 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
+bool PassHSCPpresel_SingleMu_Eta1(int hscpIndex);
+
 bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
 
 
@@ -434,7 +436,7 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderArray<float> pvSumPt2 = {fReader, "pvSumPt2"};
 
       // MET
-   /*
+/*   
    TTreeReaderValue<Float_t> RecoPFMET = {fReader, "RecoPFMET"};
    TTreeReaderValue<Float_t> RecoCaloMET = {fReader, "RecoCaloMET"};
    TTreeReaderValue<Bool_t> Flag_allMETFilters = {fReader, "Flag_allMETFilters"};
@@ -442,7 +444,7 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderValue<Bool_t> HLT_PFHT500_PFMET100_PFMHT100_IDTight = {fReader, "HLT_PFHT500_PFMET100_PFMHT100_IDTight"};
    TTreeReaderValue<Bool_t> HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 = {fReader, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60"};
    TTreeReaderValue<Bool_t> HLT_MET105_IsoTrk50 = {fReader, "HLT_MET105_IsoTrk50"};
-   */
+*/
 
    /*
    TTreeReaderValue<Float_t> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};
@@ -483,15 +485,15 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
 
    TTreeReaderArray<float> muonE = {fReader, "muonE"};
    TTreeReaderArray<float> muonPt = {fReader, "muonPt"};
-   TTreeReaderArray<float> globalTrackMuonPt = {fReader, "globalTrackMuonPt"};
-   TTreeReaderArray<float> innerTrackMuonPt = {fReader, "innerTrackMuonPt"};
-   TTreeReaderArray<float> muonPtErr = {fReader, "muonPtErr"};
-   TTreeReaderArray<float> muonEta = {fReader, "muonEta"};
-   TTreeReaderArray<float> muonPhi = {fReader, "muonPhi"};
-   TTreeReaderArray<float> muonBeta = {fReader, "muonBeta"};
-   TTreeReaderValue<vector<bool>> muonIsLoose = {fReader, "muonIsLoose"};
-   TTreeReaderValue<vector<bool>> muonIsMedium = {fReader, "muonIsMedium"};
-   TTreeReaderValue<vector<bool>> muonIsTight = {fReader, "muonIsTight"};
+   //TTreeReaderArray<float> globalTrackMuonPt = {fReader, "globalTrackMuonPt"};
+   //TTreeReaderArray<float> innerTrackMuonPt = {fReader, "innerTrackMuonPt"};
+   //TTreeReaderArray<float> muonPtErr = {fReader, "muonPtErr"};
+   //TTreeReaderArray<float> muonEta = {fReader, "muonEta"};
+   //TTreeReaderArray<float> muonPhi = {fReader, "muonPhi"};
+   //TTreeReaderArray<float> muonBeta = {fReader, "muonBeta"};
+   //TTreeReaderValue<vector<bool>> muonIsLoose = {fReader, "muonIsLoose"};
+   //TTreeReaderValue<vector<bool>> muonIsMedium = {fReader, "muonIsMedium"};
+   //TTreeReaderValue<vector<bool>> muonIsTight = {fReader, "muonIsTight"};
    
    TTreeReaderValue<vector<bool>> passCutPt55 = {fReader, "passCutPt55"};
    TTreeReaderValue<vector<bool>> passSelection = {fReader, "passSelection"};
@@ -519,7 +521,7 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderValue<vector<bool>> isHighPurity = {fReader, "isHighPurity"};
    TTreeReaderArray<float> EoverP = {fReader, "EoverP"};
    TTreeReaderValue<vector<bool>> isMuon = {fReader, "isMuon"};
-   TTreeReaderValue<vector<bool>> isGlobalMuon = {fReader, "isGlobalMuon"};
+   //TTreeReaderValue<vector<bool>> isGlobalMuon = {fReader, "isGlobalMuon"};
    TTreeReaderValue<vector<bool>> isElectron = {fReader, "isElectron"};
 
    /*

@@ -52,6 +52,11 @@ int year(2018);
 
 
 //ADD-SELECTION-METHODS
+bool HSCPSelector::PassHSCPpresel_SingleMu_Eta1(int i){
+   if (i<0 || i>(int)Pt.GetSize()) return false;
+   return ( ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 1) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
+}
+
 bool HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4(int i){
    if (i<0 || i>(int)Pt.GetSize()) return false;
    return ( ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 2.4) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
@@ -90,6 +95,9 @@ void HSCPSelector::Begin(TTree * /*tree*/)
     // Add selections into a vector
 
     //FILL-SELECTION-VECTOR
+selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta1);
+selLabels_.push_back("SingleMu_Eta1");
+
 selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4);
 selLabels_.push_back("SingleMu_Eta2p4");
 
@@ -246,6 +254,9 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
    //-------------------------------------
    //Add selections into a vector - to be updated
    //FILL-SELECTION-VECTOR
+selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta1);
+selLabels_.push_back("SingleMu_Eta1");
+
 selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4);
 selLabels_.push_back("SingleMu_Eta2p4");
 
@@ -536,6 +547,7 @@ selLabels_.push_back("SingleMu_Eta2p4");
         plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_pT", 200, 0, 1.1, 5000, 0, 5000);
         plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_Ih", 200, 0, 1.1, 300, 0, 15);
         plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_1oP", 200, 0, 1.1, 1000, 0, 1000);
+        plots.AddHisto2D(selLabels_[i]+"_AfterSel_eta_vs_Fpix", 80, -2.5, 2.5, 200, 0, 1.1);
 
         plots.AddHisto1D(selLabels_[i]+"_TrigInfo", 5, 0, 5);
         plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
@@ -839,13 +851,14 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
         int i = iCand[s];     // most ionising candidate
 	    if (i<0) continue;
+        //std::cout << "here ?" << std::endl;
 
         //FILL-CPLOTS-HERE
         if (selections_[s]){
             vcp[s].FillHisto1D(selLabels_[s]+"_TrigInfo", *Trig.Get());
             vcp[s].FillHisto1D(selLabels_[s]+"_p",Pt[i]*cosh(eta[i]));
             vcp[s].FillHisto1D(selLabels_[s]+"_eta",eta[i]);
-            if ( !((*isMuon.Get())[i]) && !((*isGlobalMuon.Get())[i]) ) vcp[s].FillHisto1D(selLabels_[s]+"_etaWithoutMuonCandidate",eta[i]);
+            //if ( !((*isMuon.Get())[i]) && !((*isGlobalMuon.Get())[i]) ) vcp[s].FillHisto1D(selLabels_[s]+"_etaWithoutMuonCandidate",eta[i]);
             vcp[s].FillHisto1D(selLabels_[s]+"_cand",HSCP_cand[i]);
             
             vcp[s].FillHisto2D(selLabels_[s]+"_Fpix_vs_Gstrip", float(1.0 - ProbQ_noL1[i]), Ias_StripOnly[i]);
@@ -858,6 +871,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_pT", float(1.0 - ProbQ_noL1[i]), Pt[i]);
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_Ih", float(1.0 - ProbQ_noL1[i]), Ih_StripOnly[i]);
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_1oP", float(1.0 - ProbQ_noL1[i]), 10000./(Pt[i]*cosh(eta[i])));
+            vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_eta_vs_Fpix", eta[i], float(1.0 - ProbQ_noL1[i]));
         }
 
         double Ias = Ias_StripOnly[i];

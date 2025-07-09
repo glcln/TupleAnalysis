@@ -2354,6 +2354,10 @@ void ExtractCorrelations(std::string samples)
     TH2F *Fpix_vs_pT_Eta1 = (TH2F*)ifile->Get(Form("%s_Eta1_AfterSel_Fpix_vs_pT", samples.c_str()));
     TH2F *Fpix_vs_pT_Eta1_2p4 = (TH2F*)ifile->Get(Form("%s_Eta1_2p4_AfterSel_Fpix_vs_pT", samples.c_str()));
     TH2F *Fpix_vs_pT_Eta2p4 = (TH2F*)ifile->Get(Form("%s_Eta2p4_AfterSel_Fpix_vs_pT", samples.c_str()));
+    TH2F *eta_vs_Fpix_Eta1 = (TH2F*)ifile->Get(Form("%s_Eta1_AfterSel_eta_vs_Fpix", samples.c_str()));
+    TH2F *eta_vs_Fpix_Eta1_2p4 = (TH2F*)ifile->Get(Form("%s_Eta1_2p4_AfterSel_eta_vs_Fpix", samples.c_str()));
+    TH2F *eta_vs_Fpix_Eta2p4 = (TH2F*)ifile->Get(Form("%s_Eta2p4_AfterSel_eta_vs_Fpix", samples.c_str()));
+
     
 
     // Do the profile of each TH2
@@ -2366,6 +2370,9 @@ void ExtractCorrelations(std::string samples)
     TProfile *Fpix_vs_pT_Eta1_profile = (TProfile*)Fpix_vs_pT_Eta1->ProfileX("Fpix_vs_pT_Eta1_profile");
     TProfile *Fpix_vs_pT_Eta1_2p4_profile = (TProfile*)Fpix_vs_pT_Eta1_2p4->ProfileX("Fpix_vs_pT_Eta1_2p4_profile");
     TProfile *Fpix_vs_pT_Eta2p4_profile = (TProfile*)Fpix_vs_pT_Eta2p4->ProfileX("Fpix_vs_pT_Eta2p4_profile");
+    TProfile *eta_vs_Fpix_Eta1_profile = (TProfile*)eta_vs_Fpix_Eta1->ProfileX("eta_vs_Fpix_Eta1_profile");
+    TProfile *eta_vs_Fpix_Eta1_2p4_profile = (TProfile*)eta_vs_Fpix_Eta1_2p4->ProfileX("eta_vs_Fpix_Eta1_2p4_profile");
+    TProfile *eta_vs_Fpix_Eta2p4_profile = (TProfile*)eta_vs_Fpix_Eta2p4->ProfileX("eta_vs_Fpix_Eta2p4_profile");
     Fpix_vs_1oP_Eta1_profile->Rebin(4);
     Fpix_vs_1oP_Eta1_profile->SetLineColor(kRed);
     Fpix_vs_1oP_Eta1_profile->SetMarkerStyle(20);
@@ -2402,6 +2409,18 @@ void ExtractCorrelations(std::string samples)
     Fpix_vs_pT_Eta2p4_profile->SetLineColor(kGreen+2);
     Fpix_vs_pT_Eta2p4_profile->SetMarkerStyle(22);
     Fpix_vs_pT_Eta2p4_profile->SetMarkerColor(kGreen+2);
+    eta_vs_Fpix_Eta1_profile->Rebin(4);
+    eta_vs_Fpix_Eta1_profile->SetLineColor(kRed);
+    eta_vs_Fpix_Eta1_profile->SetMarkerStyle(20);
+    eta_vs_Fpix_Eta1_profile->SetMarkerColor(kRed);
+    eta_vs_Fpix_Eta1_2p4_profile->Rebin(4);
+    eta_vs_Fpix_Eta1_2p4_profile->SetLineColor(kBlue);
+    eta_vs_Fpix_Eta1_2p4_profile->SetMarkerStyle(21);
+    eta_vs_Fpix_Eta1_2p4_profile->SetMarkerColor(kBlue);
+    eta_vs_Fpix_Eta2p4_profile->Rebin(4);
+    eta_vs_Fpix_Eta2p4_profile->SetLineColor(kGreen+2);
+    eta_vs_Fpix_Eta2p4_profile->SetMarkerStyle(22);
+    eta_vs_Fpix_Eta2p4_profile->SetMarkerColor(kGreen+2);
     
 
     // Plot it
@@ -2438,10 +2457,21 @@ void ExtractCorrelations(std::string samples)
     Fpix_vs_pT_Eta2p4_profile->Draw("E1 same");
     leg1->Draw();
 
+    TCanvas *c4 = new TCanvas("ceta", "c4", 800, 800);
+    c4->cd();
+    eta_vs_Fpix_Eta1_profile->GetXaxis()->SetTitle("#eta");
+    eta_vs_Fpix_Eta1_profile->GetYaxis()->SetTitle("F_{pixel}");
+    eta_vs_Fpix_Eta1_profile->GetYaxis()->SetRangeUser(0.3, 1.0);
+    eta_vs_Fpix_Eta1_profile->Draw("E1");
+    eta_vs_Fpix_Eta1_2p4_profile->Draw("E1 same");
+    eta_vs_Fpix_Eta2p4_profile->Draw("P same");
+    leg1->Draw();
+
     ofile->cd();
     c1->Write();
     c2->Write();
     c3->Write();
+    c4->Write();
     ofile->Close();
 
     return;
@@ -2598,95 +2628,182 @@ void GstripFpix_Signal()
 {
     TFile *ofile = new TFile("PlayWithHistos/GstripFpix_Signal.root","RECREATE");
     
-    TFile *Gluino2000_Eta2p4 = new TFile("../output/Gluino2000_massCut_0_pT70_V5p5_Gstrip_Fpix_Eta2p4.root");
-    TH2F *Fpix_vs_Gstrip = (TH2F*)Gluino2000_Eta2p4->Get("SingleMu_Eta2p4_Fpix_vs_Gstrip");
-    TH2F *Fpix_vs_Gstrip_pT70 = (TH2F*)Gluino2000_Eta2p4->Get("SingleMu_Eta2p4_Fpix_vs_Gstrip_pT70");
-    TH1F *Fpix_pT70_SR = (TH1F*)Gluino2000_Eta2p4->Get("SingleMu_Eta2p4_Fpix_pT70_SR");
-    TH1F *Gstrip_pT70_SR = (TH1F*)Gluino2000_Eta2p4->Get("SingleMu_Eta2p4_Gstrip_pT70_SR");
+    TFile *Gluino2000 = new TFile("../output/Gluino2000_massCut_0_pT70_V5p5_Gstrip_Fpix.root");
+    TH2F *Fpix_vs_Gstrip_Eta2p4 = (TH2F*)Gluino2000->Get("SingleMu_Eta2p4_Fpix_vs_Gstrip");
+    TH2F *Fpix_vs_Gstrip_pT70_Eta2p4 = (TH2F*)Gluino2000->Get("SingleMu_Eta2p4_Fpix_vs_Gstrip_pT70");
+    TH1F *Fpix_pT70_SR_Eta2p4 = (TH1F*)Gluino2000->Get("SingleMu_Eta2p4_Fpix_pT70_SR");
+    TH1F *Gstrip_pT70_SR_Eta2p4 = (TH1F*)Gluino2000->Get("SingleMu_Eta2p4_Gstrip_pT70_SR");
+    TH2F *Fpix_vs_Gstrip_Eta1 = (TH2F*)Gluino2000->Get("SingleMu_Eta1_Fpix_vs_Gstrip");
+    TH2F *Fpix_vs_Gstrip_pT70_Eta1 = (TH2F*)Gluino2000->Get("SingleMu_Eta1_Fpix_vs_Gstrip_pT70");
+    TH1F *Fpix_pT70_SR_Eta1 = (TH1F*)Gluino2000->Get("SingleMu_Eta1_Fpix_pT70_SR");
+    TH1F *Gstrip_pT70_SR_Eta1 = (TH1F*)Gluino2000->Get("SingleMu_Eta1_Gstrip_pT70_SR");
 
-    TH1F *Gstrip = (TH1F*)Fpix_vs_Gstrip->ProjectionY("Gstrip", 1, Fpix_vs_Gstrip->GetNbinsX());
-    TH1F *Fpix = (TH1F*)Fpix_vs_Gstrip->ProjectionX("Fpix", 1, Fpix_vs_Gstrip->GetNbinsY());
-    TH1F *Gstrip_pT70 = (TH1F*)Fpix_vs_Gstrip_pT70->ProjectionY("Gstrip_pT70", 1, Fpix_vs_Gstrip_pT70->GetNbinsX());
-    TH1F *Fpix_pT70 = (TH1F*)Fpix_vs_Gstrip_pT70->ProjectionX("Fpix_pT70", 1, Fpix_vs_Gstrip_pT70->GetNbinsY());
+    TH1F *Gstrip_Eta2p4 = (TH1F*)Fpix_vs_Gstrip_Eta2p4->ProjectionY("Gstrip_Eta2p4", 1, Fpix_vs_Gstrip_Eta2p4->GetNbinsX());
+    TH1F *Fpix_Eta2p4 = (TH1F*)Fpix_vs_Gstrip_Eta2p4->ProjectionX("Fpix_Eta2p4", 1, Fpix_vs_Gstrip_Eta2p4->GetNbinsY());
+    TH1F *Gstrip_pT70_Eta2p4 = (TH1F*)Fpix_vs_Gstrip_pT70_Eta2p4->ProjectionY("Gstrip_pT70_Eta2p4", 1, Fpix_vs_Gstrip_pT70_Eta2p4->GetNbinsX());
+    TH1F *Fpix_pT70_Eta2p4 = (TH1F*)Fpix_vs_Gstrip_pT70_Eta2p4->ProjectionX("Fpix_pT70_Eta2p4", 1, Fpix_vs_Gstrip_pT70_Eta2p4->GetNbinsY());
 
-    Gstrip_pT70->Rebin(10);
-    Fpix_pT70->Rebin(10);
-    Gstrip_pT70_SR->Rebin(10);
-    Fpix_pT70_SR->Rebin(10);
+    TH1F *Gstrip_Eta1 = (TH1F*)Fpix_vs_Gstrip_Eta1->ProjectionY("Gstrip_Eta1", 1, Fpix_vs_Gstrip_Eta1->GetNbinsX());
+    TH1F *Fpix_Eta1 = (TH1F*)Fpix_vs_Gstrip_Eta1->ProjectionX("Fpix_Eta1", 1, Fpix_vs_Gstrip_Eta1->GetNbinsY());
+    TH1F *Gstrip_pT70_Eta1 = (TH1F*)Fpix_vs_Gstrip_pT70_Eta1->ProjectionY("Gstrip_pT70_Eta1", 1, Fpix_vs_Gstrip_pT70_Eta1->GetNbinsX());
+    TH1F *Fpix_pT70_Eta1 = (TH1F*)Fpix_vs_Gstrip_pT70_Eta1->ProjectionX("Fpix_pT70_Eta1", 1, Fpix_vs_Gstrip_pT70_Eta1->GetNbinsY());
 
-    Gstrip->SetLineColor(kBlack);
-    Gstrip->SetMarkerColor(kBlack);
-    Gstrip->SetMarkerStyle(20);
-    Fpix->SetLineColor(kBlack);
-    Fpix->SetMarkerColor(kBlack);
-    Fpix->SetMarkerStyle(20);
-    Gstrip_pT70->SetLineColor(kRed);
-    Gstrip_pT70->SetMarkerColor(kRed);
-    Gstrip_pT70->SetMarkerStyle(21);
-    Fpix_pT70->SetLineColor(kRed);
-    Fpix_pT70->SetMarkerColor(kRed);
-    Fpix_pT70->SetMarkerStyle(21);
-    Gstrip_pT70_SR->SetLineColor(kBlue);
-    Gstrip_pT70_SR->SetMarkerColor(kBlue);
-    Gstrip_pT70_SR->SetMarkerStyle(22);
-    Fpix_pT70_SR->SetLineColor(kBlue);
-    Fpix_pT70_SR->SetMarkerColor(kBlue);
-    Fpix_pT70_SR->SetMarkerStyle(22);
+    Fpix_Eta2p4->Rebin(3);
+    Gstrip_pT70_Eta2p4->Rebin(10);
+    Fpix_pT70_Eta2p4->Rebin(30);
+    Gstrip_pT70_SR_Eta2p4->Rebin(10);
+    Fpix_pT70_SR_Eta2p4->Rebin(30);
 
-    TLine *line = new TLine(0.9, 0, 0.9, 1.05*Fpix->GetMaximum());
+    Fpix_Eta1->Rebin(3);
+    Gstrip_pT70_Eta1->Rebin(10);
+    Fpix_pT70_Eta1->Rebin(30);
+    Gstrip_pT70_SR_Eta1->Rebin(10);
+    Fpix_pT70_SR_Eta1->Rebin(30);
+
+    Gstrip_Eta2p4->SetLineColor(kBlack);
+    Gstrip_Eta2p4->SetMarkerColor(kBlack);
+    Gstrip_Eta2p4->SetMarkerStyle(20);
+    Fpix_Eta2p4->SetLineColor(kBlack);
+    Fpix_Eta2p4->SetMarkerColor(kBlack);
+    Fpix_Eta2p4->SetMarkerStyle(20);
+    Gstrip_pT70_Eta2p4->SetLineColor(kRed);
+    Gstrip_pT70_Eta2p4->SetMarkerColor(kRed);
+    Gstrip_pT70_Eta2p4->SetMarkerStyle(21);
+    Fpix_pT70_Eta2p4->SetLineColor(kRed);
+    Fpix_pT70_Eta2p4->SetMarkerColor(kRed);
+    Fpix_pT70_Eta2p4->SetMarkerStyle(21);
+    Gstrip_pT70_SR_Eta2p4->SetLineColor(kBlue);
+    Gstrip_pT70_SR_Eta2p4->SetMarkerColor(kBlue);
+    Gstrip_pT70_SR_Eta2p4->SetMarkerStyle(22);
+    Fpix_pT70_SR_Eta2p4->SetLineColor(kBlue);
+    Fpix_pT70_SR_Eta2p4->SetMarkerColor(kBlue);
+    Fpix_pT70_SR_Eta2p4->SetMarkerStyle(22);
+
+    Gstrip_Eta1->SetLineColor(kBlack);
+    Gstrip_Eta1->SetMarkerColor(kBlack);
+    Gstrip_Eta1->SetMarkerStyle(20);
+    Fpix_Eta1->SetLineColor(kBlack);
+    Fpix_Eta1->SetMarkerColor(kBlack);
+    Fpix_Eta1->SetMarkerStyle(20);
+    Gstrip_pT70_Eta1->SetLineColor(kRed);
+    Gstrip_pT70_Eta1->SetMarkerColor(kRed);
+    Gstrip_pT70_Eta1->SetMarkerStyle(21);
+    Fpix_pT70_Eta1->SetLineColor(kRed);
+    Fpix_pT70_Eta1->SetMarkerColor(kRed);
+    Fpix_pT70_Eta1->SetMarkerStyle(21);
+    Gstrip_pT70_SR_Eta1->SetLineColor(kBlue);
+    Gstrip_pT70_SR_Eta1->SetMarkerColor(kBlue);
+    Gstrip_pT70_SR_Eta1->SetMarkerStyle(22);
+    Fpix_pT70_SR_Eta1->SetLineColor(kBlue);
+    Fpix_pT70_SR_Eta1->SetMarkerColor(kBlue);
+    Fpix_pT70_SR_Eta1->SetMarkerStyle(22);
+
+    TLine *line = new TLine(0.9, 0, 0.9, 1.05*Fpix_Eta2p4->GetMaximum());
     line->SetLineColor(kBlue);
     line->SetLineStyle(2);
-    TLine *line2 = new TLine(0.22, 0, 0.22, 1.1*Gstrip->GetMaximum());
+    TLine *line2 = new TLine(0.22, 0, 0.22, 1.1*Gstrip_Eta2p4->GetMaximum());
     line2->SetLineColor(kBlue);
     line2->SetLineStyle(2);
-    TLatex *text = new TLatex(0.92, 0.9*Fpix->GetMaximum(), "SR");
-    TLatex *text2 = new TLatex(0.6, 0.3*Gstrip->GetMaximum(), "SR");
+    TLatex *text = new TLatex(0.92, 0.9*Fpix_Eta2p4->GetMaximum(), "SR");
+    TLatex *text2 = new TLatex(0.6, 0.3*Gstrip_Eta2p4->GetMaximum(), "SR");
     text->SetTextSize(0.04);
     text->SetTextColor(kBlue);
     text2->SetTextSize(0.04);
     text2->SetTextColor(kBlue);
+    
+    TLine *line3 = new TLine(0.9, 0, 0.9, 1.05*Fpix_Eta1->GetMaximum());
+    line3->SetLineColor(kBlue);
+    line3->SetLineStyle(2);
+    TLine *line4 = new TLine(0.22, 0, 0.22, 1.1*Gstrip_Eta1->GetMaximum());
+    line4->SetLineColor(kBlue);
+    line4->SetLineStyle(2);
+    TLatex *text3 = new TLatex(0.92, 0.9*Fpix_Eta1->GetMaximum(), "SR");
+    TLatex *text4 = new TLatex(0.6, 0.3*Gstrip_Eta1->GetMaximum(), "SR");
+    text3->SetTextSize(0.04);
+    text3->SetTextColor(kBlue);
+    text4->SetTextSize(0.04);
+    text4->SetTextColor(kBlue);
 
     TCanvas *cGstrip_Eta2p4 = new TCanvas("cGstrip_Eta2p4", "cGstrip_Eta2p4", 800, 800);
     cGstrip_Eta2p4->cd();
-    Gstrip->GetXaxis()->SetTitle("G_{strip}");
-    Gstrip->GetYaxis()->SetTitle("Events");
-    Gstrip->Draw("hist");
-    Gstrip->GetYaxis()->SetRangeUser(0, 1.1*Gstrip->GetMaximum());
-    Gstrip_pT70->Draw("E1 same");
-    Gstrip_pT70_SR->Draw("E1 same");
+    Gstrip_Eta2p4->GetXaxis()->SetTitle("G_{strip}");
+    Gstrip_Eta2p4->GetYaxis()->SetTitle("Events");
+    Gstrip_Eta2p4->Draw("hist");
+    Gstrip_Eta2p4->GetYaxis()->SetRangeUser(0, 1.1*Gstrip_Eta2p4->GetMaximum());
+    Gstrip_pT70_Eta2p4->Draw("E1 same");
+    Gstrip_pT70_SR_Eta2p4->Draw("E1 same");
     line2->Draw("same");
     text2->Draw("same");
     TLegend *leg1 = new TLegend(0.2, 0.7, 0.6, 0.9);
     leg1->SetFillStyle(0);
     leg1->SetBorderSize(0);
     leg1->SetHeader("Number of events","C");
-    leg1->AddEntry(Gstrip, Form("PostSelection: %4.0f",Gstrip->GetEntries()), "l");
-    leg1->AddEntry(Gstrip_pT70, Form("PostSelection && p_{T}#geq70: %4.0f",Gstrip_pT70->GetEntries()), "lp");
-    leg1->AddEntry(Gstrip_pT70_SR, Form("PostSelection && p_{T}#geq70 && SR: %4.0f",Gstrip_pT70_SR->GetEntries()), "lp");
+    leg1->AddEntry(Gstrip_Eta2p4, Form("PostSelection: %4.0f",Gstrip_Eta2p4->GetEntries()), "l");
+    leg1->AddEntry(Gstrip_pT70_Eta2p4, Form("PostSelection && p_{T}#geq70: %4.0f",Gstrip_pT70_Eta2p4->GetEntries()), "lp");
+    leg1->AddEntry(Gstrip_pT70_SR_Eta2p4, Form("PostSelection && p_{T}#geq70 && SR: %4.0f",Gstrip_pT70_SR_Eta2p4->GetEntries()), "lp");
     leg1->Draw();
 
     TCanvas *cFpix_Eta2p4 = new TCanvas("cFpix_Eta2p4", "cFpix_Eta2p4", 800, 800);
     cFpix_Eta2p4->cd();
-    Fpix->GetXaxis()->SetTitle("F_{pixel}");
-    Fpix->GetYaxis()->SetTitle("Events");
-    Fpix->Draw("hist");
-    Fpix_pT70->Draw("E1 same");
-    Fpix_pT70_SR->Draw("E1 same");
+    Fpix_Eta2p4->GetXaxis()->SetTitle("F_{pixel}");
+    Fpix_Eta2p4->GetYaxis()->SetTitle("Events");
+    Fpix_Eta2p4->Draw("hist");
+    Fpix_pT70_Eta2p4->Draw("E1 same");
+    Fpix_pT70_SR_Eta2p4->Draw("E1 same");
     line->Draw("same");
     text->Draw("same");
     TLegend *leg2 = new TLegend(0.2, 0.7, 0.6, 0.9);
     leg2->SetFillStyle(0);
     leg2->SetBorderSize(0);
     leg2->SetHeader("Number of events","C");
-    leg2->AddEntry(Fpix, Form("PostSelection: %4.0f",Fpix->GetEntries()), "l");
-    leg2->AddEntry(Fpix_pT70, Form("PostSelection && p_{T}#geq70: %4.0f",Fpix_pT70->GetEntries()), "lp");
-    leg2->AddEntry(Fpix_pT70_SR, Form("PostSelection && p_{T}#geq70 && SR: %4.0f",Fpix_pT70_SR->GetEntries()), "lp");
+    leg2->AddEntry(Fpix_Eta2p4, Form("PostSelection: %4.0f",Fpix_Eta2p4->GetEntries()), "l");
+    leg2->AddEntry(Fpix_pT70_Eta2p4, Form("PostSelection && p_{T}#geq70: %4.0f",Fpix_pT70_Eta2p4->GetEntries()), "lp");
+    leg2->AddEntry(Fpix_pT70_SR_Eta2p4, Form("PostSelection && p_{T}#geq70 && SR: %4.0f",Fpix_pT70_SR_Eta2p4->GetEntries()), "lp");
     leg2->Draw();
+
+    TCanvas *cGstrip_Eta1 = new TCanvas("cGstrip_Eta1", "cGstrip_Eta1", 800, 800);
+    cGstrip_Eta1->cd();
+    Gstrip_Eta1->GetXaxis()->SetTitle("G_{strip}");
+    Gstrip_Eta1->GetYaxis()->SetTitle("Events");
+    Gstrip_Eta1->Draw("hist");
+    Gstrip_Eta1->GetYaxis()->SetRangeUser(0, 1.1*Gstrip_Eta1->GetMaximum());
+    Gstrip_pT70_Eta1->Draw("E1 same");
+    Gstrip_pT70_SR_Eta1->Draw("E1 same");
+    line4->Draw("same");
+    text4->Draw("same");
+    TLegend *leg3 = new TLegend(0.2, 0.7, 0.6, 0.9);
+    leg3->SetFillStyle(0);
+    leg3->SetBorderSize(0);
+    leg3->SetHeader("Number of events","C");
+    leg3->AddEntry(Gstrip_Eta1, Form("PostSelection: %4.0f",Gstrip_Eta1->GetEntries()), "l");
+    leg3->AddEntry(Gstrip_pT70_Eta1, Form("PostSelection && p_{T}#geq70: %4.0f",Gstrip_pT70_Eta1->GetEntries()), "lp");
+    leg3->AddEntry(Gstrip_pT70_SR_Eta1, Form("PostSelection && p_{T}#geq70 && SR: %4.0f",Gstrip_pT70_SR_Eta1->GetEntries()), "lp");
+    leg3->Draw();
+
+    TCanvas *cFpix_Eta1 = new TCanvas("cFpix_Eta1", "cFpix_Eta1", 800, 800);
+    cFpix_Eta1->cd();
+    Fpix_Eta1->GetXaxis()->SetTitle("F_{pixel}");
+    Fpix_Eta1->GetYaxis()->SetTitle("Events");
+    Fpix_Eta1->Draw("hist");
+    Fpix_pT70_Eta1->Draw("E1 same");
+    Fpix_pT70_SR_Eta1->Draw("E1 same");
+    line3->Draw("same");
+    text3->Draw("same");
+    TLegend *leg4 = new TLegend(0.2, 0.7, 0.6, 0.9);
+    leg4->SetFillStyle(0);
+    leg4->SetBorderSize(0);
+    leg4->SetHeader("Number of events","C");
+    leg4->AddEntry(Fpix_Eta1, Form("PostSelection: %4.0f",Fpix_Eta1->GetEntries()), "l");
+    leg4->AddEntry(Fpix_pT70_Eta1, Form("PostSelection && p_{T}#geq70: %4.0f",Fpix_pT70_Eta1->GetEntries()), "lp");
+    leg4->AddEntry(Fpix_pT70_SR_Eta1, Form("PostSelection && p_{T}#geq70 && SR: %4.0f",Fpix_pT70_SR_Eta1->GetEntries()), "lp");
+    leg4->Draw();
 
 
     ofile->cd();
     cGstrip_Eta2p4->Write();
     cFpix_Eta2p4->Write();
+    cGstrip_Eta1->Write();
+    cFpix_Eta1->Write();
     ofile->Close();
 
     return;
