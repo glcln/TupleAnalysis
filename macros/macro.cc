@@ -162,6 +162,27 @@
            file.close();
        }
    }
+   if(dataset == "Gluino2000_Eta1"){
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V5p10_gluino/";
+       std::string fileNamesGluino2000[] = { (pathData+"Gluino2000.txt").c_str()};
+
+       for (const std::string& fileName : fileNamesGluino2000) {
+           std::ifstream file(fileName);
+           if (!file.is_open()) {
+               std::cerr << "Failed to open file: " << fileName << std::endl;
+               continue;
+           }
+           std::string line;
+           while (std::getline(file, line)) {
+               if (!line.empty() && line.back() == '\n') {
+                   line.pop_back();
+               }
+               chain->AddFile(line.c_str());
+           }
+
+           file.close();
+       }
+   }
    if(dataset == "Gluino2400"){
        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V2p20/";
        std::string fileNamesGluino2400[] = { (pathData+"Gluino2400.txt").c_str()};
