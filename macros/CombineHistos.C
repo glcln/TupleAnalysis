@@ -10,8 +10,14 @@
 #include "TGraph.h"
 #include <iostream>
 
-TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, std::string RatioTitle, std::string OptionDraw, bool logy)
+TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle,
+                       std::string RatioTitle, std::string OptionDraw, bool logy)
 {
+    if (!h1 || !h2) {
+        std::cerr << "DrawWithRatio: h1 or h2 is null! Returning nullptr.\n";
+        return nullptr;
+    }
+
     TCanvas* c_new = new TCanvas(CanvasTitle.c_str(), CanvasTitle.c_str(), 800, 800);
 
     // Define pads
@@ -25,25 +31,33 @@ TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, s
     pad2->SetBottomMargin(0.45);
     pad2->Draw();
 
-    // Draw upper plot without x labels
+    // Draw upper plot: draw h1 then h2 (use OptionDraw for h1, and "E1 same" for h2)
     pad1->cd();
-    TList* list = c1->GetListOfPrimitives();
-    TIter next(list);
-    TObject* obj;
-    while ((obj = next())) {
-        TObject* cloned = obj->Clone();
-        cloned->Draw(OptionDraw.c_str());
-        if (cloned->InheritsFrom("TH1")) {
-            ((TH1*)cloned)->GetXaxis()->SetLabelSize(0);
-        }
+    // Make clones so que l'originale reste inchangée
+    TH1* h1c = (TH1*)h1->Clone(TString(h1->GetName()) + "_" + CanvasTitle);
+    TH1* h2c = (TH1*)h2->Clone(TString(h2->GetName()) + "_" + CanvasTitle);
+    if (!h1c || !h2c) {
+        std::cerr << "DrawWithRatio: clone failed.\n";
+        delete c_new;
+        return nullptr;
     }
+    h1c->Draw(OptionDraw.c_str());
+    h2c->Draw("E1 same");
+
+    // Remove x labels on upper pad
+    if (h1c->InheritsFrom("TH1")) ((TH1*)h1c)->GetXaxis()->SetLabelSize(0);
+    if (h2c->InheritsFrom("TH1")) ((TH1*)h2c)->GetXaxis()->SetLabelSize(0);
 
     // Draw ratio
     pad2->cd();
-    TH1* h_ratio = (TH1*)h2->Clone("h_ratio");
+    TH1* h_ratio = (TH1*)h2c->Clone(TString("h_ratio_") + CanvasTitle.c_str());
+    if (!h_ratio) {
+        std::cerr << "DrawWithRatio: ratio clone failed.\n";
+        return c_new;
+    }
     h_ratio->Sumw2();
-    h1->Sumw2();
-    h_ratio->Divide(h1);
+    h1c->Sumw2();
+    h_ratio->Divide(h1c);
 
     h_ratio->SetTitle("");
     h_ratio->GetYaxis()->SetTitle(RatioTitle.c_str());
@@ -62,7 +76,8 @@ TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, s
     h_ratio->LabelsOption("v", "X");
     h_ratio->Draw("E0");
 
-    TLine* line = new TLine(h_ratio->GetXaxis()->GetXmin(), 1, h_ratio->GetXaxis()->GetXmax(), 1);
+    TLine* line = new TLine(h_ratio->GetXaxis()->GetXmin(), 1,
+                            h_ratio->GetXaxis()->GetXmax(), 1);
     line->SetLineColor(kBlack);
     line->SetLineStyle(2);
     line->Draw("same");
@@ -70,6 +85,7 @@ TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, s
     c_new->Update();
     return c_new;
 }
+
 
 // Same but for matching D -> reweighting = B*C/A
 void etaReweighingP(TH2F* nabla_eta_C, const TH1F* eta_B_, const TH1F* eta_A_)
@@ -2809,7 +2825,391 @@ void GstripFpix_Signal()
     return;
 }
 
+void CheckGstripTemplate(std::string templateFile)
+{
+    std::string ifileName;
+    if (templateFile == "NewCorr") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/GiTemplate_EtaExtension_SatNewCorr.root";
+    else if (templateFile == "NewCorr2018") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/GiTemplate_EtaExtension_SatNewCorr_2018Only.root";
+    else if (templateFile == "NewCorr2017") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/GiTemplate_EtaExtension_SatNewCorr_2017Only.root";
+    else if (templateFile == "OldCorr") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/GiTemplate_EtaExtension.root";
+    else if (templateFile == "MCWjet") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/GiTemplate_EtaExtension_SatNewCorr_MC_all.root";
+    else if (templateFile == "Run3Caro") ifileName = "/opt/sbg/cms/safe1/cms/ccollard/HSCP/Run3IntFramework/CMSSW_14_0_7/src/stage/ntuple/test/METanalysis/template_run3_sfcorr.root";
+    else if (templateFile == "perso") ifileName = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/SingleMuon/SingleMuon_Run2018B/final.root";
+    else if (templateFile == "lastPaper_MC") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/template_2018MC_v5.root";
+    else if (templateFile == "lastPaper_data2018") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/Template_2018_merged.root";
 
+    TFile *ofile = new TFile(Form("PlayWithHistos/CheckGstripTemplate_%s.root", templateFile.c_str()), "RECREATE");
+
+    cout << ifileName << endl;
+    TFile *ifile = new TFile(ifileName.c_str());
+    TH3F *Template;
+    if (templateFile == "Run3Caro") Template = (TH3F*)ifile->Get("Charge_Vs_Path");
+    else if (templateFile == "perso") Template = (TH3F*)ifile->Get("HSCParticleAnalyzer/BaseName/Calibration_GiTemplate");
+    else Template = (TH3F*)ifile->Get("Calibration_GiTemplate");
+
+    TH1F *ModuleGeometry = (TH1F*)Template->ProjectionX("ModuleGeometry");
+    ModuleGeometry->Scale(1.0/ModuleGeometry->Integral());
+    TH1F *PathLength = (TH1F*)Template->ProjectionY("PathLength");
+    PathLength->Scale(1.0/PathLength->Integral());
+    TH1F *ChargeOverPathlength = (TH1F*)Template->ProjectionZ("ChargeOverPathlength");
+    ChargeOverPathlength->Scale(1.0/ChargeOverPathlength->Integral());
+
+    ofile->cd();
+
+    int nBinsX = Template->GetNbinsX();
+    for (int i = 1; i <= nBinsX; ++i) {
+        Template->GetXaxis()->SetRange(i, i);
+
+        TH2F* h2 = (TH2F*) Template->Project3D("yz");
+        h2->SetName(Form("ProjYZ_Xbin%d", i));
+        h2->SetTitle(Form("Projection YZ pour bin X = %d", i));
+
+        TH1F* h1 = (TH1F*) h2->ProjectionX(Form("ProjX_Xbin%d", i));
+        h1->Write();
+    }
+
+    ModuleGeometry->Write();
+    PathLength->Write();
+    ChargeOverPathlength->Write();
+    ofile->Close();
+
+    return;
+}
+
+void RatioGstripTemplate(std::string data, std::string other)
+{
+    std::string ifile_data;
+    if (data == "2018") ifile_data = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/macros/PlayWithHistos/CheckGstripTemplate_NewCorr2018.root";
+    else if (data == "all") ifile_data = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/macros/PlayWithHistos/CheckGstripTemplate_NewCorr.root";
+    else if (data == "lastPaper_data2018") ifile_data = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/macros/PlayWithHistos/CheckGstripTemplate_lastPaper_data2018.root";
+    cout << "ifile data : " << ifile_data << endl;
+    TFile *ifileDATA = new TFile(ifile_data.c_str());
+    
+    std::string ifile_other;
+    if (other == "2017") ifile_other = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/macros/PlayWithHistos/CheckGstripTemplate_NewCorr2017.root";
+    else if (other == "MC") ifile_other = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/macros/PlayWithHistos/CheckGstripTemplate_MCWjet.root";
+    else if (other == "lastPaper_MC") ifile_other = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/macros/PlayWithHistos/CheckGstripTemplate_lastPaper_MC.root";
+    cout << "ifile other : " << ifile_other << endl;
+    TFile *ifileOther = new TFile(ifile_other.c_str());
+
+    TFile *ofile = new TFile(Form("PlayWithHistos/RatioGstripTemplate_data_%s_VS_%s.root", data.c_str(), other.c_str()), "RECREATE");
+
+
+    TH1F *ModuleGeometry_NewCorr = (TH1F*)ifileDATA->Get("ModuleGeometry");
+    TH1F *PathLength_NewCorr = (TH1F*)ifileDATA->Get("PathLength");
+    TH1F *ChargeOverPathlength_NewCorr = (TH1F*)ifileDATA->Get("ChargeOverPathlength");
+    TH1F *ModuleGeometry_OldCorr = (TH1F*)ifileOther->Get("ModuleGeometry");
+    TH1F *PathLength_OldCorr = (TH1F*)ifileOther->Get("PathLength");
+    TH1F *ChargeOverPathlength_OldCorr = (TH1F*)ifileOther->Get("ChargeOverPathlength");
+
+
+    std::vector <TH1F*> ChargeOverPathlength_Layer_NewCorr, ChargeOverPathlength_Layer_OldCorr;
+    std::vector <TCanvas*> cChargeOverPathlength_Layer, cChargeOverPathlength_Layer_VF;
+    TString labels[15] = {"IB1", "IB2", "OB1", "OB2", "W1A", "W2A", "W3A", "W1B", "W2B", "W3B", "W4", "W5", "W6", "W7", "Pixels"};
+    TLegend *legLayer = new TLegend(0.6, 0.7, 0.9, 0.9);
+    legLayer->SetFillStyle(0);
+    legLayer->SetBorderSize(0);
+    legLayer->AddEntry(ModuleGeometry_OldCorr, Form("%s", other.c_str()), "l");
+    legLayer->AddEntry(ModuleGeometry_NewCorr, Form("Data %s", data.c_str()), "P");
+    for (int i=0; i<15; i++) {
+        ChargeOverPathlength_Layer_NewCorr.push_back((TH1F*)ifileDATA->Get(Form("ProjX_Xbin%d", i+1)));
+        ChargeOverPathlength_Layer_OldCorr.push_back((TH1F*)ifileOther->Get(Form("ProjX_Xbin%d", i+1)));
+
+        ChargeOverPathlength_Layer_NewCorr[i]->SetLineColor(kRed);
+        ChargeOverPathlength_Layer_NewCorr[i]->SetMarkerStyle(20);
+        ChargeOverPathlength_Layer_NewCorr[i]->SetMarkerColor(kRed);
+        ChargeOverPathlength_Layer_OldCorr[i]->SetLineColor(kBlack);
+        ChargeOverPathlength_Layer_NewCorr[i]->Scale(1.0/ChargeOverPathlength_Layer_NewCorr[i]->Integral());
+        ChargeOverPathlength_Layer_OldCorr[i]->Scale(1.0/ChargeOverPathlength_Layer_OldCorr[i]->Integral());
+        ChargeOverPathlength_Layer_OldCorr[i]->Rebin(5);
+        ChargeOverPathlength_Layer_NewCorr[i]->Rebin(5);
+
+        cChargeOverPathlength_Layer.push_back(new TCanvas(Form("ChargeOverPathlength_Layer_%s", labels[i].Data()), Form("ChargeOverPathlength_Layer_%s", labels[i].Data()), 800, 800));
+        cChargeOverPathlength_Layer[i]->cd();
+        ChargeOverPathlength_Layer_OldCorr[i]->Draw("hist");
+        ChargeOverPathlength_Layer_NewCorr[i]->Draw("E1 same");
+        TLegend *legLayer = new TLegend(0.6, 0.7, 0.9, 0.9);
+        legLayer->SetFillStyle(0);
+        legLayer->SetBorderSize(0);
+        legLayer->AddEntry(ModuleGeometry_OldCorr, Form("%s", other.c_str()), "l");
+        legLayer->AddEntry(ModuleGeometry_NewCorr, Form("Data %s", data.c_str()), "P");
+        legLayer->Draw();
+        cChargeOverPathlength_Layer[i]->SetLogy();
+        cChargeOverPathlength_Layer_VF.push_back(DrawWithRatio(ChargeOverPathlength_Layer_OldCorr[i], ChargeOverPathlength_Layer_NewCorr[i], cChargeOverPathlength_Layer[i], Form("ChargeOverPathlength_Layer_%s", labels[i].Data()), Form("Data %s/%s", data.c_str(), other.c_str()), "hist same", true));
+    }
+
+
+    ModuleGeometry_NewCorr->SetLineColor(kRed);
+    ModuleGeometry_NewCorr->SetMarkerStyle(20);
+    ModuleGeometry_NewCorr->SetMarkerColor(kRed);
+    ModuleGeometry_OldCorr->SetLineColor(kBlack);
+    PathLength_NewCorr->SetLineColor(kRed);
+    PathLength_NewCorr->SetMarkerStyle(20);
+    PathLength_NewCorr->SetMarkerColor(kRed);
+    PathLength_OldCorr->SetLineColor(kBlack);
+    ChargeOverPathlength_NewCorr->SetLineColor(kRed);
+    ChargeOverPathlength_NewCorr->SetMarkerStyle(20);
+    ChargeOverPathlength_NewCorr->SetMarkerColor(kRed);
+    ChargeOverPathlength_OldCorr->SetLineColor(kBlack);
+
+    ChargeOverPathlength_OldCorr->Rebin(5);
+    ChargeOverPathlength_NewCorr->Rebin(5);
+
+
+    TCanvas *c1 = new TCanvas("ModuleGeometry", "ModuleGeometry", 800, 800);
+    c1->cd();
+    ModuleGeometry_OldCorr->Draw("hist");
+    ModuleGeometry_NewCorr->Draw("E1 same");
+    TLegend *leg = new TLegend(0.6, 0.7, 0.9, 0.9);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->AddEntry(ModuleGeometry_OldCorr, "MC", "l");
+    leg->AddEntry(ModuleGeometry_NewCorr, "Data", "P");
+    leg->Draw();
+    TCanvas* cModuleGeometry = DrawWithRatio(ModuleGeometry_OldCorr, ModuleGeometry_NewCorr, c1, "ModuleGeometryRatio", Form("Data %s/%s", data.c_str(), other.c_str()), "hist same", false);
+
+    TCanvas *c2 = new TCanvas("Pathlength", "Pathlength", 800, 800);
+    c2->cd();
+    PathLength_OldCorr->Draw("hist");
+    PathLength_NewCorr->Draw("E1 same");
+    leg->Draw();
+    c2->SetLogy();
+    TCanvas* cPathlength = DrawWithRatio(PathLength_OldCorr, PathLength_NewCorr, c2, "PathlengthRatio", Form("Data %s/%s", data.c_str(), other.c_str()), "hist same", true);
+
+    TCanvas *c3 = new TCanvas("ChargeOverPathlength", "ChargeOverPathlength", 800, 800);
+    c3->cd();
+    ChargeOverPathlength_OldCorr->Draw("hist");
+    ChargeOverPathlength_NewCorr->Draw("E1 same");
+    leg->Draw();
+    c3->SetLogy();
+    TCanvas* cChargeOverPathlength = DrawWithRatio(ChargeOverPathlength_OldCorr, ChargeOverPathlength_NewCorr, c3, "ChargeOverPathlengthRatio", Form("Data %s/%s", data.c_str(), other.c_str()), "hist same", true);
+
+    ofile->cd();
+    c1->Write();
+    c2->Write();
+    c3->Write();
+    cModuleGeometry->Write();
+    cPathlength->Write();
+    cChargeOverPathlength->Write();
+    for (int i=0; i<15; i++) cChargeOverPathlength_Layer_VF[i]->Write();
+    ofile->Close();
+
+    return;
+}
+
+void TwoDComparisonGstripTemplate()
+{
+    TFile *ofile = new TFile("PlayWithHistos/TwoDComparisonGstripTemplate.root", "RECREATE");
+
+    TFile *ifileNewCorr = new TFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/GiTemplate_EtaExtension_SatNewCorr_v2.root");
+    TFile *ifileOldCorr = new TFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/GiTemplate_EtaExtension.root");
+
+    TH3F *hNew = (TH3F*)ifileNewCorr->Get("Calibration_GiTemplate");
+    TH3F *hOld = (TH3F*)ifileOldCorr->Get("Calibration_GiTemplate");
+
+    int nbinsX = hNew->GetNbinsX();
+    int nbinsY = hNew->GetNbinsY();
+    int nbinsZ = hNew->GetNbinsZ();
+
+    for (int i = 1; i <= nbinsX; ++i)
+    {
+        TString nameNew = Form("%s_projNewZ_Xbin%d", hNew->GetName(), i);
+        TString nameOld = Form("%s_projOldZ_Xbin%d", hOld->GetName(), i);
+
+        TH1D* hZ_New = new TH1D(nameNew, nameNew, nbinsZ, hNew->GetZaxis()->GetXbins()->GetArray());
+        TH1D* hZ_Old = new TH1D(nameOld, nameOld, nbinsZ, hOld->GetZaxis()->GetXbins()->GetArray());
+
+        for (int j = 1; j <= nbinsY; ++j) {
+            for (int k = 1; k <= nbinsZ; ++k) {
+                hZ_New->AddBinContent(k, hNew->GetBinContent(i, j, k));
+                hZ_Old->AddBinContent(k, hOld->GetBinContent(i, j, k));
+            }
+        }
+
+        ofile->cd();
+        hZ_New->Write();
+    }
+
+    ofile->Close();
+}
+
+void GstripQuantile(std::string etatype)
+{
+    TFile *ofile = new TFile(Form("PlayWithHistos/GstripQuantile_%s.root", etatype.c_str()), "RECREATE");
+
+    std::string ifileName;
+    if (etatype == "Eta1") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/output/Mu2018D_Eta1OldSat_massCut_0_pT70_V2p33_Gstrip_Fpix.root";
+    else if (etatype == "Eta2p4") ifileName = "/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/output/Mu2018D_Eta2p4OldSat_massCut_0_pT70_V2p34_Gstrip_Fpix.root";
+    else
+    {
+        cout << "Wrong file name" << endl;
+        return;
+    }
+    cout << "input file: " << ifileName << endl;
+    TFile *ifile = new TFile(ifileName.c_str());
+    
+    
+    TH2F *iasA_2D, *iasB_2D;
+    if (etatype == "Eta1")
+    {
+        iasA_2D = (TH2F*)ifile->Get("ias_ih_regionA_ias90_SingleMu_Eta1");
+        iasB_2D = (TH2F*)ifile->Get("ias_ih_regionB_90ias100_SingleMu_Eta1");
+    }
+    else if (etatype == "Eta2p4")
+    {
+        iasA_2D = (TH2F*)ifile->Get("ias_ih_regionA_ias90_SingleMu_Eta2p4");
+        iasB_2D = (TH2F*)ifile->Get("ias_ih_regionB_90ias100_SingleMu_Eta2p4");
+    }
+    else cout << "TH2 not found" << endl;
+
+
+    TH1F *iasA = (TH1F*)iasA_2D->ProjectionX("iasA_and_B");
+    TH1F *iasB = (TH1F*)iasB_2D->ProjectionX("iasB");
+
+    for (int i = 0; i <= iasA->GetNbinsX()+1; i++) iasA->SetBinContent(i, iasA->GetBinContent(i) + iasB->GetBinContent(i));
+
+    iasA->Scale(1.0/iasA->Integral());
+
+    // cout every 10% quantile:
+    double xp[1];
+    double p[1];
+    int quantile = -1;
+    for (int i = 5; i <= 9; ++i)
+    {
+        p[0] = i*0.1;
+        quantile = iasA->GetQuantiles(1,xp,p);
+        cout << "Quantile " << i * 10 << "%: " << xp[0] << endl;
+    }
+    p[0] = 0.99;
+    quantile = iasA->GetQuantiles(1,xp,p);
+    cout << "Quantile 0.99%: " << xp[0] << endl;
+    p[0] = 0.999;
+    quantile = iasA->GetQuantiles(1,xp,p);
+    cout << "Quantile 0.999%: " << xp[0] << endl;
+
+
+    ofile->cd();
+    iasA->Write();
+    ofile->Close();
+
+    return;
+}
+
+void CompareGstripEta()
+{
+    TFile *ofile = new TFile("PlayWithHistos/CompareGstripEta.root", "RECREATE");
+
+    TFile *eta1_file = new TFile("PlayWithHistos/GstripQuantile_Eta1.root");
+    TFile *eta2p4_file = new TFile("PlayWithHistos/GstripQuantile_Eta2p4.root");
+    TH1F *iasA_and_B_eta1 = (TH1F*)eta1_file->Get("iasA_and_B");
+    TH1F *iasA_and_B_eta2p4 = (TH1F*)eta2p4_file->Get("iasA_and_B");
+
+    iasA_and_B_eta1->Rebin(4);
+    iasA_and_B_eta2p4->Rebin(4);
+
+    TCanvas *c1 = new TCanvas("c1", "Comparison of Gstrip Eta", 800, 800);
+    c1->cd();
+    iasA_and_B_eta1->SetLineColor(kRed);
+    iasA_and_B_eta1->SetMarkerColor(kRed);
+    iasA_and_B_eta1->SetMarkerStyle(20);
+    iasA_and_B_eta2p4->SetLineColor(kBlack);
+    iasA_and_B_eta2p4->SetMarkerColor(kBlack);
+    iasA_and_B_eta1->Draw("E1");
+    iasA_and_B_eta2p4->Draw("E1 same");
+    TLegend *leg = new TLegend(0.6, 0.7, 0.9, 0.9);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->SetHeader("2018D (30.3 fb^{-1})","C");
+    leg->AddEntry(iasA_and_B_eta1, "|#eta|<1", "lp");
+    leg->AddEntry(iasA_and_B_eta2p4, "|#eta|<2.4", "lp");
+    leg->Draw();
+    c1->SetLogy();
+
+    TCanvas* cratio = DrawWithRatio(iasA_and_B_eta1, iasA_and_B_eta2p4, c1, "cratio", "|#eta|<2.4 / |#eta|<1", "E1 same", false);
+
+
+    ofile->cd();
+    c1->Write();
+    cratio->Write();
+    ofile->Close();
+
+    return;
+}
+
+void ImpactQuantileOnSignal()
+{
+    TFile *ofile = new TFile("PlayWithHistos/ImpactQuantileOnSignal.root", "RECREATE");
+
+    TFile *ifile = new TFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/output/Mu2018_NewCorr_massCut_0_pT70_V4p14_Gstrip_Fpix_Eta2p4.root");
+    TFile *Gluino2600 = new TFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/output/Gluino2600_massCut_0_pT70_V5p13_Gstrip_Fpix_Eta2p4.root");
+    
+    TH2F *ias = (TH2F*)ifile->Get("SingleMu_Eta2p4_Gstrip_NewVSOld_All");
+    TH1F *ias_old = (TH1F*)ias->ProjectionX("ias_old");
+    TH1F *ias_new = (TH1F*)ias->ProjectionY("ias_new");
+
+    TH1F *ias_old_copy = (TH1F*)ias_old->Clone("ias_old_copy");
+    TH1F *ias_new_copy = (TH1F*)ias_new->Clone("ias_new_copy");
+
+    ias_old->Scale(1.0/ias_old->Integral());
+    ias_new->Scale(1.0/ias_new->Integral());
+
+    // cout every 10% quantile:
+    double xp_old[1], xp_new[1];
+    double p[1];
+    int quantile_old=-1, quantile_new=-1;
+    std::vector <float> saveQuantile_old, saveQuantile_new;
+    for (int i = 5; i <= 9; ++i)
+    {
+        p[0] = i*0.1;
+        quantile_old = ias_old->GetQuantiles(1,xp_old,p);
+        quantile_new = ias_new->GetQuantiles(1,xp_new,p);
+        saveQuantile_old.push_back(xp_old[0]);
+        saveQuantile_new.push_back(xp_new[0]);
+        cout << "Quantile " << i * 10 << "%: " << xp_old[0] << " (old)   " << xp_new[0] << " (new)" << endl;
+    }
+    p[0] = 0.99;
+    quantile_old = ias_old->GetQuantiles(1,xp_old,p);
+    quantile_new = ias_new->GetQuantiles(1,xp_new,p);
+    saveQuantile_old.push_back(xp_old[0]);
+    saveQuantile_new.push_back(xp_new[0]);
+    cout << "Quantile 0.99%: " << xp_old[0] << " (old)   " << xp_new[0] << " (new)" << endl;
+
+    p[0] = 0.999;
+    quantile_old = ias_old->GetQuantiles(1,xp_old,p);
+    quantile_new = ias_new->GetQuantiles(1,xp_new,p);
+    saveQuantile_old.push_back(xp_old[0]);
+    saveQuantile_new.push_back(xp_new[0]);
+    cout << "Quantile 0.999%: " << xp_old[0] << " (old)   " << xp_new[0] << " (new)" << endl;
+
+
+
+    TH2F *ias_gluino = (TH2F*)Gluino2600->Get("SingleMu_Eta2p4_Gstrip_NewVSOld_All");
+    TH1F *ias_gluino_old = (TH1F*)ias_gluino->ProjectionX("ias_gluino_old");
+    TH1F *ias_gluino_new = (TH1F*)ias_gluino->ProjectionY("ias_gluino_new");
+
+    // For every quantile in saveQuantile_old and saveQuantile_new, compute the integral from that quantile to the end of the histogram for the signal
+    for (unsigned int i = 0; i < saveQuantile_old.size(); ++i)
+    {
+        float integral_gluino_old = ias_gluino_old->Integral(ias_gluino_old->FindBin(saveQuantile_old[i]), ias_gluino_old->GetNbinsX()+1);
+        float integral_gluino_new = ias_gluino_new->Integral(ias_gluino_new->FindBin(saveQuantile_new[i]), ias_gluino_new->GetNbinsX()+1);
+        float integral_old = ias_old_copy->Integral(ias_old_copy->FindBin(saveQuantile_old[i]), ias_old_copy->GetNbinsX()+1);
+        float integral_new = ias_new_copy->Integral(ias_new_copy->FindBin(saveQuantile_new[i]), ias_new_copy->GetNbinsX()+1);
+        cout << "Quantile " << (i < 5 ? (i+5)*10 : (i==5 ? 99 : 99.9)) << "%: "
+             << integral_gluino_old << " (old signal), "
+             << integral_gluino_new << " (new signal) | "
+             << integral_old << " (old bkg), "
+             << integral_new << " (new bkg)" << endl;    
+    }
+
+    ofile->cd();
+    ias_old->Write();
+    ias_new->Write();
+    ias_gluino_old->Write();
+    ias_gluino_new->Write();
+    ofile->Close();
+
+    return;
+}
 
 void CombineHistos()
 {
@@ -2840,8 +3240,29 @@ void CombineHistos()
     //CorrectBias_1oP("MET");
 
     //EtaIn8fp9();
-    GstripFpix_Signal();
+    //GstripFpix_Signal();
     //ExtractWeight_BoA();
+
+    //CheckGstripTemplate("NewCorr");
+    //CheckGstripTemplate("NewCorr2018");
+    //CheckGstripTemplate("NewCorr2017");
+    //CheckGstripTemplate("OldCorr");
+    //CheckGstripTemplate("MCWjet");
+    //CheckGstripTemplate("Run3Caro");
+    //CheckGstripTemplate("perso");
+    //CheckGstripTemplate("lastPaper_MC");
+    //CheckGstripTemplate("lastPaper_data2018");
+    //RatioGstripTemplate("2018", "MC");
+    //RatioGstripTemplate("2018", "2017");
+    //RatioGstripTemplate("all", "MC");
+    RatioGstripTemplate("lastPaper_data2018", "lastPaper_MC");
+    //TwoDComparisonGstripTemplate();
+
+    //GstripQuantile("Eta1");
+    //GstripQuantile("Eta2p4");
+    //CompareGstripEta();
+
+    //ImpactQuantileOnSignal();
 
     return;
 }

@@ -52,12 +52,7 @@ int year(2018);
 
 
 //ADD-SELECTION-METHODS
-bool HSCPSelector::PassHSCPpresel_SingleMu_Eta1(int i){
-   if (i<0 || i>(int)Pt.GetSize()) return false;
-   return ( ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 1) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
-}
-
-bool HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4(int i){
+bool HSCPSelector::PassHSCPpresel_SingleMu(int i){
    if (i<0 || i>(int)Pt.GetSize()) return false;
    return ( ( (*Trig.Get() > 0) && (Pt[i] > 55.0) && (abs(eta[i]) < 2.4) && (NOPH[i] >= 2) && (FOVH[i] > 0.8) && (NOM[i] >= 10) && ((*isHighPurity.Get())[i] == true) && (Chi2[i]/Ndof[i] < 5.0) && (abs(dZ[i]) < 0.1) && (abs(dXY[i]) < 0.02) && (PFMiniIso_relative[i] < 0.02) && (EoverP[i] < 0.3) && (PtErr[i]/Pt[i] < 1) && (track_genTrackIsoSumPt_dr03[i] < 15) && (PtErr[i]/(Pt[i]*Pt[i]) < 0.0008) && (PtErr[i]/(Pt[i]*Pt[i]) > 0) && (ProbQ_noL1[i] < 0.7) && (ProbQ_noL1[i] > 0) && (Ih_StripOnly[i] > 3.14) ) );
 }
@@ -95,11 +90,8 @@ void HSCPSelector::Begin(TTree * /*tree*/)
     // Add selections into a vector
 
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta1);
-selLabels_.push_back("SingleMu_Eta1");
-
-selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4);
-selLabels_.push_back("SingleMu_Eta2p4");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu);
+selLabels_.push_back("SingleMu");
 
 
     //https://root-forum.cern.ch/t/proof-session-tselector-how-to-pass-object-to-slaves/25502
@@ -222,7 +214,7 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
        C = C_data2017;
        year = 2017;
    }
-   if(dataset_ == "Mu2018"){ 
+   if(dataset_ == "Mu2018" || dataset_ == "Mu2018D_Eta1OldSat" || dataset_ == "Mu2018D_Eta2p4OldSat"){ 
        K = K_data2018;
        C = C_data2018;
        year = 2018;
@@ -254,11 +246,8 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
    //-------------------------------------
    //Add selections into a vector - to be updated
    //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta1);
-selLabels_.push_back("SingleMu_Eta1");
-
-selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu_Eta2p4);
-selLabels_.push_back("SingleMu_Eta2p4");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_SingleMu);
+selLabels_.push_back("SingleMu");
 
    //-------------------------------------
    
@@ -549,6 +538,11 @@ selLabels_.push_back("SingleMu_Eta2p4");
         plots.AddHisto2D(selLabels_[i]+"_AfterSel_Fpix_vs_1oP", 200, 0, 1.1, 1000, 0, 1000);
         plots.AddHisto2D(selLabels_[i]+"_AfterSel_eta_vs_Fpix", 80, -2.5, 2.5, 200, 0, 1.1);
 
+        plots.AddHisto2D(selLabels_[i]+"_Gstrip_NewVSOld_All", 10000,0,1, 10000,0,1);
+        plots.AddHisto1D(selLabels_[i]+"_Gstrip_New_minus_Old_All", 10000,-1,1);
+        plots.AddHisto2D(selLabels_[i]+"_Gstrip_NewVSOld_OnlySat", 10000,0,1, 10000,0,1);
+        plots.AddHisto2D(selLabels_[i]+"_Gstrip_NewVSOld_NoSat", 10000,0,1, 10000,0,1);
+
         plots.AddHisto1D(selLabels_[i]+"_TrigInfo", 5, 0, 5);
         plots.AddHisto1D(selLabels_[i]+"_p",40,0,4000);
         plots.AddHisto1D(selLabels_[i]+"_eta",48,-2.4,+2.4);
@@ -806,25 +800,6 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             }*/
         }
 
-            //TAKE MOST IONIZING PF AND GLOBAL MUON CANDIDATE
-        /*
-        for(unsigned int s=0;s<selections_.size();s++){
-            bool (HSCPSelector::*ptr)(int);
-        ptr = selections_[s];
-        if((this->*ptr)(i)){
-            bool hscpPFmuon = (*isMuon.Get())[i];
-            bool hscpGlobalMuon = (*isGlobalMuon.Get())[i];
-            if(hscpPFmuon) foundOnePF[s] = true;
-            if(hscpGlobalMuon) foundOneGlobal[s] = true;
-            passedThisSel[s] = true;
-        vcp[s].FillHisto1D(selLabels_[s]+"_hIh",Ih_StripOnly[i]);
-        if(Ih_StripOnly[i]>maxIh[s] && ((*isMuon.Get())[i]) && ((*isGlobalMuon.Get())[i])){
-                maxIh[s]=Ih_StripOnly[i];
-                iCand[s]=i;
-            }
-            }
-        }
-        */
    }
 
     // Event CUTFLOW
@@ -872,6 +847,20 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_Ih", float(1.0 - ProbQ_noL1[i]), Ih_StripOnly[i]);
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_Fpix_vs_1oP", float(1.0 - ProbQ_noL1[i]), 10000./(Pt[i]*cosh(eta[i])));
             vcp[s].FillHisto2D(selLabels_[s]+"_AfterSel_eta_vs_Fpix", eta[i], float(1.0 - ProbQ_noL1[i]));
+
+                // Gstrip NewCorr VS Gstrip OldCorr
+            vcp[s].FillHisto2D(selLabels_[s]+"_Gstrip_NewVSOld_All", Ias_StripOnly[i], Ias_StripOnly_OldCorr[i]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_Gstrip_New_minus_Old_All", Ias_StripOnly[i]-Ias_StripOnly_OldCorr[i]);
+
+            bool isSatTrack = false;
+            const std::vector<bool>& vec254 = clust_sat254[i];      // vector of the boolean values of saturation for each cluster in the HSCP candidate track
+            const std::vector<bool>& vec255 = clust_sat255[i];
+            for (unsigned int j=0; j<vec254.size(); j++)
+            {
+                if (vec254[j] || vec255[j]) isSatTrack = true;
+            }
+            if (isSatTrack) vcp[s].FillHisto2D(selLabels_[s]+"_Gstrip_NewVSOld_OnlySat", Ias_StripOnly[i], Ias_StripOnly_OldCorr[i]);
+            else vcp[s].FillHisto2D(selLabels_[s]+"_Gstrip_NewVSOld_NoSat", Ias_StripOnly[i], Ias_StripOnly_OldCorr[i]);
         }
 
         double Ias = Ias_StripOnly[i];
@@ -885,7 +874,6 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
         double massDedx = GetMass(pt*cosh(eta[i]),Ih_StripOnly[i],K,C);
         double massDedxInit = GetMass(pt*cosh(eta[i]),Ih_StripOnly[i],K,C);
-        double massBeta = GetMassBeta(pt*cosh(eta[i]),(1./TOF[i]));
         double massAtlas = -1;
         float massForRegions = massDedx; 
  
@@ -968,18 +956,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                if( (Fpix > fpix6) && (Fpix <= fpix7) ) vmrp_regionD_6f7[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
                if( (Fpix > fpix6) && (Fpix <= fpix9) ) vmrp_regionD_6f9[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
                if( (Fpix > fpix7) && (Fpix <= fpix8) ) vmrp_regionD_7f8[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
-               if( (Fpix > fpix8) && (Fpix <= fpix9) )
-               {
-                    vmrp_regionD_8f9[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
-
-                        // write in a .txt file the following information:
-                        // mass pT eta phi Ih Ias Fpix NOPH FOVH NOM Chi2oNDF dZ dXY PFMiniIso_relative EoverP PtErr[i]/Pt[i] PtErr[i]/(Pt[i]*Pt[i]) track_genTrackIsoSumPt_dr03
-                    
-                    /*if (massForRegions > 2000)
-                    {
-                        OutputTuples << massForRegions << " " << pt << " " << eta[i] << " " << phi[i] << " " << Ih << " " << Ias << " " << Fpix << " " << NOPH[i] << " " << FOVH[i] << " " << NOM[i] << " " << Chi2[i]/Ndof[i] << " " << dZ[i] << " " << dXY[i] << " " << PFMiniIso_relative[i] << " " << EoverP[i] << " " << PtErr[i]/(Pt[i]) << " " << PtErr[i]/(Pt[i]*Pt[i]) << " " << track_genTrackIsoSumPt_dr03[i] << "\n";
-                    }*/
-               }
+               if( (Fpix > fpix8) && (Fpix <= fpix9) ) vmrp_regionD_8f9[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
                if( (Fpix > fpix8) && (Fpix <= fpix10) ) vmrp_regionD_8f10[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
                if( (Fpix > fpix9) && (Fpix <= fpix10) ) vmrp_regionD_9f10[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
                if( (Fpix > fpix99) && (Fpix <= fpix10) ) vmrp_regionD_99f10[s].fill(eta[i],NOM[i],P,pt,PtErr[i],Ih_StripOnly[i],Ias_StripOnly[i],-1,massForRegions,TOF[i],*nofVtx.Get(),Fpix,newWeight,1);
@@ -1026,37 +1003,6 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             
         }  
         
-        
-        //TEST NEW OUTPUT TTREE
-        float massDedxMuonInit = -1;
-        float massMuonBeta = -1;
-
-        float massCombinedWeighted = -1;
-        float massCombinedMuonWeighted = -1;
-        float chi2CombMuonNoSquare = -1;
-
-
-        TreeInverseBeta=TOF[i];
-        TreeIh = Ih_StripOnly[i];
-
-        TreeMassIh = massDedxInit; 
-        TreeMuonMassIh = massDedxMuonInit;
-
-        TreeMassBeta = massBeta;
-        TreeMuonMassBeta = massMuonBeta;
-
-        TreeMassCombined = massCombinedWeighted;
-        TreeMuonMassCombined = massCombinedMuonWeighted;
-
-        TreeMuonMassAtlas = massAtlas;
-        float hscpMuonPt = -1;
-        TreePt = hscpMuonPt;
-        TreeFpix = Fpix;
-        TreeChi2 = chi2CombMuonNoSquare;
-
-        if(selLabels_[s] == "testIhPt" && FillTree){        
-            outputTree->Fill();
-        }
     }
    //} 
    //}
