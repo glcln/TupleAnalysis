@@ -6,7 +6,7 @@
    //proof->SetParallel(1);
    
    ifstream ifile;
-   ifile.open("/opt/sbg/cms/ui3_data1/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/cfg/configFile.txt");
+   ifile.open("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/cfg/configFile.txt");
    if(!ifile) std::cout << "Error when opening config file " <<  std::endl;
    std::string line;
    std::string label;
@@ -98,10 +98,96 @@
    if(dataset == "Mu2018"){
        //ALL FILES 
 
-       //std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/CMSSW_10_6_30/src/HSCPTreeAnalyzer/macros/";
-       //std::string fileNamesMu2018[] = { (pathData+"HistosLocal.txt").c_str()};
        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V2p11/";
        std::string fileNamesMu2018[] = { (pathData+"SingleMuon_Run2018.txt").c_str()}; //test.txt
+
+       for (const std::string& fileName : fileNamesMu2018) {
+           std::ifstream file(fileName);
+           if (!file.is_open()) {
+               std::cerr << "Failed to open file: " << fileName << std::endl;
+               continue;
+           }
+           std::string line;
+           while (std::getline(file, line)) {
+               if (!line.empty() && line.back() == '\n') {
+                   line.pop_back();
+               }
+               chain->AddFile(line.c_str());
+           }
+
+           file.close();
+       }
+   }
+   if(dataset == "Mu2018D_Eta1OldSat"){
+       //ALL FILES 
+
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V2p33_2p34_2p35/";
+       std::string fileNamesMu2018[] = { (pathData+"SingleMu_2018D_Eta1_Template1OldCorrSat.txt").c_str()};
+
+       for (const std::string& fileName : fileNamesMu2018) {
+           std::ifstream file(fileName);
+           if (!file.is_open()) {
+               std::cerr << "Failed to open file: " << fileName << std::endl;
+               continue;
+           }
+           std::string line;
+           while (std::getline(file, line)) {
+               if (!line.empty() && line.back() == '\n') {
+                   line.pop_back();
+               }
+               chain->AddFile(line.c_str());
+           }
+
+           file.close();
+       }
+   }
+   if(dataset == "Mu2018D_Eta2p4OldSat"){
+       //ALL FILES 
+
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V2p33_2p34_2p35/";
+       std::string fileNamesMu2018[] = { (pathData+"SingleMu_2018D_Eta2p4_Template2p4OldCorrSat.txt").c_str()};
+
+       for (const std::string& fileName : fileNamesMu2018) {
+           std::ifstream file(fileName);
+           if (!file.is_open()) {
+               std::cerr << "Failed to open file: " << fileName << std::endl;
+               continue;
+           }
+           std::string line;
+           while (std::getline(file, line)) {
+               if (!line.empty() && line.back() == '\n') {
+                   line.pop_back();
+               }
+               chain->AddFile(line.c_str());
+           }
+
+           file.close();
+       }
+   }
+   if(dataset == "Mu2018B"){
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V2p37/";
+       std::string fileNamesMu2018[] = { (pathData+"V2p37.txt").c_str()};
+
+       for (const std::string& fileName : fileNamesMu2018) {
+           std::ifstream file(fileName);
+           if (!file.is_open()) {
+               std::cerr << "Failed to open file: " << fileName << std::endl;
+               continue;
+           }
+           std::string line;
+           while (std::getline(file, line)) {
+               if (!line.empty() && line.back() == '\n') {
+                   line.pop_back();
+               }
+               chain->AddFile(line.c_str());
+           }
+
+           file.close();
+       }
+   }
+   if(dataset == "Mu2018_NewCorr"){
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V4p14/";
+       std::string fileNamesMu2018[] = { (pathData+"V4p14.txt").c_str()};
 
        for (const std::string& fileName : fileNamesMu2018) {
            std::ifstream file(fileName);
@@ -204,7 +290,27 @@
            file.close();
        }
    }
+    if(dataset == "Gluino2600"){
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V5p13/";
+       std::string fileNamesGluino2600[] = { (pathData+"V5p13.txt").c_str()};
 
+       for (const std::string& fileName : fileNamesGluino2600) {
+           std::ifstream file(fileName);
+           if (!file.is_open()) {
+               std::cerr << "Failed to open file: " << fileName << std::endl;
+               continue;
+           }
+           std::string line;
+           while (std::getline(file, line)) {
+               if (!line.empty() && line.back() == '\n') {
+                   line.pop_back();
+               }
+               chain->AddFile(line.c_str());
+           }
+
+           file.close();
+       }
+   }
    
 
 

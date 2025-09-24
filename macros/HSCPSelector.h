@@ -37,9 +37,7 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-bool PassHSCPpresel_SingleMu_Eta1(int hscpIndex);
-
-bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
+bool PassHSCPpresel_SingleMu(int hscpIndex);
 
 
    bool do1Dplots;
@@ -48,7 +46,6 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
 
    bool UseFpixel;
    bool UseGstrip;
-   bool makeOnlyCRBeta;
    bool CalibrationZmumu;
    bool FillTree;
    bool computeAtlasMass;
@@ -84,27 +81,6 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
  
    std::string dataset_;
    std::string oFile_;
-   float TreeInverseBeta;
-   float TreeIh;
-
-   float TreeMassIh;
-   float TreeMuonMassIh;
-
-
-   float TreeMassAtlas;
-   float TreeMuonMassAtlas;
-
-   float TreeMassBeta;
-   float TreeMuonMassBeta;
-
-   float TreeMassCombined;
-   float TreeMuonMassCombined;
-
-   float TreePt;
-   float TreeFpix; 
-   float TreeChi2;
-   
-
    std::string version_;
 
    int filltofErrUp =0;
@@ -130,17 +106,10 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
 
 
    vector<double> Ih_cut_values;
-   vector<double> beta_cut_values;
 
    std::vector<double> ptErrScaleFactors;
-   std::vector<double> betaErrScaleFactors;
    std::vector<std::pair<double,double>> ptBinRanges = { {0, 100}, {100, 200}, {200, 300},{300, 400}, {400, 500},{500, 600}, {600, 700}, {700, 800}, {800, 900}, {900, 1000},{1000, 1100}, {1100, 1200}, {1200, 1300}, {1300, 1400}, {1400, 100000}
    };
-   std::vector<std::pair<double,double>> betaBinRanges = { {0.45, 0.5}, {0.5, 0.55}, {0.55, 0.6},{0.6, 0.65},{0.65, 0.7},{0.7, 0.75},{0.75, 0.8},{0.8, 0.85},{0.85, 0.9},{0.9, 0.95},{0.95, 1.0},{1.0, 1.05},{1.05, 1.1},{1.1, 1.15},{1.15,100}
-   };
-   
-   std::vector<std::pair<double, double>> ih_betagamma;
-   std::vector<std::tuple<double, double, double>> ih_betagamma_error;
 
    std::vector<bool (HSCPSelector::*)(int)> selections_;
    std::vector<string> selLabels_;
@@ -150,12 +119,10 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TFile* treeTest;
    //Will be used to proced mass plots at given selections (see selLabels)
 
-   std::map<std::pair<double, double>, std::string> cut_hist_map_beta_CR;
    std::map<std::pair<double, double>, std::string> cut_hist_map_dedx_CR;
    std::map<std::pair<double, double>, std::string> cut_hist_map_comb_CR;
    std::map<std::pair<double, double>, std::string> cut_hist_map_atlas_CR;
 
-   std::map<std::pair<double, double>, std::string> cut_hist_map_beta_SR;
    std::map<std::pair<double, double>, std::string> cut_hist_map_dedx_SR;
    std::map<std::pair<double, double>, std::string> cut_hist_map_comb_SR;
    std::map<std::pair<double, double>, std::string> cut_hist_map_atlas_SR;
@@ -182,30 +149,6 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
 
 
    std::string regFpixAll = "_regionAll";
-   std::string regFpixLowBetaAll="_regionCR_3fp8";
-
-   std::string regFpixA_3fp4BetaAll= "_regionA_CR_3fp4";
-   std::string regFpixA_3fp8BetaAll= "_regionA_CR_3fp8";
-   std::string regFpixA_3fp6BetaAll= "_regionA_CR_3fp6";
-   std::string regFpixA_4fp5BetaAll= "_regionA_CR_4fp5";
-   std::string regFpixA_5fp6BetaAll= "_regionA_CR_5fp6";
-   std::string regFpixA_6fp7BetaAll= "_regionA_CR_6fp7";
-   std::string regFpixA_6fp9BetaAll= "_regionA_CR_6fp9";
-   std::string regFpixA_7fp8BetaAll= "_regionA_CR_7fp8";
-   std::string regFpixA_8fp9BetaAll= "_regionA_CR_8fp9";
-   std::string regFpixA_9fp10BetaAll= "_regionA_CR_9fp10";
-
-   std::string regFpixC_3fp4BetaAll= "_regionC_CR_3fp4";
-   std::string regFpixC_3fp6BetaAll= "_regionC_CR_3fp6";
-   std::string regFpixC_3fp8BetaAll= "_regionC_CR_3fp8";
-   std::string regFpixC_4fp5BetaAll= "_regionC_CR_4fp5";
-   std::string regFpixC_5fp6BetaAll= "_regionC_CR_5fp6";
-   std::string regFpixC_6fp7BetaAll= "_regionC_CR_6fp7";
-   std::string regFpixC_6fp9BetaAll= "_regionC_CR_6fp9";
-   std::string regFpixC_7fp8BetaAll= "_regionC_CR_7fp8";
-   std::string regFpixC_8fp9BetaAll= "_regionC_CR_8fp9";
-   std::string regFpixC_9fp10BetaAll= "_regionC_CR_9fp10";
-
 
    std::string regFpixA_3f4 = "_regionA_3fp4";
    std::string regFpixA_3f6 = "_regionA_3fp6";
@@ -296,30 +239,6 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
 
 
    std::vector<RegionMassPlot> vmrp_regionFpix_all;
-   std::vector<RegionMassPlot> vmrp_regionFpixLow_BetaAll;
-
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_3fp4;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_3fp8;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_3fp6;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_4fp5;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_5fp6;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_6fp7;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_6fp9;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_7fp8;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_8fp9;
-   std::vector<RegionMassPlot> vmrp_regionA_BetaAll_9fp10;
-
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_3fp4;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_3fp8;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_3fp6;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_4fp5;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_5fp6;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_6fp7;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_6fp9;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_7fp8;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_8fp9;
-   std::vector<RegionMassPlot> vmrp_regionC_BetaAll_9fp10;
-
 
    std::vector<RegionMassPlot> vmrp_regionA_3f4;
    std::vector<RegionMassPlot> vmrp_regionA_3f6;
@@ -436,7 +355,7 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderArray<float> pvSumPt2 = {fReader, "pvSumPt2"};
 
       // MET
-/*   
+   /*
    TTreeReaderValue<Float_t> RecoPFMET = {fReader, "RecoPFMET"};
    TTreeReaderValue<Float_t> RecoCaloMET = {fReader, "RecoCaloMET"};
    TTreeReaderValue<Bool_t> Flag_allMETFilters = {fReader, "Flag_allMETFilters"};
@@ -444,7 +363,7 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderValue<Bool_t> HLT_PFHT500_PFMET100_PFMHT100_IDTight = {fReader, "HLT_PFHT500_PFMET100_PFMHT100_IDTight"};
    TTreeReaderValue<Bool_t> HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 = {fReader, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60"};
    TTreeReaderValue<Bool_t> HLT_MET105_IsoTrk50 = {fReader, "HLT_MET105_IsoTrk50"};
-*/
+   */
 
    /*
    TTreeReaderValue<Float_t> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};
@@ -471,29 +390,20 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
 
       // MUON
    TTreeReaderValue<Bool_t> HLT_Mu50 = {fReader, "HLT_Mu50"};
-   /*
-   TTreeReaderValue<Bool_t> L1_SingleMu22 = {fReader, "L1_SingleMu22"};
-   TTreeReaderValue<Bool_t> L1_SingleMu22or25 = {fReader, "L1_SingleMu22or25"};
-   TTreeReaderValue<Bool_t> L1_LastMuFilter = {fReader, "L1_LastMuFilter"};
-   */
+
    TTreeReaderValue<Bool_t> matchedMuonWasFound = {fReader, "matchedMuonWasFound"};
    
-   TTreeReaderArray<float> gParticleEta = {fReader, "gParticleEta"};
-   TTreeReaderArray<float> gParticlePhi = {fReader, "gParticlePhi"};
-   TTreeReaderArray<float> gParticleBeta = {fReader, "gParticleBeta"};
-   TTreeReaderArray<float> gParticlePt = {fReader, "gParticlePt"};
-
    TTreeReaderArray<float> muonE = {fReader, "muonE"};
    TTreeReaderArray<float> muonPt = {fReader, "muonPt"};
-   //TTreeReaderArray<float> globalTrackMuonPt = {fReader, "globalTrackMuonPt"};
-   //TTreeReaderArray<float> innerTrackMuonPt = {fReader, "innerTrackMuonPt"};
-   //TTreeReaderArray<float> muonPtErr = {fReader, "muonPtErr"};
-   //TTreeReaderArray<float> muonEta = {fReader, "muonEta"};
-   //TTreeReaderArray<float> muonPhi = {fReader, "muonPhi"};
-   //TTreeReaderArray<float> muonBeta = {fReader, "muonBeta"};
-   //TTreeReaderValue<vector<bool>> muonIsLoose = {fReader, "muonIsLoose"};
-   //TTreeReaderValue<vector<bool>> muonIsMedium = {fReader, "muonIsMedium"};
-   //TTreeReaderValue<vector<bool>> muonIsTight = {fReader, "muonIsTight"};
+   TTreeReaderArray<float> globalTrackMuonPt = {fReader, "globalTrackMuonPt"};
+   TTreeReaderArray<float> innerTrackMuonPt = {fReader, "innerTrackMuonPt"};
+   TTreeReaderArray<float> muonPtErr = {fReader, "muonPtErr"};
+   TTreeReaderArray<float> muonEta = {fReader, "muonEta"};
+   TTreeReaderArray<float> muonPhi = {fReader, "muonPhi"};
+   TTreeReaderArray<float> muonBeta = {fReader, "muonBeta"};
+   TTreeReaderValue<vector<bool>> muonIsLoose = {fReader, "muonIsLoose"};
+   TTreeReaderValue<vector<bool>> muonIsMedium = {fReader, "muonIsMedium"};
+   TTreeReaderValue<vector<bool>> muonIsTight = {fReader, "muonIsTight"};
    
    TTreeReaderValue<vector<bool>> passCutPt55 = {fReader, "passCutPt55"};
    TTreeReaderValue<vector<bool>> passSelection = {fReader, "passSelection"};
@@ -507,6 +417,7 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderArray<float> Ias_noTIBnoTIDno3TEC = {fReader, "Ias_noTIBnoTIDno3TEC"};
    TTreeReaderArray<float> Ias_PixelOnly = {fReader, "Ias_PixelOnly"};
    TTreeReaderArray<float> Ias_StripOnly = {fReader, "Ias_StripOnly"};
+   TTreeReaderArray<float> Ias_StripOnly_OldCorr = {fReader, "Ias_StripOnly_OldCorr"}; // After V2p37
    TTreeReaderArray<float> Ias_PixelOnly_noL1 = {fReader, "Ias_PixelOnly_noL1"};
    TTreeReaderArray<float> Ih = {fReader, "Ih"};
    TTreeReaderArray<float> Ick = {fReader, "Ick"};
@@ -521,7 +432,7 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderValue<vector<bool>> isHighPurity = {fReader, "isHighPurity"};
    TTreeReaderArray<float> EoverP = {fReader, "EoverP"};
    TTreeReaderValue<vector<bool>> isMuon = {fReader, "isMuon"};
-   //TTreeReaderValue<vector<bool>> isGlobalMuon = {fReader, "isGlobalMuon"};
+   TTreeReaderValue<vector<bool>> isGlobalMuon = {fReader, "isGlobalMuon"};
    TTreeReaderValue<vector<bool>> isElectron = {fReader, "isElectron"};
 
    /*
@@ -541,21 +452,7 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderArray<float> CSCTOF = {fReader, "CSCTOF"};
    TTreeReaderArray<float> CSCTOFErr = {fReader, "CSCTOFErr"};
    TTreeReaderArray<unsigned int> CSCTOF_ndof = {fReader, "CSCTOF_ndof"};
-   /*
-   TTreeReaderValue<vector<bool>> isPhoton = {fReader, "isPhoton"};
-   TTreeReaderValue<vector<bool>> isChHadron = {fReader, "isChHadron"};
-   TTreeReaderValue<vector<bool>> isNeutHadron = {fReader, "isNeutHadron"};
-   TTreeReaderValue<vector<bool>> isPfTrack = {fReader, "isPfTrack"};
-   TTreeReaderValue<vector<bool>> isUndefined = {fReader, "isUndefined"};
-   TTreeReaderArray<float> ECAL_energy = {fReader, "ECAL_energy"};
-   TTreeReaderArray<float> HCAL_energy = {fReader, "HCAL_energy"};
-   TTreeReaderArray<float> DTTOF = {fReader, "DTTOF"};
-   TTreeReaderArray<float> DTTOFErr = {fReader, "DTTOFErr"};
-   TTreeReaderArray<unsigned int> DTTOF_ndof = {fReader, "DTTOF_ndof"};
-   TTreeReaderArray<float> CSCTOF = {fReader, "CSCTOF"};
-   TTreeReaderArray<float> CSCTOFErr = {fReader, "CSCTOFErr"};
-   TTreeReaderArray<unsigned int> CSCTOF_ndof = {fReader, "CSCTOF_ndof"};
-   */
+
    TTreeReaderArray<float> Mass = {fReader, "Mass"};
    TTreeReaderArray<float> MassErr = {fReader, "MassErr"};
    TTreeReaderArray<float> dZ = {fReader, "dZ"};
@@ -578,20 +475,9 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderArray<float> track_genTrackMiniIsoSumPt = {fReader, "track_genTrackMiniIsoSumPt"};
    TTreeReaderArray<float> track_genTrackAbsIsoSumPtFix = {fReader, "track_genTrackAbsIsoSumPtFix"};
    TTreeReaderArray<float> track_genTrackIsoSumPt_dr03 = {fReader, "track_genTrackIsoSumPt_dr03"};
-   /*
-   TTreeReaderArray<float> HSCP_tuneP_Pt = {fReader, "HSCP_tuneP_Pt"};
-   TTreeReaderArray<float> HSCP_tuneP_PtErr = {fReader, "HSCP_tuneP_PtErr"};
-   TTreeReaderArray<float> HSCP_tuneP_Eta = {fReader, "HSCP_tuneP_Eta"};
-   TTreeReaderArray<float> HSCP_tuneP_Phi = {fReader, "HSCP_tuneP_Phi"};
-   TTreeReaderArray<int> HSCP_tuneP_MuonBestTrackType = {fReader, "HSCP_tuneP_MuonBestTrackType"};
-   TTreeReaderArray<int> HSCP_ErrorHisto_bin = {fReader, "HSCP_ErrorHisto_bin"};
-   */
-   TTreeReaderArray<int> HSCP_type = {fReader, "HSCP_type"};
-   
-   
-   TTreeReaderArray<unsigned int> HSCP_cand = {fReader, "Hscp"};
 
-   
+   TTreeReaderArray<int> HSCP_type = {fReader, "HSCP_type"};
+   TTreeReaderArray<unsigned int> HSCP_cand = {fReader, "Hscp"};
 
    TTreeReaderArray<float> PFMiniIso_relative = {fReader, "PFMiniIso_relative"};
    TTreeReaderArray<float> TrackPFIsolationR005_sumChargedHadronPt = {fReader, "TrackPFIsolationR005_sumChargedHadronPt"};
@@ -611,13 +497,6 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderArray<float> TrackPFIsolationR05_sumPhotonPt = {fReader, "TrackPFIsolationR05_sumPhotonPt"};
    TTreeReaderArray<float> TrackPFIsolationR05_sumPUPt = {fReader, "TrackPFIsolationR05_sumPUPt"};
    
-   /*
-   TTreeReaderArray<float> PFMiniIso_wMuon_relative = {fReader, "PFMiniIso_wMuon_relative"};
-   TTreeReaderArray<float> MuonPFIsolationR03_sumChargedHadronPt = {fReader, "MuonPFIsolationR03_sumChargedHadronPt"};
-   TTreeReaderArray<float> MuonPFIsolationR03_sumNeutralHadronPt = {fReader, "MuonPFIsolationR03_sumNeutralHadronPt"};
-   TTreeReaderArray<float> MuonPFIsolationR03_sumPhotonPt = {fReader, "MuonPFIsolationR03_sumPhotonPt"};
-   TTreeReaderArray<float> MuonPFIsolationR03_sumPUPt = {fReader, "MuonPFIsolationR03_sumPUPt"};
-   */
    TTreeReaderArray<float> Ih_noL1 = {fReader, "Ih_noL1"};
    TTreeReaderArray<float> Ih_15drop = {fReader, "Ih_15drop"};
    TTreeReaderArray<float> Ih_StripOnly = {fReader, "Ih_StripOnly"};
@@ -632,27 +511,19 @@ bool PassHSCPpresel_SingleMu_Eta2p4(int hscpIndex);
    TTreeReaderArray<vector<unsigned int>> clust_detid = {fReader, "clust_detid"};
    TTreeReaderArray<vector<bool>> clust_isStrip = {fReader, "clust_isStrip"};
    TTreeReaderArray<vector<bool>> clust_isPixel = {fReader, "clust_isPixel"};
-   /*
-   TTreeReaderArray<float> GenId = {fReader, "GenId"};
-   TTreeReaderArray<float> GenCharge = {fReader, "GenCharge"};
-   TTreeReaderArray<float> GenMass = {fReader, "GenMass"};
-   TTreeReaderArray<float> GenPhi = {fReader, "GenPhi"};
-   */
    TTreeReaderArray<float> GenEta = {fReader, "GenEta"};
    TTreeReaderArray<float> GenPt = {fReader, "GenPt"};
-   TTreeReaderArray<float> GenBeta = {fReader, "HSCP_GenBeta"};
 
    HSCPSelector()
    {
-  
-       fout = 0;
-       treeTest = 0;
+      fout = 0;
+      treeTest = 0;
    }
 
    virtual ~HSCPSelector() 
    {
-       if(!fout) delete fout;
-       if(!treeTest) delete treeTest; 
+      if(!fout) delete fout;
+      if(!treeTest) delete treeTest; 
    }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
