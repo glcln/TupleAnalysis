@@ -31,15 +31,10 @@ TH2F* BetheBlochForMass(float mass);
 // Function returning the MassErr as function momentum, dEdx, and errors on momentum and dEdx
 // Not take into account any erros coming from K&C factors because this function is used to see the impact of binning in p and dedx on mass error
 double GetMassErr (double P, double PErr, double dEdx, double dEdxErr, double M, double dEdxK, double dEdxC);
-float triggerSystFactor(float eta, float beta, int syst);
 // Return the mass as a function of momentum, dEdx, K and C. 
 // It corresponds to the Bethe-Bloch parametrisation used in the Hscp analysis
 float GetMass(float p, float ih, float k, float c);
-float GetMassPow(float p, float ih, float k, float c,float n_estim);
-float GetMassBeta(float p, float beta);
 float sigmaP(float pt, float eta,float sigma_pt);
-float errorMassBeta(float p, float beta, float sigma_beta);
-float errorMassBetaWithP(float p, float beta, float sigma_beta,float sigma_p);
 float errorMassDedx(float p,float ih,float k,float c,float sigma_dEdx);
 float errorMassWithP(float p,float ih,float k,float c,float sigma_dEdx,float sigma_p);
 double partial_df_dedx(double beta_gamma, double p1, double p2, double p3, double p4);

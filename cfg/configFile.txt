@@ -1,3 +1,4 @@
 #TOF cut - pT cut - eta bins - ih bins - p bins - mass bins - massCut - TOFbins - FPIXbins -      type     -        version
 
-0           70         80        400      1000      400         0        200        20          Gluino2000           V10p0
+#0           70         80        400      1000      400         0        200        20          Gluino2000_AOD          V11p2
+0           70         80        400      1000      400         0        200        20          Gluino2000_miniAOD          V11p2

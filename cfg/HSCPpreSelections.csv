@@ -1,2 +1,2 @@
 selections, true
-sel, (true)
+Comp, ( Pt[i] > 50 && isHighPurityTrack[i] && abs(dxy[i]) < 0.5 && abs(dz[i]) < 0.5 && (miniRelIsoChg[i] < 1.0 || Pt[i] > 100) )

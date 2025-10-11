@@ -37,6 +37,8 @@ void HSCPSelector::Begin(TTree * /*tree*/)
     int ptInt = std::stoi(ptname);
 
     oFile_ = ((TObjString *)(tx->At(9)))->String().Data();
+    oFile_ += "_";
+    oFile_ += ((TObjString *)(tx->At(10)))->String().Data();
     oFile_ += "_Eta2p4";
     oFile_ += ext;
 
@@ -92,9 +94,21 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
         plots.AddHisto1D(selLabels_[i]+"_ptOverptErrptErr", 1000, 0, 0.1);
         plots.AddHisto1D(selLabels_[i]+"_ptOverptErr", 100, 0, 1);
         plots.AddHisto1D(selLabels_[i]+"_Fpix", 100, 0, 1);
-        plots.AddHisto1D(selLabels_[i]+"_RecoCaloMET", 100, 0, 500);
+        plots.AddHisto1D(selLabels_[i]+"_CaloJets", 100, 0, 500);
         plots.AddHisto1D(selLabels_[i]+"_Flag_allMETFilters", 2, -0.5, 1.5);
+        plots.AddHisto1D(selLabels_[i]+"_HSCP_type", 6, -0.5, 5.5);
+        plots.AddHisto1D(selLabels_[i]+"_PFMET", 100, 0, 500);
+        plots.AddHisto1D(selLabels_[i]+"_PFMET_phi", 50, -3.5, 3.5);
         
+        // only in AOD : 
+        //plots.AddHisto1D(selLabels_[i]+"_RecoCaloMET", 100, 0, 500);
+        //plots.AddHisto1D(selLabels_[i]+"_RecoCaloMET_phi", 50, -3.5, 3.5);
+        
+        // only in miniAOD :
+        plots.AddHisto1D(selLabels_[i]+"_PatCaloMET", 100, 0, 500);
+        plots.AddHisto1D(selLabels_[i]+"_PatCaloMET_phi", 50, -3.5, 3.5);
+        plots.AddHisto1D(selLabels_[i]+"_PatPuppiMET", 100, 0, 500);
+        plots.AddHisto1D(selLabels_[i]+"_PatPuppiMET_phi", 50, -3.5, 3.5);
 
 
         vcp.push_back(std::move(plots));
@@ -105,7 +119,6 @@ void HSCPSelector::SlaveBegin(TTree * /*tree*/)
 Bool_t HSCPSelector::Process(Long64_t entry)
 {
     fReader.SetLocalEntry(entry);
-
 
     //----------------------------------
     //Loop over all HSCP candidates
@@ -140,6 +153,39 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         if (selections_[s]){
 
             // Fill the histograms based on the list : Pt Eta NbPixelHit_noL1 NOM_noL1 FracOfValidHit isHighPurityTrack miniRelIsoAll IsoSumPt_dr03 IsoTrack_dz IsoTrack_dxy IsoTrack_normChi2 EoP ptOverptErrptErr ptOverptErr Fpix RecoCaloMET Flag_allMETFilters
+        
+            // for the first 100 event displays everything below:
+            ULong64_t evId = *Event;
+            UInt_t runId   = *Run;
+            UInt_t lumiId  = *Lumi;
+            /*if (runId==1 && lumiId==25 && (evId<25000 && evId>24000)) {
+                std::cout << "      Run : " << runId << " Lumi: " << lumiId << " Event: " << evId << std::endl;
+                std::cout << "HSCP type: " << HSCP_type[i] << std::endl;    //0 : globalmuon, 1 : trackermuon, 2 : matchedstandalonemuon, 3 : standalonemuon, 4 : innertrack, 5 : unknown
+                std::cout << "Ih: " << Ih_Strip[i] << std::endl;
+                std::cout << "P: " << P[i] << std::endl;
+                std::cout << "Pt: " << Pt[i] << std::endl;
+                std::cout << "Eta: " << Eta[i] << std::endl;
+                std::cout << "Phi: " << Phi[i] << std::endl;
+                std::cout << "NbPixelHit_noL1: " << NbPixelHit_noL1[i] << std::endl;
+                std::cout << "NOM_noL1: " << NOM_noL1[i] << std::endl;
+                std::cout << "FracOfValidHit: " << FracOfValidHit[i] << std::endl;
+                std::cout << "isHighPurityTrack: " << isHighPurityTrack[i] << std::endl;
+                std::cout << "miniRelIsoAll: " << miniRelIsoAll[i] << std::endl;
+                std::cout << "IsoSumPt_dr03: " << IsoSumPt_dr03[i] << std::endl;
+                std::cout << "dz: " << dz[i] << std::endl;
+                std::cout << "dxy: " << dxy[i] << std::endl;
+                std::cout << "normChi2: " << normChi2[i] << std::endl;
+                std::cout << "EoP: " << EoP[i] << std::endl;
+                std::cout << "Pterr: " << Pterr[i] << std::endl;
+                std::cout << "Fpix: " << Fpix[i] << std::endl;
+                std::cout << "RecoPFMET: " << RecoPFMET[0] << std::endl;
+                std::cout << "RecoPFMET_phi: " << RecoPFMET_phi[0] << std::endl;
+                std::cout << "RecoCaloMET: " << RecoCaloMET[0] << std::endl;
+                std::cout << "RecoCaloMET_phi: " << RecoCaloMET_phi[0] << std::endl;
+                std::cout << "Flag_allMETFilters: " << Flag_allMETFilters[0] << std::endl;
+                std::cout << std::endl;
+            }*/
+            
             vcp[s].FillHisto1D(selLabels_[s]+"_Ih", Ih_Strip[i]);
             vcp[s].FillHisto1D(selLabels_[s]+"_Pt", Pt[i]);
             vcp[s].FillHisto1D(selLabels_[s]+"_Eta", Eta[i]);
@@ -156,10 +202,24 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             vcp[s].FillHisto1D(selLabels_[s]+"_ptOverptErrptErr", ptOverptErrptErr[i]);
             vcp[s].FillHisto1D(selLabels_[s]+"_ptOverptErr", ptOverptErr[i]);
             vcp[s].FillHisto1D(selLabels_[s]+"_Fpix", Fpix[i]);
-            vcp[s].FillHisto1D(selLabels_[s]+"_RecoCaloMET", RecoCaloMET[0]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_CaloJets", CaloJets[0]);
             vcp[s].FillHisto1D(selLabels_[s]+"_Flag_allMETFilters", Flag_allMETFilters[0]);
-        }
+            vcp[s].FillHisto1D(selLabels_[s]+"_HSCP_type", HSCP_type[i]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_PFMET", RecoPFMET[0]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_PFMET_phi", RecoPFMET_phi[0]);
+            
+            // only in AOD :
+            //vcp[s].FillHisto1D(selLabels_[s]+"_RecoCaloMET", RecoCaloMET[0]);
+            //vcp[s].FillHisto1D(selLabels_[s]+"_RecoCaloMET_phi", RecoCaloMET_phi[0]);
+            
+            // only in miniAOD :
+            vcp[s].FillHisto1D(selLabels_[s]+"_PatCaloMET", PatCaloMET[0]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_PatCaloMET_phi", PatCaloMET_phi[0]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_PatPuppiMET", RecoPuppiMET[0]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_PatPuppiMET_phi", RecoPuppiMET_phi[0]);
+            
 
+        }
     }
    //} 
    //}
