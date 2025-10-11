@@ -4,7 +4,7 @@
     TProof::Open("workers=1");   //change number of worker.
 
     ifstream ifile;
-    ifile.open("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_20/src/TupleAnalysis/cfg/configFile.txt");
+    ifile.open("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_21/src/TupleAnalysis/cfg/configFile.txt");
     if(!ifile) std::cout << "Error when opening config file " <<  std::endl;
     std::string line;
     std::string dataset;
@@ -29,29 +29,11 @@
 
     TChain* chain;
     // TO BE CHANGED IF NEEDED
-    chain = new TChain("HSCParticleAnalyzer/Events");
+    if(dataset == "Gluino2000_miniAOD") chain = new TChain("HSCPMiniAODAnalyzer/Events");
+    else if (dataset == "Gluino2000_AOD") chain = new TChain("HSCPFullAODAnalyzer/Events");
 
-    if(dataset == "Gluino2000"){
-        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V10p0/";
-        std::string fileNamesGluino2000[] = { (pathData+"V10p0.txt").c_str()};
-
-        for (const std::string& fileName : fileNamesGluino2000) {
-            std::ifstream file(fileName);
-            if (!file.is_open()) {
-                std::cerr << "Failed to open file: " << fileName << std::endl;
-                continue;
-            }
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty() && line.back() == '\n') {
-                    line.pop_back();
-                }
-                chain->AddFile(line.c_str());
-            }
-
-            file.close();
-        }
-    }
+    if(dataset == "Gluino2000_miniAOD") chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_21/src/output_SameminiAOD.root");
+    else if (dataset == "Gluino2000_AOD") chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_21/src/output_SameAOD.root");
 
 
     std::string binning = std::to_string(tofcut) + "," + std::to_string(ptcut) + "," + std::to_string(etabins) + "," + std::to_string(ihbins) + "," + std::to_string(pbins) + "," + std::to_string(massbins) + "," + std::to_string(masscut)  + "," +std::to_string(tofbins) + ","+std::to_string(fpixbins) + "," + dataset + "," + version;

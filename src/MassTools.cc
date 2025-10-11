@@ -47,134 +47,11 @@ double GetMassErr (double P, double PErr, double dEdx, double dEdxErr, double M,
 }
 
 
-
-float triggerSystFactor(float eta, float beta, int syst) {
-  float betaBins[7] = {0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
-  if (syst > 0) {
-  // Up systematics
-    if (fabs(eta) < 0.3) {
-      //EtaA
-      float scaleBins[7] = {1.0,2.3,1.4,1.1,1.0,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else if(fabs(eta) < 0.6) {
-      //EtaB
-      float scaleBins[7] = {1.0,2.3,2.2,1.2,1.0,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else if(fabs(eta) < 0.9) {
-      //EtaC
-      float scaleBins[7] = {1.0,2.3,2.2,1.4,1.1,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else if(fabs(eta) < 1.2) {
-      //EtaD
-      float scaleBins[7] = {1.0,2.2,2.2,2.1,1.2,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else if(fabs(eta) < 2.1) {
-      //EtaE
-      float scaleBins[7] = {1.0,2.3,2.2,1.3,1.0,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else {
-      //EtaF
-      float scaleBins[7] = {1.0,2.3,2.2,1.1,1.0,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    }
-  } else {
-      // Down systematics
-    if (fabs(eta) < 0.3) {
-        //EtaA
-      float scaleBins[7] = {0.0,0.3,0.64,0.86,0.94,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else if(fabs(eta) < 0.6) {
-        //EtaB
-      float scaleBins[7] = {0.0,0.34,0.34,0.74,0.96,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else if(fabs(eta) < 0.9) {
-        //EtaC
-      float scaleBins[7] = {0.0,0.4,0.4,0.59,0.85,0.96,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else if(fabs(eta) < 1.2) {
-        //EtaD
-      float scaleBins[7] = {0.0,0.37,0.37,0.37,0.7,0.95,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else if(fabs(eta) < 2.1) {
-        //EtaE
-      float scaleBins[7] = {0.0,0.37,0.38,0.72,0.95,0.98,0.98};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    } else {
-        //EtaF
-      float scaleBins[7] = {0.0,0.45,0.45,0.8,0.99,1.0,1.0};
-      for (int i = 0; i < 7; i++) {
-        if (beta < betaBins[i]) {
-          return scaleBins[i];
-        }
-      }
-    }
-  }
-  return 0;
-}
-
 // Return the mass as a function of momentum, dEdx, K and C. 
 // It corresponds to the Bethe-Bloch parametrisation used in the Hscp analysis
 float GetMass(float p, float ih, float k, float c)
 {
     return (ih-c)<0?-1:sqrt((ih-c)/k)*p;
-}
-
-
-float GetMassPow(float p, float ih, float k, float c,float n_estim)
-{
-    return (ih-c)<0?-1:pow((ih-c)/k,1/n_estim)*p;
-}
-
-
-
-float GetMassBeta(float p, float beta)
-{
-    float gamma = 1 / sqrt(1 - beta * beta);
-    return (p / (beta * gamma));
 }
 
 float sigmaP(float pt, float eta,float sigma_pt)
@@ -184,25 +61,7 @@ float sigmaP(float pt, float eta,float sigma_pt)
     return sigma_p;
 }
 
-float errorMassBeta(float p, float beta, float sigma_beta)
-{
 
-    float gamma = 1 / sqrt(1 - beta * beta);
-    //float partial_derivative = -p / (beta * beta * gamma * gamma * gamma);
-    float partial_derivative = -p * (gamma + ( (beta*beta)/pow((1-(beta*beta)),3/2)))/(beta*beta*gamma*gamma);
-    float sigma_mass = fabs(partial_derivative * sigma_beta);    
-    return sigma_mass;
-}
-
-float errorMassBetaWithP(float p, float beta, float sigma_beta,float sigma_p)
-{
-
-    float gamma = 1 / sqrt(1 - beta * beta);
-    float dmdbeta = (-p*1.0) / (beta*beta * sqrt(1-(beta*beta)));
-    float dmdp = (sqrt(1-(beta*beta))/beta);
-    float sigma_mass = sqrt( (dmdbeta*dmdbeta*sigma_beta*sigma_beta) + (dmdp*dmdp*sigma_p*sigma_p)  );
-    return sigma_mass;
-}
 float errorMassDedx(float p,float ih,float k,float c,float sigma_dEdX)
 {
     if (ih - c < 0) return -1;

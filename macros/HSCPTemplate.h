@@ -31,20 +31,6 @@ public :
 
    //ADD-HSCP-SELECTION
 
-   bool do1Dplots;
-   bool do2Dplots;
-   bool doPreselPlots;
-
-   bool UseFpixel;
-   bool UseGstrip;
-   bool CalibrationZmumu;
-   bool FillTree;
-   bool computeAtlasMass;
-   bool correctEstimators;
-   bool isSimulation;
-   bool debug;
-   bool debugSignal;
-
    int etabins_;
    int ihbins_;
    int pbins_;
@@ -55,95 +41,69 @@ public :
    double ptcut_;
    double tofcut_;
  
-
-   int PFMu;
-   int GlobalMu;
-   int passedSel;
-   int tot;
-
-
-   int muBadReco;
-   int muGoodReco;
-   int muGoodRecoGoodError;
-   int muGoodRecoButBadError;
- 
-   std::string numbersMpoint_;
-   int massPointSig_;
- 
    std::string dataset_;
    std::string oFile_;
    std::string version_;
-
-   int filltofErrUp =0;
-   int toferrUpEqualsZero = 0;
-   int fillNominal = 0;
-
-   int befPreSel=0;
-   int preselTestIh = 0;
-
-   vector< vector <float> > ratioPandEta;
-
-   vector<float> ratioPmuPele;
-   vector<float> ratioIHmuIHele;
-   vector<float> ratioEtaMuEtaEle;
-
-   vector<float> etaMin;
-   vector<float> etaMax;
-   vector<float> etaWeights;
- 
-   vector<float> toferrMin;
-   vector<float> toferrMax;
-   vector<float> toferrWeights;
-
-
-   vector<double> Ih_cut_values;
-
-   std::vector<double> ptErrScaleFactors;
-   std::vector<std::pair<double,double>> ptBinRanges = { {0, 100}, {100, 200}, {200, 300},{300, 400}, {400, 500},{500, 600}, {600, 700}, {700, 800}, {800, 900}, {900, 1000},{1000, 1100}, {1100, 1200}, {1200, 1300}, {1300, 1400}, {1400, 100000}
-   };
-
    std::vector<bool (HSCPSelector::*)(int)> selections_;
    std::vector<string> selLabels_;
-
-   //Test
-   TFile* fout;
-   TFile* treeTest;
-   //Will be used to proced mass plots at given selections (see selLabels)
-
-
-   //Will be used to produce many plots at given selections (see selLabels)
    std::vector<CPlots> vcp; 
 
+   TFile* fout;
+
+
    // Readers to access the data (delete the ones you do not need).
+
+   bool isAOD = false;
+
+   TTreeReaderValue<ULong64_t> Event = {fReader, "event"};
+   TTreeReaderValue<uint32_t> Run = {fReader, "run"};
+   TTreeReaderValue<uint32_t> Lumi = {fReader, "luminosityBlock"};
+
    TTreeReaderArray<float> Ih_Strip = {fReader, "DeDx_IhStrip"};
+   TTreeReaderArray<double> P = {fReader, "IsoTrack_p"};
    TTreeReaderArray<double> Pt = {fReader, "IsoTrack_pt"};
+   TTreeReaderArray<double> Pterr = {fReader, "IsoTrack_ptError"};
    TTreeReaderArray<double> Eta = {fReader, "IsoTrack_eta"};
+   TTreeReaderArray<double> Phi = {fReader, "IsoTrack_phi"};
    TTreeReaderArray<uint32_t> NbPixelHit_noL1 = {fReader, "DeDx_PixelNoL1NOM"};
    TTreeReaderArray<uint32_t> NOM_noL1 = {fReader, "DeDx_NoL1NOM"};
    TTreeReaderArray<double> FracOfValidHit = {fReader, "IsoTrack_fractionOfValidHits"};
    TTreeReaderArray<bool> isHighPurityTrack = {fReader, "IsoTrack_isHighPurityTrack"};
    TTreeReaderArray<float> miniRelIsoAll = {fReader, "IsoTrack_pfMiniRelIsoAll"};
+   TTreeReaderArray<float> miniRelIsoChg = {fReader, "IsoTrack_pfMiniRelIsoChg"};
    TTreeReaderArray<float> IsoSumPt_dr03 = {fReader, "IsoTrack_IsoSumPt_dr03"};
-   TTreeReaderArray<float> dz = {fReader, "IsoTrack_dz"};
-   TTreeReaderArray<float> dxy = {fReader, "IsoTrack_dxy"};
+   TTreeReaderArray<double> dz = {fReader, "IsoTrack_dz"};
+   TTreeReaderArray<double> dxy = {fReader, "IsoTrack_dxy"};
    TTreeReaderArray<double> normChi2 = {fReader, "IsoTrack_normChi2"};
    TTreeReaderArray<double> EoP = {fReader, "IsoTrack_pfEnergyOverP"};
    TTreeReaderArray<double> ptOverptErrptErr = {fReader, "IsoTrack_ptErrOverPt2"};
    TTreeReaderArray<double> ptOverptErr = {fReader, "IsoTrack_ptErrOverPt"};
    TTreeReaderArray<float> Fpix = {fReader, "DeDx_FiPixelNoL1"};
-   TTreeReaderArray<double> RecoCaloMET = {fReader, "RecoCaloMET"};
+   TTreeReaderArray<double> CaloJets = {fReader, "CaloJets"};
+   TTreeReaderArray<int> HSCP_type = {fReader, "HSCP_type"};
    TTreeReaderArray<bool> Flag_allMETFilters = {fReader, "Flag_allMETFilters"};
+   TTreeReaderArray<double> RecoPFMET = {fReader, "RecoPFMET"};
+   TTreeReaderArray<double> RecoPFMET_phi = {fReader, "RecoPFMET_phi"};
 
+   // only in AOD : 
+   //TTreeReaderArray<double> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};
+   //TTreeReaderArray<double> RecoCaloMET = {fReader, "RecoCaloMET"};
+
+   // only in miniAOD :
+   TTreeReaderArray<double> PatCaloMET = {fReader, "PatCaloMET"};
+   TTreeReaderArray<double> PatCaloMET_phi = {fReader, "PatCaloMET_phi"};
+   TTreeReaderArray<double> RecoPuppiMET = {fReader, "RecoPuppiMET"};
+   TTreeReaderArray<double> RecoPuppiMET_phi = {fReader, "RecoPuppiMET_phi"};
+   
+   
    HSCPSelector()
    {
       fout = 0;
-      treeTest = 0;
    }
 
    virtual ~HSCPSelector() 
    {
       if(!fout) delete fout;
-      if(!treeTest) delete treeTest; 
    }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
