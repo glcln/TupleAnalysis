@@ -5,8 +5,8 @@
 #include <TH1.h>
 #include <TStyle.h>
 #include <functional>
+#include <cmath>
 
-#define M_PI   3.14159265358979323846  /* pi */
 
 //K and C values are set based on the config file dataset name (see below)
 float K(2.54), C(3.14); 
@@ -24,7 +24,7 @@ int year(2018);
 
 
 //ADD-SELECTION-METHODS
-bool HSCPSelector::PassHSCPpresel_NoSelections(int i){
+bool HSCPSelector::PassHSCPpresel_NoCriteria(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
       return false;
@@ -52,8 +52,8 @@ void HSCPSelector::Begin(TTree *tree)
     oFile_ += ext;
 
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_NoSelections);
-selLabels_.push_back("NoSelections");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_NoCriteria);
+selLabels_.push_back("NoCriteria");
 
 
     std::cout << std::endl;
@@ -94,8 +94,8 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     //-------------------------------------
     //Add selections into a vector - to be updated
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_NoSelections);
-selLabels_.push_back("NoSelections");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_NoCriteria);
+selLabels_.push_back("NoCriteria");
 
     //-------------------------------------
 
@@ -125,7 +125,6 @@ selLabels_.push_back("NoSelections");
         plots.AddHisto1D(selLabels_[i]+"_ptOverptErr", 100, 0, 1);
         plots.AddHisto1D(selLabels_[i]+"_Fpix", 100, 0, 1);
         plots.AddHisto1D(selLabels_[i]+"_GStrip", 100, 0, 1);
-        plots.AddHisto1D(selLabels_[i]+"_CaloJets", 100, 0, 500);
         plots.AddHisto1D(selLabels_[i]+"_Flag_allMETFilters", 2, -0.5, 1.5);
         plots.AddHisto1D(selLabels_[i]+"_HSCP_type", 6, -0.5, 5.5);
         plots.AddHisto1D(selLabels_[i]+"_PF_type", 250, 0, 250);
@@ -139,11 +138,29 @@ selLabels_.push_back("NoSelections");
         plots.AddHisto1D(selLabels_[i]+"_Pt_PFChgHadron", 100, 0, 2000);
         plots.AddHisto1D(selLabels_[i]+"_Pt_other", 100, 0, 2000);
 
-        // only in AOD : 
-        plots.AddHisto1D(selLabels_[i]+"_RecoCaloMET", 100, 0, 500);
-        plots.AddHisto1D(selLabels_[i]+"_RecoCaloMET_phi", 50, -3.5, 3.5);
-        plots.AddHisto2D(selLabels_[i]+"_CaloJets_VS_RecoCaloMET", 100, 0, 500, 100, 0, 500);
-        plots.AddHisto2D(selLabels_[i]+"_PseudoMET_noCut_VS_wCut", 100, 0, 500, 100, 0, 500);
+
+        // Trigger efficiency
+        plots.AddHisto1D(selLabels_[i]+"_CaloJets", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___CaloJets", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___CaloJets", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___CaloJets", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___CaloJets", 100, 0, 2500);
+
+        plots.AddHisto1D(selLabels_[i]+"_RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___RecoPFMET", 100, 0, 2500);
+
+        plots.AddHisto1D(selLabels_[i]+"_if___orMETtrg___CaloJets", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___orMETtrg___RecoPFMET", 100, 0, 2500);
+
+        plots.AddHisto1D(selLabels_[i]+"_RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___orMETtrg___RecoCaloMET", 100, 0, 2500);
 
         vcp.push_back(std::move(plots));
     }
@@ -153,6 +170,8 @@ selLabels_.push_back("NoSelections");
     plots.AddHisto1D("CandidateCutflow", 18, 0, 18);
     plots.AddHisto1D("EventCutflow", 18, 0, 18);
     plots.AddHisto1D("EventCutflow_NotrackCut", 20, 0, 20);
+
+    plots.AddHisto1D("Trigger", 3, -1, 2);
 
     plots.AddHisto1D("Nm1_trigger", 4, -1.5, 2.5);
     plots.AddHisto1D("Nm1_METfilters", 2, 0, 2);
@@ -177,6 +196,28 @@ selLabels_.push_back("NoSelections");
     plots.AddHisto1D("Pt_lastBin", 100, 0, 2000);
     plots.AddHisto1D("HSCPtype_lastBin", 6, -0.5, 5.5);
     plots.AddHisto1D("PFtype_lastBin", 250, 0, 250);
+
+    plots.AddHisto1D("RecoPFMET", 400, 0, 2000);
+    plots.AddHisto1D("RecoPFMET___wCaloJetsCut", 400, 0, 2000);
+    plots.AddHisto1D("RecoPFMET___wCaloMETCut", 400, 0, 2000);
+
+
+    plots.AddHisto2D("LastBinEventCutflow___GenPt_vs_trackPt", 100, 0, 2500, 100, 0, 2500);
+    plots.AddHisto1D("LastBinEventCutflow___HSCP_type", 6, -0.5, 5.5);
+    plots.AddHisto1D("LastBinEventCutflow___PF_type", 250, 0, 250);
+
+
+    // temp
+    plots.AddHisto2D("trackPT_vs_trackPseudoTrackPT", 100, 0, 2500, 100, 0, 2500);
+    plots.AddHisto2D("trackETA_vs_trackPseudoTrackETA", 60, -3, +3, 60, -3, +3);
+    plots.AddHisto2D("trackPHI_vs_trackPseudoTrackPHI", 64, -3.2, 3.2, 64, -3.2, 3.2);
+    plots.AddHisto2D("genPT_vs_trackPseudoTrackPT", 100, 0, 2500, 100, 0, 2500);
+    plots.AddHisto2D("genPT_vs_trackPT", 100, 0, 2500, 100, 0, 2500);
+    plots.AddHisto1D("PseudoTrack_m_gen_over_gen", 60, -3, +3);
+    plots.AddHisto2D("gen__vs__PseudoTrack_m_gen_over_gen", 100, 0, 2500, 60, -3, +3);
+    plots.AddHisto1D("Track_m_gen_over_gen", 60, -3, +3);
+    plots.AddHisto2D("gen__vs__Track_m_gen_over_gen", 100, 0, 2500, 60, -3, +3);
+
     
     vcp_nosel.push_back(std::move(plots));
 
@@ -201,22 +242,48 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     bool METfilters = false;
     float CaloMET_pseudoMET = -1;
     if (dataset_.find("Mu50") != std::string::npos) {
-        trigger = *HLT_Mu50;
+        //trigger = *HLT_Mu50;
+        trigger = *HLT_FilterOR;
         METfilters = true; // no MET filters in muon datasets
         CaloMET_pseudoMET = 200; // no CaloMET in muon datasets, set it to pass the cut
     }
-    /*else if (dataset_.find("MET") != std::string::npos) {
-        trigger = HLT_PFMET120_PFMHT120_IDTight[0] || HLT_PFHT500_PFMET100_PFMHT100_IDTight[0]
-        || HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60[0] || HLT_MET105_IsoTrk50[0]
+    else if (dataset_.find("MET") != std::string::npos) {
+        //trigger = *HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
+        //|| *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50;
+        trigger = *HLT_FilterOR;
 
         METfilters = Flag_allMETFilters[0];
         CaloMET_pseudoMET = 200; // to change with CaloJets[0];
-    }*/
-    singleCut[0] = true; vcp_nosel[0].FillHisto1D("CandidateCutflow", 0); // All events 
+    }
+    vcp_nosel[0].FillHisto1D("CandidateCutflow", 0); // All events
+    
+    
+    singleCut[0] = trigger;
+    if (singleCut[0]) {
+        vcp_nosel[0].FillHisto1D("EventCutflow", 1.5);
+        vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", 1.5);
+    }
+    singleCut[1] = singleCut[0] && METfilters;
+    if (singleCut[1]) {
+        vcp_nosel[0].FillHisto1D("EventCutflow", 2.5);
+        vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", 2.5);
+    }
+    singleCut[2] = singleCut[1] && (CaloMET_pseudoMET > 170.);
+    if (singleCut[2]) {
+        vcp_nosel[0].FillHisto1D("EventCutflow", 3.5);
+        vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", 3.5);
+    }
+
+
+        //
+    vcp_nosel[0].FillHisto1D("Trigger", *HLT_FilterOR);
+    vcp_nosel[0].FillHisto1D("RecoPFMET", RecoPFMET[0]);
+    if (CaloJets[0] > 170) vcp_nosel[0].FillHisto1D("RecoPFMET___wCaloJetsCut", RecoPFMET[0]);
+    //if (RecoCaloMET[0] > 170) vcp_nosel[0].FillHisto1D("RecoPFMET___wCaloMETCut", RecoPFMET[0]);
 
 
     unsigned int i = 0;
-    for (unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){    // Every candidate
+    for (unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){
 
         if (!HSCP_hasTrack[j]) continue;
 
@@ -232,12 +299,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             }
         }
 
-
         // CUTFLOW
-        //singleCut[1] = singleCut[0] && METfilters;
-        //singleCut[2] = singleCut[1] && (CaloMET_pseudoMET > 170.);
-        singleCut[1] = singleCut[0] && passTechnicalChecks[i];
-        singleCut[2] = singleCut[1] && trigger;
         singleCut[3] = singleCut[2] && (Pt[i] > 55.);
         singleCut[4] = singleCut[3] && (fabs(Eta[i]) < 2.4);
         singleCut[5] = singleCut[4] && (NbPixelHit_noL1[i] >= 2);
@@ -262,7 +324,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
 
         std::vector<std::function<bool(int)>> cuts;
-        cuts.push_back([&](int i){ return (trigger && passTechnicalChecks[i]); });
+        cuts.push_back([&](int i){ return trigger; });
         cuts.push_back([&](int i){ return METfilters; });
         cuts.push_back([&](int i){ return CaloMET_pseudoMET > 170; });
         cuts.push_back([&](int i){ return Pt[i] > 55.0; });
@@ -337,31 +399,63 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         if (passedCuts[17]) vcp_nosel[0].FillHisto1D("Nm1_PtErr_over_Pt", ptOverptErr[i]);
         if (passedCuts[18]) vcp_nosel[0].FillHisto1D("Nm1_Ih_StripOnly", Ih_Strip[i]);
 
+
+            // Event cutflow last bin: check GenPart info and PF_type
+        if (eventCuts[18]) {
+            for (unsigned int j = 0; j < GenPart_pt.GetSize(); j++) {
+                float dEta = GenPart_eta[j] - Eta[i];
+                float dPhi = GenPart_phi[j] - Phi[i];
+                while (dPhi >  M_PI) dPhi -= 2*M_PI;
+                while (dPhi < -M_PI) dPhi += 2*M_PI;
+                if (std::sqrt(dEta*dEta + dPhi*dPhi) < 0.01) vcp_nosel[0].FillHisto2D("LastBinEventCutflow___GenPt_vs_trackPt", GenPart_pt[j], Pt[i]);
+            }
+            vcp_nosel[0].FillHisto1D("LastBinEventCutflow___HSCP_type", HSCP_type[i]);
+            vcp_nosel[0].FillHisto1D("LastBinEventCutflow___PF_type", PF_type[i]);
+        }
+
         i++;
     } //End of loop over all HSCP candidates
 
     // Event CUTFLOW
     vcp_nosel[0].FillHisto1D("EventCutflow", 0.5); // All events
-    for (unsigned int j = 0; j < 19; ++j) { // cuts length
+    for (unsigned int j = 3; j < 19; ++j) { // cuts length
         if (eventCuts[j]) vcp_nosel[0].FillHisto1D("EventCutflow", j+1.5);
     }
-    //if (eventCuts[18]) cout << *Event << endl;
-    
 
-    // Event CUTFLOW
     vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", 0.5); // All events
-    for (unsigned int j = 0; j < 19; ++j) { // cuts length
+    for (unsigned int j = 3; j < 19; ++j) { // cuts length
         if (eventCuts_noTrackCut[j]) vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", j+1.5);
     }
-    
+
 
 
     bool AtLeastOneSelPassed = false;
-
     i = 0;
     for(unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){    // Every candidate
 
         if (!HSCP_hasTrack[j]) continue;
+
+            // temp
+        vcp_nosel[0].FillHisto2D("trackPT_vs_trackPseudoTrackPT", Pt[i], Pt_pseudo[i]);
+        vcp_nosel[0].FillHisto2D("trackETA_vs_trackPseudoTrackETA", Eta[i], Eta_pseudo[i]);
+        vcp_nosel[0].FillHisto2D("trackPHI_vs_trackPseudoTrackPHI", Phi[i], Phi_pseudo[i]);
+
+        // loop over the generated particles
+        for (unsigned int k = 0; k < GenPart_pt.GetSize(); k++) {
+            float dEta = GenPart_eta[k] - Eta[i];
+            float dPhi = GenPart_phi[k] - Phi[i];
+            while (dPhi >  M_PI) dPhi -= 2*M_PI;
+            while (dPhi < -M_PI) dPhi += 2*M_PI;
+            if (std::sqrt(dEta*dEta + dPhi*dPhi) < 0.01 && fabs(GenPart_pdgId[k]) > 100000 ) {
+                vcp_nosel[0].FillHisto2D("genPT_vs_trackPseudoTrackPT", GenPart_pt[i] , Pt_pseudo[i]);
+                vcp_nosel[0].FillHisto2D("genPT_vs_trackPT", GenPart_pt[i], Pt[i]);
+
+                vcp_nosel[0].FillHisto1D("PseudoTrack_m_gen_over_gen", (Pt_pseudo[i]-GenPart_pt[i])/GenPart_pt[i]);
+                vcp_nosel[0].FillHisto2D("gen__vs__PseudoTrack_m_gen_over_gen", GenPart_pt[i], (Pt_pseudo[i]-GenPart_pt[i])/GenPart_pt[i]);
+                vcp_nosel[0].FillHisto1D("Track_m_gen_over_gen", (Pt[i]-GenPart_pt[i])/GenPart_pt[i]);
+                vcp_nosel[0].FillHisto2D("gen__vs__Track_m_gen_over_gen", GenPart_pt[i], (Pt[i]-GenPart_pt[i])/GenPart_pt[i]);
+            }
+        }
         
 
         for(unsigned int s=0;s<selections_.size();s++){ 
@@ -374,7 +468,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 //int i = iCand[s];     // most ionising candidate
                 //if (i < 0) continue;
 
-                //if (selections_[s]) {
+                /*if (selections_[s]) {
                     vcp[s].FillHisto1D(selLabels_[s]+"_Ih", Ih_Strip[i]);
                     vcp[s].FillHisto1D(selLabels_[s]+"_Pt", Pt[i]);
                     vcp[s].FillHisto1D(selLabels_[s]+"_Eta", Eta[i]);
@@ -406,11 +500,14 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                     }
                     else if (PF_type[i]==211 || PF_type[i]==11) vcp[s].FillHisto1D(selLabels_[s]+"_Pt_PFChgHadron", Pt[i]);
                     else vcp[s].FillHisto1D(selLabels_[s]+"_Pt_other", Pt[i]);
-                //}
+                }*/
+
+
+
             }
         }
 
-        if (isAOD) {
+        /*if (isAOD) {
             for (unsigned int j=0; j<OnlyIn_AOD.size(); j++) {
                 if (*Event == OnlyIn_AOD[j]) {
                     vcp_nosel[0].FillHisto1D("Pt_lastBin", Pt[i]);
@@ -429,26 +526,61 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                     break;
                 }
             }
-        }
+        }*/
         i++;
 
     } // End of loop over all candidates
 
-    // In the event, I need at least one candidate passing the selection
+
+    // for all event, compute the trigger efficiency vs the caloJets
     for(unsigned int s=0;s<selections_.size();s++) { 
-        if (AtLeastOneSelPassed) {
-            vcp[s].FillHisto1D(selLabels_[s]+"_npv", *PV_npvsGood);
-            vcp[s].FillHisto1D(selLabels_[s]+"_PFMET", RecoPFMET[0]);
-            vcp[s].FillHisto1D(selLabels_[s]+"_PFMET_phi", RecoPFMET_phi[0]);
+        bool SelPassed = false;
+
+        for(unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){
+            if (!HSCP_hasTrack[j]) continue;
+            if ((this->*selections_[s])(j)) SelPassed = true;
+        }
+
+        if (SelPassed) {
+
+            // Trigger efficiency
             vcp[s].FillHisto1D(selLabels_[s]+"_CaloJets", CaloJets[0]);
-            vcp[s].FillHisto1D(selLabels_[s]+"_Flag_allMETFilters", Flag_allMETFilters[0]);    
-            
-            // only in AOD :
-            //vcp[s].FillHisto1D(selLabels_[s]+"_RecoCaloMET", RecoCaloMET[0]);
-            //vcp[s].FillHisto1D(selLabels_[s]+"_RecoCaloMET_phi", RecoCaloMET_phi[0]);
-            //vcp[s].FillHisto2D(selLabels_[s]+"_CaloJets_VS_RecoCaloMET", CaloJets[0], RecoCaloMET[0]);
-            //vcp[s].FillHisto2D(selLabels_[s]+"_PseudoMET_noCut_VS_wCut", CaloJets[0], CaloJets_wCut[0]);
-            
+            vcp[s].FillHisto1D(selLabels_[s]+"_RecoPFMET", RecoPFMET[0]);
+            if (*HLT_PFMET120_PFMHT120_IDTight) {
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___CaloJets", CaloJets[0]);
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", RecoPFMET[0]);                
+            }
+            if (*HLT_PFHT500_PFMET100_PFMHT100_IDTight) {
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___CaloJets", CaloJets[0]);
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", RecoPFMET[0]);
+            }
+            if (*HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60) {
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___CaloJets", CaloJets[0]);
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", RecoPFMET[0]);
+            }
+            if (*HLT_MET105_IsoTrk50) {
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___CaloJets", CaloJets[0]);
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___RecoPFMET", RecoPFMET[0]);
+            }
+            if (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
+                || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) {
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___orMETtrg___CaloJets", CaloJets[0]);
+                vcp[s].FillHisto1D(selLabels_[s]+"_if___orMETtrg___RecoPFMET", RecoPFMET[0]);
+            }
+
+            /*if (isAOD) {
+
+                vcp[s].FillHisto1D(selLabels_[s]+"_RecoCaloMET", RecoCaloMET[0]);
+                if (*HLT_PFMET120_PFMHT120_IDTight) vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET", RecoCaloMET[0]);                
+                if (*HLT_PFHT500_PFMET100_PFMHT100_IDTight) vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoCaloMET", RecoCaloMET[0]);
+                if (*HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60) vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoCaloMET", RecoCaloMET[0]);
+                if (*HLT_MET105_IsoTrk50) vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___RecoCaloMET", RecoCaloMET[0]);
+                if (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
+                    || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50)
+                    vcp[s].FillHisto1D(selLabels_[s]+"_if___orMETtrg___RecoCaloMET", RecoCaloMET[0]);
+                
+            }*/
+
         }
     }
 
