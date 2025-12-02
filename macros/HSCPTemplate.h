@@ -117,13 +117,9 @@ public :
    TTreeReaderArray<double> Muon_phi = {fReader, "Muon_phi"};
    TTreeReaderArray<bool> hasMuon = {fReader, "HSCP_hasMuon"};
 
-   // temp
-   TTreeReaderArray<double> Pt_pseudo = {fReader, "IsoTrack_PseudoTrack_pt"};
-   TTreeReaderArray<double> Eta_pseudo = {fReader, "IsoTrack_PseudoTrack_eta"};
-   TTreeReaderArray<double> Phi_pseudo = {fReader, "IsoTrack_PseudoTrack_phi"};
 
-   
    // GENINFO
+   TTreeReaderArray<double> GenPart_mass = {fReader, "GenPart_mass"};
    TTreeReaderArray<double> GenPart_pt = {fReader, "GenPart_pt"};
    TTreeReaderArray<double> GenPart_eta = {fReader, "GenPart_eta"};
    TTreeReaderArray<double> GenPart_phi = {fReader, "GenPart_phi"};
