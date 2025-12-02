@@ -18,6 +18,7 @@
 
 #include "../inc/RegionMassPlot.h"
 #include "../inc/CPlots.h"
+#include "../inc/ComputeATLASmass.h"
 
 using namespace std;
 
