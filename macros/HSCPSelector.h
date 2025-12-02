@@ -30,7 +30,7 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-bool PassHSCPpresel_NoSelections(int hscpIndex);
+bool PassHSCPpresel_NoCriteria(int hscpIndex);
 
 
    int etabins_;
@@ -63,15 +63,14 @@ bool PassHSCPpresel_NoSelections(int hscpIndex);
    // Readers to access the data (delete the ones you do not need).
 
    // TRIGGERS
-   TTreeReaderValue<bool> HLT_Mu50 = {fReader, "HLT_Mu50"};
+   //TTreeReaderValue<bool> HLT_Mu50 = {fReader, "HLT_Mu50"};
    TTreeReaderValue<bool> HLT_FilterOR = {fReader, "HLT_FilterOR"};
 
-   /*
    TTreeReaderValue<bool> HLT_PFMET120_PFMHT120_IDTight = {fReader, "HLT_PFMET120_PFMHT120_IDTight"};
    TTreeReaderValue<bool> HLT_PFHT500_PFMET100_PFMHT100_IDTight = {fReader, "HLT_PFHT500_PFMET100_PFMHT100_IDTight"};
    TTreeReaderValue<bool> HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 = {fReader, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60"};
    TTreeReaderValue<bool> HLT_MET105_IsoTrk50 = {fReader, "HLT_MET105_IsoTrk50"};
-   */
+   
 
    // EVENT INFO
    TTreeReaderValue<ULong64_t> Event = {fReader, "event"};
@@ -80,7 +79,6 @@ bool PassHSCPpresel_NoSelections(int hscpIndex);
    TTreeReaderValue<uint32_t> PV_npvsGood = {fReader, "PV_npvsGood"};
 
       // track info
-   TTreeReaderArray<bool> passTechnicalChecks = {fReader, "HasPassedTechnicalChecks"};
    TTreeReaderArray<int> PF_type = {fReader, "IsoTrack_pfType"};
    TTreeReaderArray<int> HSCP_type = {fReader, "HSCP_type"};
    TTreeReaderArray<uint32_t> HSCP_n = {fReader, "HSCP_n"};
@@ -119,6 +117,19 @@ bool PassHSCPpresel_NoSelections(int hscpIndex);
    TTreeReaderArray<double> Muon_eta = {fReader, "Muon_eta"};
    TTreeReaderArray<double> Muon_phi = {fReader, "Muon_phi"};
    TTreeReaderArray<bool> hasMuon = {fReader, "HSCP_hasMuon"};
+
+   // temp
+   TTreeReaderArray<double> Pt_pseudo = {fReader, "IsoTrack_PseudoTrack_pt"};
+   TTreeReaderArray<double> Eta_pseudo = {fReader, "IsoTrack_PseudoTrack_eta"};
+   TTreeReaderArray<double> Phi_pseudo = {fReader, "IsoTrack_PseudoTrack_phi"};
+
+   
+   // GENINFO
+   TTreeReaderArray<double> GenPart_pt = {fReader, "GenPart_pt"};
+   TTreeReaderArray<double> GenPart_eta = {fReader, "GenPart_eta"};
+   TTreeReaderArray<double> GenPart_phi = {fReader, "GenPart_phi"};
+   TTreeReaderArray<int> GenPart_pdgId = {fReader, "GenPart_pdgId"};
+
 
 
    // only in AOD : 
