@@ -1,10 +1,8 @@
 {
     gSystem->Load("../libTools.so");
 
-    TProof::Open("workers=1");   //change number of worker.
-
     ifstream ifile;
-    ifile.open("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_21/src/TupleAnalysis/cfg/configFile.txt");
+    ifile.open("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/cfg/configFile.txt");
     if(!ifile) std::cout << "Error when opening config file " <<  std::endl;
     std::string line;
     std::string dataset;
@@ -31,11 +29,11 @@
     // TO BE CHANGED IF NEEDED
     if(dataset == "Gluino2000_miniAOD_Mu50") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_21/src/output_SameminiAOD.root");
+        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/output_SameminiAOD.root");
     }
     else if (dataset == "Gluino2000_AOD_Mu50") {
         chain = new TChain("HSCPFullAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_21/src/output_SameAOD.root");
+        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/output_SameAOD.root");
     }
 
     else if(dataset == "Gluino2000_miniAOD_FULL_Mu50") {
@@ -58,11 +56,11 @@
 
     else if (dataset == "Data2018_miniAOD") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_21/src/Mu_Run2.root");
+        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/Mu_Run2.root");
     }
     else if (dataset == "Data2022_miniAOD") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_14_0_21/src/Mu_Run3.root");
+        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/Mu_Run3.root");
     }
 
     else {

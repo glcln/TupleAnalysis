@@ -24,20 +24,12 @@ int year(2018);
 
 
 //ADD-SELECTION-METHODS
-bool HSCPSelector::PassHSCPpresel_NoCriteria(int i){
-   if (i<0 || i>(int)Pt.GetSize()) {
-      cout << i << endl;
-      return false;
-   }
-   return (( true ));
-}
-
 bool HSCPSelector::PassHSCPpresel_OnlyMET(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
       return false;
    }
-   return (( (Flag_allMETFilters[0] == true) && (Pt[i] > 55.0) && (abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (abs(dz[i]) < 0.1) && (abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) ));
+   return (( (Flag_allMETFilters[0] == true) && (Pt[i] > 55.0) && (Pt_pseudo[i] > 55.0) && (abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (abs(dz[i]) < 0.1) && (abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (Ih_Strip[i] > 3.18)));
 }
 
 
@@ -60,9 +52,6 @@ void HSCPSelector::Begin(TTree *tree)
     oFile_ += ext;
 
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_NoCriteria);
-selLabels_.push_back("NoCriteria");
-
 selections_.push_back(&HSCPSelector::PassHSCPpresel_OnlyMET);
 selLabels_.push_back("OnlyMET");
 
@@ -84,9 +73,6 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     //-------------------------------------
     //Add selections into a vector - to be updated
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_NoCriteria);
-selLabels_.push_back("NoCriteria");
-
 selections_.push_back(&HSCPSelector::PassHSCPpresel_OnlyMET);
 selLabels_.push_back("OnlyMET");
 
@@ -99,7 +85,6 @@ selLabels_.push_back("OnlyMET");
     {
         CPlots plots;
 
-        plots.AddHisto1D(selLabels_[i]+"_massGEN", 200, 0, 4000);
         plots.AddHisto1D(selLabels_[i]+"_massKC", 200, 0, 4000);
         plots.AddHisto1D(selLabels_[i]+"_massATLAS", 200, 0, 4000);
 
@@ -116,6 +101,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     //----------------------------------
     //Loop over all HSCP candidates
     //----------------------------------
+    vector<int> iCand(selLabels_.size(),-1);
+    vector<float> maxIh(selLabels_.size(),-1);
     unsigned int i = 0;
     for (unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){
 
@@ -136,20 +123,6 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     } //End of loop over all HSCP candidates
 
 
-    // Loop over the gen candidates:
-    for (unsigned int m=0; m<GenPart_mass.GetSize(); m++){
-
-        for(unsigned int s=0; s<selections_.size(); s++){
-            bool (HSCPSelector::*ptr)(int);
-            ptr = selections_[s];
-            if((this->*ptr)(i)){
-                if (fabs(GenPart_pdgId[km]) > 100000) plots.FillHisto1D(selLabels_[s]+"_massGEN", GenPart_mass[m]);
-            }
-        }
-    }
-
-
-
     i = 0;
     for(unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){    // Every candidate
 
@@ -160,14 +133,13 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             ptr = selections_[s];
             if((this->*ptr)(i)){
 
-                AtLeastOneSelPassed = true;
-
                 //int i = iCand[s];     // most ionising candidate
-                if (i < 0) continue;
+                //if (i < 0) continue;
 
                 if (selections_[s]) {
-                    plots.FillHisto1D(selLabels_[s]+"_massKC", GetMass(IsoTrack_p[i], Ih_Strip[i], K_signal2018, C_signal2018));
-                    plots.FillHisto1D(selLabels_[s]+"_massATLAS", findMass(IsoTrack_p[i], Ih_Strip[i]));
+                    double P = Pt_pseudo[i]*cosh(Eta_pseudo[i]);
+                    vcp[s].FillHisto1D(selLabels_[s]+"_massKC", GetMass(P, Ih_Strip[i], K_signal2018, C_signal2018));
+                    vcp[s].FillHisto1D(selLabels_[s]+"_massATLAS", findMass(P, Ih_Strip[i]));
                 }
             }
         }

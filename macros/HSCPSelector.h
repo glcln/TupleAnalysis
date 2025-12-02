@@ -4,7 +4,6 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include <TProof.h>
 #include <TSelector.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
@@ -31,8 +30,6 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-bool PassHSCPpresel_NoCriteria(int hscpIndex);
-
 bool PassHSCPpresel_OnlyMET(int hscpIndex);
 
 
@@ -120,6 +117,12 @@ bool PassHSCPpresel_OnlyMET(int hscpIndex);
    TTreeReaderArray<double> Muon_eta = {fReader, "Muon_eta"};
    TTreeReaderArray<double> Muon_phi = {fReader, "Muon_phi"};
    TTreeReaderArray<bool> hasMuon = {fReader, "HSCP_hasMuon"};
+
+
+   // PseudoTrack() infos
+   TTreeReaderArray<double> Pt_pseudo = {fReader, "IsoTrack_PseudoTrack_pt"};
+   TTreeReaderArray<double> Eta_pseudo = {fReader, "IsoTrack_PseudoTrack_eta"};
+   TTreeReaderArray<double> Phi_pseudo = {fReader, "IsoTrack_PseudoTrack_phi"};
 
 
    // GENINFO

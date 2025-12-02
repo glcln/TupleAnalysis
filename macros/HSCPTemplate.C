@@ -71,7 +71,6 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     {
         CPlots plots;
 
-        plots.AddHisto1D(selLabels_[i]+"_massGEN", 200, 0, 4000);
         plots.AddHisto1D(selLabels_[i]+"_massKC", 200, 0, 4000);
         plots.AddHisto1D(selLabels_[i]+"_massATLAS", 200, 0, 4000);
 
@@ -88,6 +87,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     //----------------------------------
     //Loop over all HSCP candidates
     //----------------------------------
+    vector<int> iCand(selLabels_.size(),-1);
+    vector<float> maxIh(selLabels_.size(),-1);
     unsigned int i = 0;
     for (unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){
 
@@ -108,20 +109,6 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     } //End of loop over all HSCP candidates
 
 
-    // Loop over the gen candidates:
-    for (unsigned int m=0; m<GenPart_mass.GetSize(); m++){
-
-        for(unsigned int s=0; s<selections_.size(); s++){
-            bool (HSCPSelector::*ptr)(int);
-            ptr = selections_[s];
-            if((this->*ptr)(i)){
-                if (fabs(GenPart_pdgId[km]) > 100000) plots.FillHisto1D(selLabels_[s]+"_massGEN", GenPart_mass[m]);
-            }
-        }
-    }
-
-
-
     i = 0;
     for(unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){    // Every candidate
 
@@ -132,14 +119,13 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             ptr = selections_[s];
             if((this->*ptr)(i)){
 
-                AtLeastOneSelPassed = true;
-
                 //int i = iCand[s];     // most ionising candidate
-                if (i < 0) continue;
+                //if (i < 0) continue;
 
                 if (selections_[s]) {
-                    plots.FillHisto1D(selLabels_[s]+"_massKC", GetMass(IsoTrack_p[i], Ih_Strip[i], K_signal2018, C_signal2018));
-                    plots.FillHisto1D(selLabels_[s]+"_massATLAS", findMass(IsoTrack_p[i], Ih_Strip[i]));
+                    double P = Pt_pseudo[i]*cosh(Eta_pseudo[i]);
+                    vcp[s].FillHisto1D(selLabels_[s]+"_massKC", GetMass(P, Ih_Strip[i], K_signal2018, C_signal2018));
+                    vcp[s].FillHisto1D(selLabels_[s]+"_massATLAS", findMass(P, Ih_Strip[i]));
                 }
             }
         }

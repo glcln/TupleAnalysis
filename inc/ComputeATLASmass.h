@@ -10,7 +10,7 @@ using namespace std;
 #define MAX_ITER 1000
 
 #define MIN 0.3
-#define MAX 100
+#define MAX 10000
 
 
 double AtlasFunction(double *x, double *par)
@@ -27,7 +27,7 @@ double AtlasFunction(double *x, double *par)
 
   double term1 = pow( ( sqrt(pow(bg,4) + 4*(bg)*(bg)) - (bg)*(bg) )/2 , p2/2);
 
-  return p1 * term1 * log(1 + pow(p3 * bg, p4)) - p5 - dEdx;
+  return p1 * term1 * log(1 + pow(p3 * bg, p4)) - p5 - dEdx;        
 }
 
 double findXmin(const double inf, const double sup, const double *params)
@@ -40,12 +40,9 @@ double findXmin(const double inf, const double sup, const double *params)
     f->FixParameter(4, params[4]);
     f->FixParameter(5, params[5]);
 
-    if ( f->Eval(f->GetMinimumX()) > 0)
-    {
-        cout << "               WARNING" << endl;
-        cout << "[inf, sup] -> [f(inf), f(sup)] : " << "[" << inf << " , " << sup << "] -> [" << f->Eval(inf) << " , " << f->Eval(sup) << "]" << endl;
-        cout << "min , f(min) -> " << f->GetMinimumX() << " , " << f->Eval(f->GetMinimumX()) << endl;
-    }
+    // NB: min of f(x) = AtlasFunction + p0 is 2.95863
+    // no solution if Ih(=dEdx=p0) < 2.95863
+    if (f->Eval(f->GetMinimumX()) > 0) return -1;
 
     return f->GetMinimumX();
 }
@@ -63,11 +60,7 @@ double ZeroBisectionMethod(double a, double b, const double *params)
     double fa = f->Eval(a);
     double fb = f->Eval(b);
 
-    if (fa * fb >= 0)
-    {
-        cout << "[a , b] -> [f(a) , f(b)] : " << "[" << a << " , " << b << "] -> [" << fa << " , " << fb << "]" << endl;    
-        return -1;
-    }
+    if (fa * fb >= 0) return -1;
 
     int iter = 0;
     double c;
@@ -211,6 +204,8 @@ double findMass(const double p, const double Ih)
     double params[6] = {Ih, 0.00669857, -26.6212, 0.989545, 6.88361, -2.84246};
 
     double bgmin = findXmin(MIN, MAX, params);
+    if (bgmin < 0) return -1;   // Ih > min value, no solution
+
     //double First_bg = ZeroBisectionMethod(MIN, bgmin, params);
     double First_bg = ZeroBrentMethod(MIN, bgmin, TOLERANCE, params);
     
