@@ -87,6 +87,7 @@ selLabels_.push_back("OnlyMET");
 
         plots.AddHisto1D(selLabels_[i]+"_massKC", 200, 0, 4000);
         plots.AddHisto1D(selLabels_[i]+"_massATLAS", 200, 0, 4000);
+        plots.AddHisto1D(selLabels_[i]+"_massATLAS_sup", 200, 0, 4000);
 
         vcp.push_back(std::move(plots));
     }
@@ -139,7 +140,9 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 if (selections_[s]) {
                     double P = Pt_pseudo[i]*cosh(Eta_pseudo[i]);
                     vcp[s].FillHisto1D(selLabels_[s]+"_massKC", GetMass(P, Ih_Strip[i], K_signal2018, C_signal2018));
-                    vcp[s].FillHisto1D(selLabels_[s]+"_massATLAS", findMass(P, Ih_Strip[i]));
+                    vcp[s].FillHisto1D(selLabels_[s]+"_massATLAS", findMass(P, Ih_Strip[i], "2024", false, false, false)); // only nominal here
+
+                    vcp[s].FillHisto1D(selLabels_[s]+"_massATLAS_sup", findMass(P, Ih_Strip[i], "2024", false, false, true)); // only nominal here
                 }
             }
         }

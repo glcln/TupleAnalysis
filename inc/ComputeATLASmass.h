@@ -1,20 +1,62 @@
-# include <cmath>
-# include <cstdlib>
-# include <ctime>
-# include <iostream>
-# include "TF1.h"
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
+#include <TMatrixDSym.h>
+#include <TMatrixDSymEigen.h>
+#include <TVectorD.h>
+#include <TF1.h>
 
 using namespace std;
 
 #define TOLERANCE 1e-6
 #define MAX_ITER 1000
-
 #define MIN 0.3
 #define MAX 10000
 
+// -----------------------------------------------------------------------------
+// Define here all the parameters and covariance matrix extracted from the fit
+// -----------------------------------------------------------------------------
 
-double AtlasFunction(double *x, double *par)
-{
+double FitParam2024[5] = {0.00715155, -29.1616, 0.875561, 6.91718, -2.82801};
+//double FitParam2024[5] = {0.00669857, -26.6212, 0.989545, 6.88361, -2.84246};     // under old saturation correction
+double covMatrix2024[5][5] = {
+    {1.50116e-10, 3.13094e-12, -2.90955e-09, -6.56178e-09, 2.7389e-09},
+    {3.13094e-12, 5.91383e-09, 1.05878e-10, -1.40831e-09, 3.86214e-11},
+    {-2.90955e-09, 1.05878e-10, 5.84564e-08, 1.81817e-07, -5.18447e-08},
+    {-6.56178e-09, -1.40831e-09, 1.81817e-07, 1.83453e-06, -8.52439e-08},
+    {2.7389e-09, 3.86214e-11, -5.18447e-08, -8.52439e-08, 5.11685e-08}
+};
+
+
+
+// -----------------------------------------------------------------------------
+// Initialization functions
+// -----------------------------------------------------------------------------
+struct BetaGammaMinResult {
+    double bg_nominal;
+    double bg_up;
+    double bg_down;
+
+    double params_nom[6];   // parameters used for bg_nominal
+    double params_up[6];    // parameters used for bg_up
+    double params_down[6];  // parameters used for bg_down
+};
+
+TMatrixDSym InitializeCovMatrix(double covMatrix[5][5]) {
+    TMatrixDSym Cov = TMatrixDSym(5);
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) Cov(i, j) = covMatrix[i][j];
+    }
+
+    return Cov;
+}
+
+
+// -----------------------------------------------------------------------------
+// Fit function
+// -----------------------------------------------------------------------------
+double AtlasFunction(double *x, double *par) {
   double bg = x[0];
   double dEdx = par[0];
 
@@ -30,35 +72,112 @@ double AtlasFunction(double *x, double *par)
   return p1 * term1 * log(1 + pow(p3 * bg, p4)) - p5 - dEdx;        
 }
 
-double findXmin(const double inf, const double sup, const double *params)
-{
-    TF1 *f = new TF1("f", AtlasFunction, inf, sup, 6);
-    f->FixParameter(0, params[0]); // dEdx
-    f->FixParameter(1, params[1]);
-    f->FixParameter(2, params[2]);
-    f->FixParameter(3, params[3]);
-    f->FixParameter(4, params[4]);
-    f->FixParameter(5, params[5]);
+double findMinimumX(const double *par) {
+    TF1 f("f", AtlasFunction, MIN, MAX, 6);
+    for (int i = 0; i < 6; i++) f.FixParameter(i, par[i]);
 
-    // NB: min of f(x) = AtlasFunction + p0 is 2.95863
-    // no solution if Ih(=dEdx=p0) < 2.95863
-    if (f->Eval(f->GetMinimumX()) > 0) return -1;
+    // If the minimum is above zero, no physical solution
+    // appen if Ih < min value = 2.95863 (corresponding to bg=6.98->if p<6.98*m no solution)
+    if (f.Eval(f.GetMinimumX()) > 0) return -1;
 
-    return f->GetMinimumX();
+    return f.GetMinimumX();
 }
 
+
+// -----------------------------------------------------------------------------
+// Compute minimum including correlations using eigen-decomposition
+// -----------------------------------------------------------------------------
+BetaGammaMinResult findBetaGammaWithCovariance(double Ih, const double *FitParam, const TMatrixDSym &Cov) {
+    // --- Nominal parameter vector --------------------------------------------
+    double p_nom[6] = {Ih,
+                       FitParam[0],
+                       FitParam[1],
+                       FitParam[2],
+                       FitParam[3],
+                       FitParam[4]};
+
+    TVectorD p0(5);
+    for (int i=0; i<5; i++) p0[i] = p_nom[i+1];
+
+    // --- Diagonalize covariance matrix ---------------------------------------
+    TMatrixDSymEigen eigen(Cov);                     // /!\ only FitParam in it !
+    TVectorD  eigenVal = eigen.GetEigenValues();     // λ_k
+    TMatrixD  eigenVec = eigen.GetEigenVectors();    // V_ik
+
+    // --- Nominal minimum ------------------------------------------------------
+    BetaGammaMinResult R;
+    R.bg_nominal = findMinimumX(p_nom);
+
+    double min_up  = R.bg_nominal;
+    double min_down = R.bg_nominal;
+    double *p_up_end = p_nom;
+    double *p_down_end = p_nom;
+
+    // --- Loop over each eigen-direction --------------------------------------
+    for (int k=0; k<5; k++)
+    {
+        double sigma_k = sqrt( eigenVal[k] );
+
+        // Build delta parameter vectors
+        TVectorD delta(5);
+        for (int i=0; i<5; i++)
+            delta[i] = eigenVec(i,k) * sigma_k;
+
+        double p_up[6];
+        double p_down[6];
+
+        // dEdx stays the same (index 0)
+        p_up[0]   = Ih;
+        p_down[0] = Ih;
+
+        // Apply p +/- delta
+        for (int i=0; i<5; i++) {
+            p_up[i+1]   = p0[i] + delta[i];
+            p_down[i+1] = p0[i] - delta[i];
+        }
+
+        // Compute minima for each variation
+        double x_up   = findMinimumX(p_up);
+        double x_down = findMinimumX(p_down);
+
+        // Keep envelope: worst-case shifts
+        if (x_up   > min_up) {
+            min_up   = x_up;
+            p_up_end[0] = Ih;
+            for (int i=0; i<5; i++) p_up_end[i+1] = p_up[i+1];
+        }
+        if (x_down < min_down) {
+            min_down = x_down;
+            p_down_end[0] = Ih;
+            for (int i=0; i<5; i++) p_down_end[i+1] = p_down[i+1];
+        }
+    }
+
+    // --- Final asymmetric uncertainties ---------------------------------------
+    R.bg_up   = min_up;
+    R.bg_down = min_down;
+
+    for (int i = 0; i < 6; i++) {
+        R.params_nom[i]  = p_nom[i];       // nominal
+        R.params_up[i]   = p_up_end[i];        // upper
+        R.params_down[i] = p_down_end[i];      // lower
+    }
+
+    return R;
+}
+
+
+// -----------------------------------------------------------------------------
+// Find zero of the function using Bisection Method
+// -----------------------------------------------------------------------------
 double ZeroBisectionMethod(double a, double b, const double *params)
 {
-    TF1 *f = new TF1("f", AtlasFunction, a, b, 6);
-    f->FixParameter(0, params[0]); // dEdx
-    f->FixParameter(1, params[1]);
-    f->FixParameter(2, params[2]);
-    f->FixParameter(3, params[3]);
-    f->FixParameter(4, params[4]);
-    f->FixParameter(5, params[5]);
+    TF1 f("f", AtlasFunction, a, b, 6);
+    for (int i = 0; i < 6; i++)
+        f.FixParameter(i, params[i]);
 
-    double fa = f->Eval(a);
-    double fb = f->Eval(b);
+    double fa = f.Eval(a);
+    double fb = f.Eval(b);
 
     if (fa * fb >= 0) return -1;
 
@@ -67,7 +186,7 @@ double ZeroBisectionMethod(double a, double b, const double *params)
 
     while ((b - a) > TOLERANCE && iter < MAX_ITER) {
         c = (a + b) / 2;
-        double fc = f->Eval(c);
+        double fc = f.Eval(c);
         if (fc == 0.0)
             return c;
         else if (fa * fc < 0) {
@@ -83,7 +202,11 @@ double ZeroBisectionMethod(double a, double b, const double *params)
     return (a + b) / 2;
 }
 
-// https://people.math.sc.edu/Burkardt/cpp_src/brent/brent.html#:~:text=BRENT%2C%20a%20C%2B%2B%20library%20which,that%20the%20function%20is%20differentiable.
+
+// -----------------------------------------------------------------------------
+// Find zero of the function using Brent's Method
+// https://people.math.sc.edu/Burkardt/cpp_src/brent/brent.html#:~:text=BRENT%2C%20a%20C%2B%2B%20library%20which,that%20the%20function%20is%20differentiable
+// -----------------------------------------------------------------------------
 double ZeroBrentMethod (double a, double b, double t, const double *params)
 {
     double c;
@@ -102,20 +225,16 @@ double ZeroBrentMethod (double a, double b, double t, const double *params)
     double sb;
     double tol;
 
-    TF1 *f = new TF1("f", AtlasFunction, a, b, 6);
-    f->FixParameter(0, params[0]); // dEdx
-    f->FixParameter(1, params[1]);
-    f->FixParameter(2, params[2]);
-    f->FixParameter(3, params[3]);
-    f->FixParameter(4, params[4]);
-    f->FixParameter(5, params[5]);
+    TF1 f("f", AtlasFunction, a, b, 6);
+    for (int i = 0; i < 6; i++)
+        f.FixParameter(i, params[i]);
 
 
     // Make local copies of A and B.
     sa = a;
     sb = b;
-    fa = f->Eval(sa);
-    fb = f->Eval(sb);
+    fa = f.Eval(sa);
+    fb = f.Eval(sb);
 
     c = sa;
     fc = fa;
@@ -186,7 +305,7 @@ double ZeroBrentMethod (double a, double b, double t, const double *params)
         else if (0.0 < m) sb = sb + tol;
         else sb = sb - tol;
 
-        fb = f->Eval(sb);
+        fb = f.Eval(sb);
 
         if ((0.0<fb && 0.0<fc) || (fb<=0.0 && fc<=0.0))
         {
@@ -199,15 +318,39 @@ double ZeroBrentMethod (double a, double b, double t, const double *params)
     return sb;
 }
 
-double findMass(const double p, const double Ih)
-{
-    double params[6] = {Ih, 0.00669857, -26.6212, 0.989545, 6.88361, -2.84246};
 
-    double bgmin = findXmin(MIN, MAX, params);
-    if (bgmin < 0) return -1;   // Ih > min value, no solution
+// -----------------------------------------------------------------------------
+// Main function to be called
+// -----------------------------------------------------------------------------
+double findMass(const double p, const double Ih, const std::string year, bool up, bool down, bool nomsup)
+{
+    TMatrixDSym CovMatrix = TMatrixDSym(5);
+    double *params = nullptr;
+    if (year == "2024") {
+        params = FitParam2024;
+        CovMatrix = InitializeCovMatrix(covMatrix2024);
+    }
+
+    BetaGammaMinResult R = findBetaGammaWithCovariance(Ih, params, CovMatrix);
+    if (R.bg_nominal < 0 || R.bg_up < 0 || R.bg_down < 0) return -1;   // Ih < min value, no solution
 
     //double First_bg = ZeroBisectionMethod(MIN, bgmin, params);
-    double First_bg = ZeroBrentMethod(MIN, bgmin, TOLERANCE, params);
+
+    if (up) {           // For the upper band
+        double First_bg_up = ZeroBrentMethod(MIN, R.bg_up, TOLERANCE, R.params_up);
+        return p / First_bg_up;
+    }
+    else if (down) {    // For the lower band
+        double First_bg_down = ZeroBrentMethod(MIN, R.bg_down, TOLERANCE, R.params_down);
+        return p / First_bg_down;
+    }
+    else if (nomsup) {
+        double First_bg_sup = ZeroBrentMethod(R.bg_nominal, MAX, TOLERANCE, R.params_up);
+        return p / First_bg_sup;    // always First_bg_sup == MAX -> never extra solution
+    }
     
-    return p / First_bg;
+    // Use the parameters associated with the nominal minimum
+    double First_bg_nom = ZeroBrentMethod(MIN, R.bg_nominal, TOLERANCE, R.params_nom);
+
+    return p / First_bg_nom;
 }
