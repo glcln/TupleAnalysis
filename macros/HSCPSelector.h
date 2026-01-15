@@ -4,7 +4,6 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include <TProof.h>
 #include <TSelector.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
@@ -39,11 +38,8 @@ bool PassHSCPpresel_NoCriteria(int hscpIndex);
    int pbins_;
    int massbins_;
    int masscut_;
-   int tofbins_;
    int fpixbins_;
    double ptcut_;
-   double tofcut_;
- 
    std::string dataset_;
    std::string oFile_;
    std::string version_;
@@ -64,13 +60,16 @@ bool PassHSCPpresel_NoCriteria(int hscpIndex);
    // Readers to access the data (delete the ones you do not need).
 
    // TRIGGERS
-   //TTreeReaderValue<bool> HLT_Mu50 = {fReader, "HLT_Mu50"};
+   TTreeReaderValue<bool> HLT_Mu50 = {fReader, "HLT_Mu50"};
    TTreeReaderValue<bool> HLT_FilterOR = {fReader, "HLT_FilterOR"};
 
    TTreeReaderValue<bool> HLT_PFMET120_PFMHT120_IDTight = {fReader, "HLT_PFMET120_PFMHT120_IDTight"};
    TTreeReaderValue<bool> HLT_PFHT500_PFMET100_PFMHT100_IDTight = {fReader, "HLT_PFHT500_PFMET100_PFMHT100_IDTight"};
    TTreeReaderValue<bool> HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 = {fReader, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60"};
    TTreeReaderValue<bool> HLT_MET105_IsoTrk50 = {fReader, "HLT_MET105_IsoTrk50"};
+
+   //TTreeReaderValue<bool> HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ = {fReader, "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"};
+   //TTreeReaderValue<bool> HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL = {fReader, "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL"};
    
 
    // EVENT INFO
@@ -105,6 +104,9 @@ bool PassHSCPpresel_NoCriteria(int hscpIndex);
    TTreeReaderArray<float> Fpix = {fReader, "DeDx_FiPixelNoL1"};
    TTreeReaderArray<float> GStrip = {fReader, "DeDx_GiStrip"};
 
+   //TTreeReaderArray<float> Ih_Strip_oldCorr = {fReader, "DeDx_IhStrip_oldCorr"};
+   //TTreeReaderArray<float> GStrip_oldCorr = {fReader, "DeDx_GiStrip_oldCorr"};
+
    TTreeReaderArray<float> miniRelIsoAll = {fReader, "IsoTrack_pfMiniRelIsoAll"};
    TTreeReaderArray<float> miniRelIsoChg = {fReader, "IsoTrack_pfMiniRelIsoChg"};
    TTreeReaderArray<float> IsoSumPt_dr03 = {fReader, "IsoTrack_IsoSumPt_dr03"};
@@ -113,30 +115,169 @@ bool PassHSCPpresel_NoCriteria(int hscpIndex);
    TTreeReaderArray<double> RecoPFMET = {fReader, "RecoPFMET"};
    TTreeReaderArray<double> RecoPFMET_phi = {fReader, "RecoPFMET_phi"};
    TTreeReaderArray<double> CaloJets = {fReader, "PseudoMET_viaCaloJets"};
+   TTreeReaderArray<double> RecoPuppiMET = {fReader, "RecoPuppiMET"};
 
-   TTreeReaderArray<double> Muon_pt = {fReader, "Muon_pt"};
-   TTreeReaderArray<double> Muon_eta = {fReader, "Muon_eta"};
-   TTreeReaderArray<double> Muon_phi = {fReader, "Muon_phi"};
-   TTreeReaderArray<bool> hasMuon = {fReader, "HSCP_hasMuon"};
+   //TTreeReaderArray<double> Muon_pt = {fReader, "Muon_pt"};
+   //TTreeReaderArray<double> Muon_eta = {fReader, "Muon_eta"};
+   //TTreeReaderArray<double> Muon_phi = {fReader, "Muon_phi"};
+   //TTreeReaderArray<bool> hasMuon = {fReader, "HSCP_hasMuon"};
 
    // temp
    TTreeReaderArray<double> Pt_pseudo = {fReader, "IsoTrack_PseudoTrack_pt"};
-   TTreeReaderArray<double> Eta_pseudo = {fReader, "IsoTrack_PseudoTrack_eta"};
-   TTreeReaderArray<double> Phi_pseudo = {fReader, "IsoTrack_PseudoTrack_phi"};
+   //TTreeReaderArray<double> Eta_pseudo = {fReader, "IsoTrack_PseudoTrack_eta"};
+   //TTreeReaderArray<double> Phi_pseudo = {fReader, "IsoTrack_PseudoTrack_phi"};
 
    
    // GENINFO
    TTreeReaderArray<double> GenPart_pt = {fReader, "GenPart_pt"};
    TTreeReaderArray<double> GenPart_eta = {fReader, "GenPart_eta"};
    TTreeReaderArray<double> GenPart_phi = {fReader, "GenPart_phi"};
+   TTreeReaderArray<double> GenPart_mass = {fReader, "GenPart_mass"};
    TTreeReaderArray<int> GenPart_pdgId = {fReader, "GenPart_pdgId"};
 
+/*
+   // muon info
+   TTreeReaderArray<double> muon_pt = {fReader, "muon_pt"};
+   TTreeReaderArray<double> muon_eta = {fReader, "muon_eta"};
+   TTreeReaderArray<double> muon_phi = {fReader, "muon_phi"};
 
 
+   // electron info
+   TTreeReaderArray<double> electron_pt = {fReader, "electron_pt"};
+   TTreeReaderArray<double> electron_eta = {fReader, "electron_eta"};
+   TTreeReaderArray<double> electron_phi = {fReader, "electron_phi"};
+*/
    // only in AOD : 
    //TTreeReaderArray<double> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};
    //TTreeReaderArray<double> RecoCaloMET = {fReader, "RecoCaloMET"};
-   //TTreeReaderArray<double> CaloJets_wCut = {fReader, "PseudoMET_viaCaloJets_wCut"};
+
+
+   // BACKGROUND ESTIMATION METHOD: HISTOGRAMS
+   bool UseFpixel;
+   
+   float fpix0 = 0.0;
+   float fpix3 = 0.3;
+   float fpix4 = 0.4;
+   float fpix5 = 0.5;
+   float fpix6 = 0.6;
+   float fpix7 = 0.7;
+   float fpix8 = 0.8;
+   float fpix9 = 0.9;
+   float fpix99 = 0.99;
+   float fpix999 = 0.999;
+   float fpix10 = 1.0;
+
+
+   std::string regFpixAll = "_regionAll";
+
+   std::string regFpixA_3f4 = "_regionA_3fp4";
+   std::string regFpixA_3f6 = "_regionA_3fp6";
+   std::string regFpixA_3f8 = "_regionA_3fp8";
+   std::string regFpixA_3f9 = "_regionA_3fp9";
+   std::string regFpixA_4f5 = "_regionA_4fp5";
+   std::string regFpixA_5f6 = "_regionA_5fp6";
+   std::string regFpixA_6f7 = "_regionA_6fp7";
+   std::string regFpixA_6f9 = "_regionA_6fp9";
+   std::string regFpixA_7f8 = "_regionA_7fp8";
+   std::string regFpixA_8f9 = "_regionA_8fp9";
+   std::string regFpixA_9f10 = "_regionA_9fp10";
+   std::string regFpixA_99f10 = "_regionA_99fp10";
+   std::string regFpixA_999f10 = "_regionA_999fp10";
+
+   std::string regFpixB_3f4 = "_regionB_3fp4";
+   std::string regFpixB_3f6 = "_regionB_3fp6";
+   std::string regFpixB_3f8 = "_regionB_3fp8";
+   std::string regFpixB_3f9 = "_regionB_3fp9";
+   std::string regFpixB_4f5 = "_regionB_4fp5";
+   std::string regFpixB_5f6 = "_regionB_5fp6";
+   std::string regFpixB_6f7 = "_regionB_6fp7";
+   std::string regFpixB_6f9 = "_regionB_6fp9";
+   std::string regFpixB_7f8 = "_regionB_7fp8";
+   std::string regFpixB_8f9 = "_regionB_8fp9";
+   std::string regFpixB_8f10 = "_regionB_8fp10";
+   std::string regFpixB_9f10 = "_regionB_9fp10";
+   std::string regFpixB_99f10 = "_regionB_99fp10";
+   std::string regFpixB_999f10 = "_regionB_999fp10";
+
+   std::string regFpixC_3f4 = "_regionC_3fp4";
+   std::string regFpixC_3f6 = "_regionC_3fp6";
+   std::string regFpixC_3f8 = "_regionC_3fp8";
+   std::string regFpixC_3f9 = "_regionC_3fp9";
+   std::string regFpixC_4f5 = "_regionC_4fp5";
+   std::string regFpixC_5f6 = "_regionC_5fp6";
+   std::string regFpixC_6f7 = "_regionC_6fp7";
+   std::string regFpixC_6f9 = "_regionC_6fp9";
+   std::string regFpixC_7f8 = "_regionC_7fp8";
+   std::string regFpixC_8f9 = "_regionC_8fp9";
+
+   std::string regFpixD_3f4 = "_regionD_3fp4";
+   std::string regFpixD_3f8 = "_regionD_3fp8";
+   std::string regFpixD_4f5 = "_regionD_4fp5";
+   std::string regFpixD_5f6 = "_regionD_5fp6";
+   std::string regFpixD_6f7 = "_regionD_6fp7";
+   std::string regFpixD_6f9 = "_regionD_6fp9";
+   std::string regFpixD_7f8 = "_regionD_7fp8";
+   std::string regFpixD_8f9 = "_regionD_8fp9";
+   std::string regFpixD_8f10 = "_regionD_8fp10";
+   std::string regFpixD_9f10 = "_regionD_9fp10";
+   std::string regFpixD_99f10 = "_regionD_99fp10";
+   std::string regFpixD_999f10 = "_regionD_999fp10";
+
+  
+   std::vector<RegionMassPlot> vmrp_regionFpix_all;
+
+   std::vector<RegionMassPlot> vmrp_regionA_3f4;
+   std::vector<RegionMassPlot> vmrp_regionA_3f6;
+   std::vector<RegionMassPlot> vmrp_regionA_3f8;
+   std::vector<RegionMassPlot> vmrp_regionA_3f9;
+   std::vector<RegionMassPlot> vmrp_regionA_4f5;
+   std::vector<RegionMassPlot> vmrp_regionA_5f6;
+   std::vector<RegionMassPlot> vmrp_regionA_6f7;
+   std::vector<RegionMassPlot> vmrp_regionA_6f9;
+   std::vector<RegionMassPlot> vmrp_regionA_7f8;
+   std::vector<RegionMassPlot> vmrp_regionA_8f9;
+   std::vector<RegionMassPlot> vmrp_regionA_9f10;
+   std::vector<RegionMassPlot> vmrp_regionA_99f10;
+   std::vector<RegionMassPlot> vmrp_regionA_999f10;
+
+   std::vector<RegionMassPlot> vmrp_regionB_3f4;
+   std::vector<RegionMassPlot> vmrp_regionB_3f6;
+   std::vector<RegionMassPlot> vmrp_regionB_3f8;
+   std::vector<RegionMassPlot> vmrp_regionB_3f9;
+   std::vector<RegionMassPlot> vmrp_regionB_4f5;
+   std::vector<RegionMassPlot> vmrp_regionB_5f6;
+   std::vector<RegionMassPlot> vmrp_regionB_6f7;
+   std::vector<RegionMassPlot> vmrp_regionB_6f9;
+   std::vector<RegionMassPlot> vmrp_regionB_7f8;
+   std::vector<RegionMassPlot> vmrp_regionB_8f9;
+   std::vector<RegionMassPlot> vmrp_regionB_8f10;
+   std::vector<RegionMassPlot> vmrp_regionB_9f10;
+   std::vector<RegionMassPlot> vmrp_regionB_99f10;
+   std::vector<RegionMassPlot> vmrp_regionB_999f10;
+
+   std::vector<RegionMassPlot> vmrp_regionC_3f4;
+   std::vector<RegionMassPlot> vmrp_regionC_3f6;
+   std::vector<RegionMassPlot> vmrp_regionC_3f8;
+   std::vector<RegionMassPlot> vmrp_regionC_3f9;
+   std::vector<RegionMassPlot> vmrp_regionC_4f5;
+   std::vector<RegionMassPlot> vmrp_regionC_5f6;
+   std::vector<RegionMassPlot> vmrp_regionC_6f7;
+   std::vector<RegionMassPlot> vmrp_regionC_6f9;
+   std::vector<RegionMassPlot> vmrp_regionC_7f8;
+   std::vector<RegionMassPlot> vmrp_regionC_8f9;
+
+   std::vector<RegionMassPlot> vmrp_regionD_3f4;
+   std::vector<RegionMassPlot> vmrp_regionD_3f8;
+   std::vector<RegionMassPlot> vmrp_regionD_4f5;
+   std::vector<RegionMassPlot> vmrp_regionD_5f6;
+   std::vector<RegionMassPlot> vmrp_regionD_6f7;
+   std::vector<RegionMassPlot> vmrp_regionD_6f9;
+   std::vector<RegionMassPlot> vmrp_regionD_7f8;
+   std::vector<RegionMassPlot> vmrp_regionD_8f9;
+   std::vector<RegionMassPlot> vmrp_regionD_8f10;
+   std::vector<RegionMassPlot> vmrp_regionD_9f10;
+   std::vector<RegionMassPlot> vmrp_regionD_99f10;
+   std::vector<RegionMassPlot> vmrp_regionD_999f10;
 
    
    HSCPSelector()
@@ -179,6 +320,15 @@ void HSCPSelector::Init(TTree *tree)
 Bool_t HSCPSelector::Notify()
 {
    return kTRUE;
+}
+
+double deltaR(double eta1, double phi1, double eta2, double phi2) {
+   double dphi = phi1 - phi2;
+   while (dphi >  M_PI) dphi -= 2*M_PI;
+   while (dphi <= -M_PI) dphi += 2*M_PI;
+
+   double deta = eta1 - eta2;
+   return std::sqrt(deta*deta + dphi*dphi);
 }
 
 #endif // #ifdef HSCPSelector_cxx

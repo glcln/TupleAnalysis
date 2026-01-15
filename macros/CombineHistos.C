@@ -81,9 +81,9 @@ TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, s
     h_ratio->GetYaxis()->SetRangeUser(0, 2);
     h_ratio->SetMarkerStyle(8);
     h_ratio->GetYaxis()->SetNdivisions(505);
-    h_ratio->GetYaxis()->SetTitleSize(0.06);
+    h_ratio->GetYaxis()->SetTitleSize(0.08);
     h_ratio->GetYaxis()->SetTitleOffset(0.5);
-    h_ratio->GetXaxis()->SetTitleSize(0.06);
+    h_ratio->GetXaxis()->SetTitleSize(0.08);
     h_ratio->GetXaxis()->SetTitleOffset(1);
     h_ratio->GetYaxis()->SetLabelSize(0.06);
     h_ratio->GetXaxis()->SetLabelSize(0.06);
@@ -108,14 +108,15 @@ TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, s
 void MET_trg_eff(const char *ifileName, bool isAOD = false) {
 
     TFile *ofile;
-    if (isAOD) ofile = new TFile("PlayWithHistos/MET_trg_eff_AOD.root", "RECREATE");
-    else ofile = new TFile("PlayWithHistos/MET_trg_eff_miniAOD.root", "RECREATE");
+    if (isAOD) ofile = new TFile("PlayWithHistos/MET_trg_eff_AOD_v2.root", "RECREATE");
+    else ofile = new TFile("PlayWithHistos/MET_trg_eff_miniAOD_v2.root", "RECREATE");
 
     TFile *ifile = new TFile(Form("%s", ifileName), "READ");
 
     // input histos
     TH1F *CaloJets = (TH1F*)ifile->Get("OnlyMET_CaloJets");
     TH1F *RecoPFMET = (TH1F*)ifile->Get("OnlyMET_RecoPFMET");
+    TH1F *RecoPFMET__CaloJetsCut = (TH1F*)ifile->Get("OnlyMET_RecoPFMET__CaloJetsCut");
 
     TH1F *if___HLT_PFMET120_PFMHT120_IDTight___CaloJets = (TH1F*)ifile->Get("OnlyMET_if___HLT_PFMET120_PFMHT120_IDTight___CaloJets");
     TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET = (TH1F*)ifile->Get("OnlyMET_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET");            
@@ -131,6 +132,8 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
 
     TH1F *if___orMETtrg___CaloJets = (TH1F*)ifile->Get("OnlyMET_if___orMETtrg___CaloJets");
     TH1F *if___orMETtrg___RecoPFMET = (TH1F*)ifile->Get("OnlyMET_if___orMETtrg___RecoPFMET");
+    TH1F *if___orMETtrg___RecoPFMET__CaloJetsCut;
+    if (!isAOD) if___orMETtrg___RecoPFMET__CaloJetsCut = (TH1F*)ifile->Get("OnlyMET_if___orMETtrg___RecoPFMET__CaloJetsCut");
 
     TH1F *RecoCaloMET;
     TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET;
@@ -170,6 +173,11 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     TH1F *eff_orMETtrg_CaloJets = (TH1F*)if___orMETtrg___CaloJets->Clone("eff_orMETtrg_CaloJets");
     if___orMETtrg___RecoPFMET->Sumw2();
     TH1F *eff_orMETtrg_RecoPFMET = (TH1F*)if___orMETtrg___RecoPFMET->Clone("eff_orMETtrg_RecoPFMET");
+    TH1F *eff_orMETtrg_RecoPFMET__CaloJetsCut;
+    if (!isAOD) {
+        if___orMETtrg___RecoPFMET__CaloJetsCut->Sumw2();    
+        eff_orMETtrg_RecoPFMET__CaloJetsCut = (TH1F*)if___orMETtrg___RecoPFMET__CaloJetsCut->Clone("eff_orMETtrg_RecoPFMET__CaloJetsCut");
+    }
 
     TH1F *eff_HLT_PFMET120_RecoCaloMET;
     TH1F *eff_HLT_PFHT500_RecoCaloMET;
@@ -200,6 +208,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_MET105_RecoPFMET->Divide(RecoPFMET);
     eff_orMETtrg_CaloJets->Divide(CaloJets);
     eff_orMETtrg_RecoPFMET->Divide(RecoPFMET);
+    if (!isAOD) eff_orMETtrg_RecoPFMET__CaloJetsCut->Divide(RecoPFMET__CaloJetsCut);
 
     if (isAOD) {
         eff_HLT_PFMET120_RecoCaloMET->Divide(RecoCaloMET);
@@ -210,8 +219,8 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     }
 
     // setting style
-    CaloJets->Scale(8.0 / CaloJets->Integral());
-    RecoPFMET->Scale(9.0 / RecoPFMET->Integral());
+    CaloJets->Scale(0.7 * 8.0 / CaloJets->Integral());
+    RecoPFMET->Scale(1.8 * 9.0 / RecoPFMET->Integral());
     CaloJets->SetLineColor(kGreen+3);
     RecoPFMET->SetLineColor(kGreen+3);
     CaloJets->SetMarkerColor(kGreen+3);
@@ -225,6 +234,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_PFMET120_CaloJets->GetXaxis()->SetTitle("CaloJets [GeV]");
     eff_HLT_PFMET120_CaloJets->GetYaxis()->SetTitle("eff. HLT_PFMET120_PFMHT120_IDTight");
     eff_HLT_PFMET120_CaloJets->GetXaxis()->SetRangeUser(0, 1500);
+    eff_HLT_PFMET120_CaloJets->GetYaxis()->SetRangeUser(0, 1);
 
     eff_HLT_PFMET120_RecoPFMET->SetLineColor(kRed);
     eff_HLT_PFMET120_RecoPFMET->SetMarkerColor(kRed);
@@ -232,6 +242,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_PFMET120_RecoPFMET->GetXaxis()->SetTitle("RecoPFMET [GeV]");
     eff_HLT_PFMET120_RecoPFMET->GetYaxis()->SetTitle("eff. HLT_PFMET120_PFMHT120_IDTight");
     eff_HLT_PFMET120_RecoPFMET->GetXaxis()->SetRangeUser(0, 1500);
+    eff_HLT_PFMET120_RecoPFMET->GetYaxis()->SetRangeUser(0, 1);
 
     eff_HLT_PFHT500_CaloJets->SetLineColor(kRed);
     eff_HLT_PFHT500_CaloJets->SetMarkerColor(kRed);
@@ -239,6 +250,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_PFHT500_CaloJets->GetXaxis()->SetTitle("CaloJets [GeV]");
     eff_HLT_PFHT500_CaloJets->GetYaxis()->SetTitle("eff. HLT_PFHT500_PFMET100_PFMHT100_IDTight");
     eff_HLT_PFHT500_CaloJets->GetXaxis()->SetRangeUser(0, 1500);
+    eff_HLT_PFHT500_CaloJets->GetYaxis()->SetRangeUser(0, 1);
 
     eff_HLT_PFHT500_RecoPFMET->SetLineColor(kRed);
     eff_HLT_PFHT500_RecoPFMET->SetMarkerColor(kRed);
@@ -246,6 +258,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_PFHT500_RecoPFMET->GetXaxis()->SetTitle("RecoPFMET [GeV]");
     eff_HLT_PFHT500_RecoPFMET->GetYaxis()->SetTitle("eff. HLT_PFHT500_PFMET100_PFMHT100_IDTight");
     eff_HLT_PFHT500_RecoPFMET->GetXaxis()->SetRangeUser(0, 1500);
+    eff_HLT_PFHT500_RecoPFMET->GetYaxis()->SetRangeUser(0, 1);
 
     eff_HLT_PFMETNoMu120_CaloJets->SetLineColor(kRed);
     eff_HLT_PFMETNoMu120_CaloJets->SetMarkerColor(kRed);
@@ -253,6 +266,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_PFMETNoMu120_CaloJets->GetXaxis()->SetTitle("CaloJets [GeV]");
     eff_HLT_PFMETNoMu120_CaloJets->GetYaxis()->SetTitle("eff. HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60");
     eff_HLT_PFMETNoMu120_CaloJets->GetXaxis()->SetRangeUser(0, 1500);
+    eff_HLT_PFMETNoMu120_CaloJets->GetYaxis()->SetRangeUser(0, 1);
 
     eff_HLT_PFMETNoMu120_RecoPFMET->SetLineColor(kRed);
     eff_HLT_PFMETNoMu120_RecoPFMET->SetMarkerColor(kRed);
@@ -260,6 +274,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_PFMETNoMu120_RecoPFMET->GetXaxis()->SetTitle("RecoPFMET [GeV]");
     eff_HLT_PFMETNoMu120_RecoPFMET->GetYaxis()->SetTitle("eff. HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60");
     eff_HLT_PFMETNoMu120_RecoPFMET->GetXaxis()->SetRangeUser(0, 1500);
+    eff_HLT_PFMETNoMu120_RecoPFMET->GetYaxis()->SetRangeUser(0, 1);
 
     eff_HLT_MET105_CaloJets->SetLineColor(kRed);
     eff_HLT_MET105_CaloJets->SetMarkerColor(kRed);
@@ -267,6 +282,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_MET105_CaloJets->GetXaxis()->SetTitle("CaloJets [GeV]");
     eff_HLT_MET105_CaloJets->GetYaxis()->SetTitle("eff. HLT_MET105_IsoTrk50");
     eff_HLT_MET105_CaloJets->GetXaxis()->SetRangeUser(0, 1500);
+    eff_HLT_MET105_CaloJets->GetYaxis()->SetRangeUser(0, 1);
 
     eff_HLT_MET105_RecoPFMET->SetLineColor(kRed);
     eff_HLT_MET105_RecoPFMET->SetMarkerColor(kRed);
@@ -274,6 +290,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_HLT_MET105_RecoPFMET->GetXaxis()->SetTitle("RecoPFMET [GeV]");
     eff_HLT_MET105_RecoPFMET->GetYaxis()->SetTitle("eff. HLT_MET105_IsoTrk50");
     eff_HLT_MET105_RecoPFMET->GetXaxis()->SetRangeUser(0, 1500);
+    eff_HLT_MET105_RecoPFMET->GetYaxis()->SetRangeUser(0, 1);
 
     eff_orMETtrg_CaloJets->SetLineColor(kRed);
     eff_orMETtrg_CaloJets->SetMarkerColor(kRed);
@@ -281,6 +298,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_orMETtrg_CaloJets->GetXaxis()->SetTitle("CaloJets [GeV]");
     eff_orMETtrg_CaloJets->GetYaxis()->SetTitle("eff. orMETtrg");
     eff_orMETtrg_CaloJets->GetXaxis()->SetRangeUser(0, 1500);
+    eff_orMETtrg_CaloJets->GetYaxis()->SetRangeUser(0, 1);
 
     eff_orMETtrg_RecoPFMET->SetLineColor(kRed);
     eff_orMETtrg_RecoPFMET->SetMarkerColor(kRed);
@@ -288,6 +306,17 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     eff_orMETtrg_RecoPFMET->GetXaxis()->SetTitle("RecoPFMET [GeV]");
     eff_orMETtrg_RecoPFMET->GetYaxis()->SetTitle("eff. orMETtrg");
     eff_orMETtrg_RecoPFMET->GetXaxis()->SetRangeUser(0, 1500);
+    eff_orMETtrg_RecoPFMET->GetYaxis()->SetRangeUser(0, 1);
+
+    if (!isAOD) {
+        eff_orMETtrg_RecoPFMET__CaloJetsCut->SetLineColor(kRed);
+        eff_orMETtrg_RecoPFMET__CaloJetsCut->SetMarkerColor(kRed);
+        eff_orMETtrg_RecoPFMET__CaloJetsCut->SetMarkerStyle(21);
+        eff_orMETtrg_RecoPFMET__CaloJetsCut->GetXaxis()->SetTitle("RecoPFMET [GeV]");
+        eff_orMETtrg_RecoPFMET__CaloJetsCut->GetYaxis()->SetTitle("eff. orMETtrg w/PseudoMET>170GeV");
+        eff_orMETtrg_RecoPFMET__CaloJetsCut->GetXaxis()->SetRangeUser(0, 1500);
+        eff_orMETtrg_RecoPFMET__CaloJetsCut->GetYaxis()->SetRangeUser(0, 1);
+    }
 
     if (isAOD) {
         eff_HLT_PFMET120_RecoCaloMET->SetLineColor(kBlue);
@@ -296,6 +325,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
         eff_HLT_PFMET120_RecoCaloMET->GetXaxis()->SetTitle("RecoCaloMET [GeV]");
         eff_HLT_PFMET120_RecoCaloMET->GetYaxis()->SetTitle("eff. HLT_PFMET120_PFMHT120_IDTight");
         eff_HLT_PFMET120_RecoCaloMET->GetXaxis()->SetRangeUser(0, 1500);
+        eff_HLT_PFMET120_RecoCaloMET->GetYaxis()->SetRangeUser(0, 1);
 
         eff_HLT_PFHT500_RecoCaloMET->SetLineColor(kBlue);
         eff_HLT_PFHT500_RecoCaloMET->SetMarkerColor(kBlue);
@@ -303,6 +333,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
         eff_HLT_PFHT500_RecoCaloMET->GetXaxis()->SetTitle("RecoCaloMET [GeV]");
         eff_HLT_PFHT500_RecoCaloMET->GetYaxis()->SetTitle("eff. HLT_PFHT500_PFMET100_PFMHT100_IDTight");
         eff_HLT_PFHT500_RecoCaloMET->GetXaxis()->SetRangeUser(0, 1500);
+        eff_HLT_PFHT500_RecoCaloMET->GetYaxis()->SetRangeUser(0, 1);
 
         eff_HLT_PFMETNoMu120_RecoCaloMET->SetLineColor(kBlue);
         eff_HLT_PFMETNoMu120_RecoCaloMET->SetMarkerColor(kBlue);
@@ -310,6 +341,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
         eff_HLT_PFMETNoMu120_RecoCaloMET->GetXaxis()->SetTitle("RecoCaloMET [GeV]");
         eff_HLT_PFMETNoMu120_RecoCaloMET->GetYaxis()->SetTitle("eff. HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60");
         eff_HLT_PFMETNoMu120_RecoCaloMET->GetXaxis()->SetRangeUser(0, 1500);
+        eff_HLT_PFMETNoMu120_RecoCaloMET->GetYaxis()->SetRangeUser(0, 1);
 
         eff_HLT_MET105_RecoCaloMET->SetLineColor(kBlue);
         eff_HLT_MET105_RecoCaloMET->SetMarkerColor(kBlue);
@@ -317,6 +349,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
         eff_HLT_MET105_RecoCaloMET->GetXaxis()->SetTitle("RecoCaloMET [GeV]");
         eff_HLT_MET105_RecoCaloMET->GetYaxis()->SetTitle("eff. HLT_MET105_IsoTrk50");
         eff_HLT_MET105_RecoCaloMET->GetXaxis()->SetRangeUser(0, 1500);
+        eff_HLT_MET105_RecoCaloMET->GetYaxis()->SetRangeUser(0, 1);
 
         eff_orMETtrg_RecoCaloMET->SetLineColor(kBlue);
         eff_orMETtrg_RecoCaloMET->SetMarkerColor(kBlue);
@@ -324,6 +357,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
         eff_orMETtrg_RecoCaloMET->GetXaxis()->SetTitle("RecoCaloMET [GeV]");
         eff_orMETtrg_RecoCaloMET->GetYaxis()->SetTitle("eff. orMETtrg");
         eff_orMETtrg_RecoCaloMET->GetXaxis()->SetRangeUser(0, 1500);
+        eff_orMETtrg_RecoCaloMET->GetYaxis()->SetRangeUser(0, 1);
     }
 
 
@@ -364,12 +398,20 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     TCanvas *c_orMETtrg___CaloJets = new TCanvas("c_orMETtrg___CaloJets","c_orMETtrg___CaloJets",800,800);
     c_orMETtrg___CaloJets->cd();
     eff_orMETtrg_CaloJets->Draw("E1");
-    CaloJets->Draw("hist same");
+    //CaloJets->Draw("hist same");
 
     TCanvas *c_orMETtrg___RecoPFMET = new TCanvas("c_orMETtrg___RecoPFMET","c_orMETtrg___RecoPFMET",800,800);
     c_orMETtrg___RecoPFMET->cd();
     eff_orMETtrg_RecoPFMET->Draw("E1");
-    RecoPFMET->Draw("hist same");
+    //RecoPFMET->Draw("hist same");
+
+    TCanvas *c_orMETtrg___RecoPFMET__CaloJetsCut;
+    if (!isAOD) {
+        c_orMETtrg___RecoPFMET__CaloJetsCut = new TCanvas("c_orMETtrg___RecoPFMET__CaloJetsCut","c_orMETtrg___RecoPFMET__CaloJetsCut",800,800);
+        c_orMETtrg___RecoPFMET__CaloJetsCut->cd();
+        eff_orMETtrg_RecoPFMET__CaloJetsCut->Draw("E1");
+        //RecoPFMET->Draw("hist same");
+    }
 
     TCanvas *c_HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET;
     TCanvas *c_HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoCaloMET;
@@ -432,6 +474,7 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
     c_HLT_MET105_IsoTrk50___RecoPFMET->Write();
     c_orMETtrg___CaloJets->Write();
     c_orMETtrg___RecoPFMET->Write();
+    if (!isAOD) c_orMETtrg___RecoPFMET__CaloJetsCut->Write();
     if (isAOD) {
         c_HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET->Write();
         c_HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoCaloMET->Write();
@@ -452,29 +495,27 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
 }
 
 
-void PFMET_Cut() {
+void PFMET_Cut(bool isAOD=false) {
 
-    TFile *ofile = new TFile("PlayWithHistos/PFMET_Cut.root", "RECREATE");
+    TFile *ofile = new TFile("PlayWithHistos/PFMET_Cut_v2.root", "RECREATE");
 
-    TFile *ifile_AOD = new TFile("../output/Gluino2000_AOD_FULL_MET_V11p12_Eta2p4.root", "READ");
+    TFile *ifile_AOD;
+    if (isAOD) ifile_AOD = new TFile("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", "READ");
     TFile *ifile_miniAOD = new TFile("../output/Gluino2000_miniAOD_FULL_MET_V11p12_Eta2p4.root", "READ");
 
     // input histos
-    TH1F *RecoPFMET_AOD = (TH1F*)ifile_AOD->Get("RecoPFMET");
-    TH1F *RecoPFMET_cutCaloJets_AOD = (TH1F*)ifile_AOD->Get("RecoPFMET___wCaloJetsCut");
-    TH1F *RecoPFMET_cutRecoCaloMET_AOD = (TH1F*)ifile_AOD->Get("RecoPFMET___wCaloMETCut");
+    TH1F *RecoPFMET_AOD; TH1F *RecoPFMET_cutCaloJets_AOD; TH1F *RecoPFMET_cutRecoCaloMET_AOD;
+    if (isAOD) {
+        RecoPFMET_AOD = (TH1F*)ifile_AOD->Get("RecoPFMET");
+        RecoPFMET_cutCaloJets_AOD = (TH1F*)ifile_AOD->Get("RecoPFMET___wCaloJetsCut");
+        RecoPFMET_cutRecoCaloMET_AOD = (TH1F*)ifile_AOD->Get("RecoPFMET___wCaloMETCut");
+    }
+    
 
     TH1F *RecoPFMET_miniAOD = (TH1F*)ifile_miniAOD->Get("RecoPFMET");
     TH1F *RecoPFMET_cutCaloJets_miniAOD = (TH1F*)ifile_miniAOD->Get("RecoPFMET___wCaloJetsCut");
 
     // setup
-    RecoPFMET_AOD->SetLineColor(kBlack);
-    RecoPFMET_AOD->SetMarkerColor(kBlack);
-    RecoPFMET_AOD->SetMarkerStyle(43);
-    RecoPFMET_AOD->Rebin(4);
-    RecoPFMET_AOD->GetXaxis()->SetTitle("RecoPFMET [GeV]");
-    RecoPFMET_AOD->GetYaxis()->SetTitle("Events");
-
     RecoPFMET_miniAOD->SetLineColor(kViolet);
     RecoPFMET_miniAOD->SetMarkerColor(kViolet);
     RecoPFMET_miniAOD->SetMarkerStyle(23);
@@ -482,50 +523,64 @@ void PFMET_Cut() {
     RecoPFMET_miniAOD->GetXaxis()->SetTitle("RecoPFMET [GeV]");
     RecoPFMET_miniAOD->GetYaxis()->SetTitle("Events");
 
-    RecoPFMET_cutCaloJets_AOD->SetLineColor(kRed);
-    RecoPFMET_cutCaloJets_AOD->SetMarkerColor(kRed);
-    RecoPFMET_cutCaloJets_AOD->SetMarkerStyle(20);
-    RecoPFMET_cutCaloJets_AOD->GetXaxis()->SetTitle("RecoPFMET [GeV]");
-    RecoPFMET_cutCaloJets_AOD->GetYaxis()->SetTitle("Events");
-    RecoPFMET_cutCaloJets_AOD->Rebin(4);
+    if (isAOD) {
+        RecoPFMET_cutCaloJets_AOD->SetLineColor(kRed);
+        RecoPFMET_cutCaloJets_AOD->SetMarkerColor(kRed);
+        RecoPFMET_cutCaloJets_AOD->SetMarkerStyle(20);
+        RecoPFMET_cutCaloJets_AOD->GetXaxis()->SetTitle("RecoPFMET [GeV]");
+        RecoPFMET_cutCaloJets_AOD->GetYaxis()->SetTitle("Events");
+        RecoPFMET_cutCaloJets_AOD->Rebin(4);
+
+        RecoPFMET_AOD->SetLineColor(kBlack);
+        RecoPFMET_AOD->SetMarkerColor(kBlack);
+        RecoPFMET_AOD->SetMarkerStyle(43);
+        RecoPFMET_AOD->Rebin(4);
+        RecoPFMET_AOD->GetXaxis()->SetTitle("RecoPFMET [GeV]");
+        RecoPFMET_AOD->GetYaxis()->SetTitle("Events");
+
+        RecoPFMET_cutRecoCaloMET_AOD->SetLineColor(kGreen+2);
+        RecoPFMET_cutRecoCaloMET_AOD->SetMarkerColor(kGreen+2);
+        RecoPFMET_cutRecoCaloMET_AOD->SetMarkerStyle(22);
+        RecoPFMET_cutRecoCaloMET_AOD->Rebin(4);
+    }
 
     RecoPFMET_cutCaloJets_miniAOD->SetLineColor(kBlue);
     RecoPFMET_cutCaloJets_miniAOD->SetMarkerColor(kBlue);
     RecoPFMET_cutCaloJets_miniAOD->SetMarkerStyle(21);
     RecoPFMET_cutCaloJets_miniAOD->Rebin(4);
 
-    RecoPFMET_cutRecoCaloMET_AOD->SetLineColor(kGreen+2);
-    RecoPFMET_cutRecoCaloMET_AOD->SetMarkerColor(kGreen+2);
-    RecoPFMET_cutRecoCaloMET_AOD->SetMarkerStyle(22);
-    RecoPFMET_cutRecoCaloMET_AOD->Rebin(4);
+    
 
 
     // drawing
-    cout << "c_PFMET_nocut" << endl;
-    TCanvas *c_PFMET_nocut = new TCanvas("c_PFMET_nocut","c_PFMET_nocut",800,800);
-    c_PFMET_nocut->cd();
-    RecoPFMET_AOD->Draw("E1");
-    RecoPFMET_miniAOD->Draw("E1 same");
-    TLegend *leg_PFMET_nocut = new TLegend(0.6,0.7,0.88,0.88);
-    leg_PFMET_nocut->AddEntry(RecoPFMET_AOD, "AOD", "ep");
-    leg_PFMET_nocut->AddEntry(RecoPFMET_miniAOD, "miniAOD", "ep");
-    leg_PFMET_nocut->Draw("same");
-    leg_PFMET_nocut->SetBorderSize(0);
-    leg_PFMET_nocut->SetFillStyle(0);
-    TCanvas *c_PFMET_nocut_ratio = DrawWithRatio(RecoPFMET_AOD, RecoPFMET_miniAOD, c_PFMET_nocut, "RecoPFMET AOD vs miniAOD", "AOD/miniAOD", "E1 same", false);
+    TCanvas *c_PFMET_AODcut_ratio; TCanvas *c_PFMET_nocut_ratio;
+    if (isAOD) {
+        cout << "c_PFMET_nocut" << endl;
+        TCanvas *c_PFMET_nocut = new TCanvas("c_PFMET_nocut","c_PFMET_nocut",800,800);
+        c_PFMET_nocut->cd();
+        RecoPFMET_AOD->Draw("E1");
+        RecoPFMET_miniAOD->Draw("E1 same");
+        TLegend *leg_PFMET_nocut = new TLegend(0.6,0.7,0.88,0.88);
+        leg_PFMET_nocut->AddEntry(RecoPFMET_AOD, "AOD", "ep");
+        leg_PFMET_nocut->AddEntry(RecoPFMET_miniAOD, "miniAOD", "ep");
+        leg_PFMET_nocut->Draw("same");
+        leg_PFMET_nocut->SetBorderSize(0);
+        leg_PFMET_nocut->SetFillStyle(0);
+        c_PFMET_nocut_ratio = DrawWithRatio(RecoPFMET_AOD, RecoPFMET_miniAOD, c_PFMET_nocut, "RecoPFMET AOD vs miniAOD", "AOD/miniAOD", "E1 same", false);
 
-    cout << "c_PFMET_AODcut" << endl;
-    TCanvas *c_PFMET_AODcut = new TCanvas("c_PFMET_AODcut","c_PFMET_AODcut",800,800);
-    c_PFMET_AODcut->cd();
-    RecoPFMET_AOD->Draw("E1");
-    RecoPFMET_cutCaloJets_AOD->Draw("E1 same");
-    TLegend *leg_PFMET_AODcut = new TLegend(0.6,0.7,0.88,0.88);
-    leg_PFMET_AODcut->AddEntry(RecoPFMET_AOD, "AOD wo CaloJets cut", "ep");
-    leg_PFMET_AODcut->AddEntry(RecoPFMET_cutCaloJets_AOD, "AOD with CaloJets cut", "ep");
-    leg_PFMET_AODcut->Draw("same");
-    leg_PFMET_AODcut->SetBorderSize(0);
-    leg_PFMET_AODcut->SetFillStyle(0);
-    TCanvas *c_PFMET_AODcut_ratio = DrawWithRatio(RecoPFMET_AOD, RecoPFMET_cutCaloJets_AOD, c_PFMET_AODcut, "RecoPFMET AOD cut", "wo cut/cut", "E1 same", false);
+        cout << "c_PFMET_AODcut" << endl;
+        TCanvas *c_PFMET_AODcut = new TCanvas("c_PFMET_AODcut","c_PFMET_AODcut",800,800);
+        c_PFMET_AODcut->cd();
+        RecoPFMET_AOD->Draw("E1");
+        RecoPFMET_cutCaloJets_AOD->Draw("E1 same");
+        TLegend *leg_PFMET_AODcut = new TLegend(0.6,0.7,0.88,0.88);
+        leg_PFMET_AODcut->AddEntry(RecoPFMET_AOD, "AOD wo CaloJets cut", "ep");
+        leg_PFMET_AODcut->AddEntry(RecoPFMET_cutCaloJets_AOD, "AOD with CaloJets cut", "ep");
+        leg_PFMET_AODcut->Draw("same");
+        leg_PFMET_AODcut->SetBorderSize(0);
+        leg_PFMET_AODcut->SetFillStyle(0);
+        c_PFMET_AODcut_ratio = DrawWithRatio(RecoPFMET_AOD, RecoPFMET_cutCaloJets_AOD, c_PFMET_AODcut, "RecoPFMET AOD cut", "wo cut/cut", "E1 same", false);
+    }
 
     cout << "c_PFMET_miniAODcut" << endl;
     TCanvas *c_PFMET_miniAODcut = new TCanvas("c_PFMET_miniAODcut","c_PFMET_miniAODcut",800,800);
@@ -540,40 +595,45 @@ void PFMET_Cut() {
     leg_PFMET_miniAODcut->SetFillStyle(0);
     TCanvas *c_PFMET_miniAODcut_ratio = DrawWithRatio(RecoPFMET_miniAOD, RecoPFMET_cutCaloJets_miniAOD, c_PFMET_miniAODcut, "RecoPFMET miniAOD cut", "wo cut/cut", "E1 same", false);
 
-    cout << "c_PFMET_onlycut" << endl;
-    TCanvas *c_PFMET_onlycut = new TCanvas("c_PFMET_onlycut","c_PFMET_onlycut",800,800);
-    c_PFMET_onlycut->cd();
-    RecoPFMET_cutCaloJets_AOD->Draw("E1");
-    RecoPFMET_cutCaloJets_miniAOD->Draw("E1 same");
-    TLegend *leg_PFMET = new TLegend(0.6,0.7,0.88,0.88);
-    leg_PFMET->AddEntry(RecoPFMET_cutCaloJets_AOD, "AOD", "ep");
-    leg_PFMET->AddEntry(RecoPFMET_cutCaloJets_miniAOD, "miniAOD", "ep");
-    leg_PFMET->Draw("same");
-    leg_PFMET->SetBorderSize(0);
-    leg_PFMET->SetFillStyle(0);
-    TCanvas *c_PFMET_ratio = DrawWithRatio(RecoPFMET_cutCaloJets_AOD, RecoPFMET_cutCaloJets_miniAOD, c_PFMET_onlycut, "RecoPFMET with CaloJets cut", "AOD/miniAOD", "E1 same", false);
 
-    cout << "c_PFMET_CaloMETcut" << endl;
-    TCanvas *c_PFMET_CaloMETcut = new TCanvas("c_PFMET_CaloMETcut","c_PFMET_CaloMETcut",800,800);
-    c_PFMET_CaloMETcut->cd();
-    RecoPFMET_cutCaloJets_AOD->Draw("E1");
-    RecoPFMET_cutRecoCaloMET_AOD->Draw("E1 same");
-    TLegend *leg_PFMET_CaloMETcut = new TLegend(0.6,0.7,0.88,0.88);
-    leg_PFMET_CaloMETcut->AddEntry(RecoPFMET_cutCaloJets_AOD, "AOD w CaloJets cut", "ep");
-    leg_PFMET_CaloMETcut->AddEntry(RecoPFMET_cutRecoCaloMET_AOD, "AOD w RecoCaloMET cut", "ep");
-    leg_PFMET_CaloMETcut->Draw("same");
-    leg_PFMET_CaloMETcut->SetBorderSize(0);
-    leg_PFMET_CaloMETcut->SetFillStyle(0);
-    TCanvas *c_PFMET_CaloMETcut_ratio = DrawWithRatio(RecoPFMET_cutCaloJets_AOD, RecoPFMET_cutRecoCaloMET_AOD, c_PFMET_CaloMETcut, "RecoPFMET AOD", "CaloJets cut/RecoCaloMET cut", "E1 same", false);
-
+    TCanvas *c_PFMET_CaloMETcut_ratio; TCanvas *c_PFMET_ratio;
+    if (isAOD) {
+        cout << "c_PFMET_CaloMETcut" << endl;
+        TCanvas *c_PFMET_CaloMETcut = new TCanvas("c_PFMET_CaloMETcut","c_PFMET_CaloMETcut",800,800);
+        c_PFMET_CaloMETcut->cd();
+        RecoPFMET_cutCaloJets_AOD->Draw("E1");
+        RecoPFMET_cutRecoCaloMET_AOD->Draw("E1 same");
+        TLegend *leg_PFMET_CaloMETcut = new TLegend(0.6,0.7,0.88,0.88);
+        leg_PFMET_CaloMETcut->AddEntry(RecoPFMET_cutCaloJets_AOD, "AOD w CaloJets cut", "ep");
+        leg_PFMET_CaloMETcut->AddEntry(RecoPFMET_cutRecoCaloMET_AOD, "AOD w RecoCaloMET cut", "ep");
+        leg_PFMET_CaloMETcut->Draw("same");
+        leg_PFMET_CaloMETcut->SetBorderSize(0);
+        leg_PFMET_CaloMETcut->SetFillStyle(0);
+        c_PFMET_CaloMETcut_ratio = DrawWithRatio(RecoPFMET_cutCaloJets_AOD, RecoPFMET_cutRecoCaloMET_AOD, c_PFMET_CaloMETcut, "RecoPFMET AOD", "CaloJets cut/RecoCaloMET cut", "E1 same", false);
+    
+            cout << "c_PFMET_onlycut" << endl;
+        TCanvas *c_PFMET_onlycut = new TCanvas("c_PFMET_onlycut","c_PFMET_onlycut",800,800);
+        c_PFMET_onlycut->cd();
+        RecoPFMET_cutCaloJets_AOD->Draw("E1");
+        RecoPFMET_cutCaloJets_miniAOD->Draw("E1 same");
+        TLegend *leg_PFMET = new TLegend(0.6,0.7,0.88,0.88);
+        leg_PFMET->AddEntry(RecoPFMET_cutCaloJets_AOD, "AOD", "ep");
+        leg_PFMET->AddEntry(RecoPFMET_cutCaloJets_miniAOD, "miniAOD", "ep");
+        leg_PFMET->Draw("same");
+        leg_PFMET->SetBorderSize(0);
+        leg_PFMET->SetFillStyle(0);
+        c_PFMET_ratio = DrawWithRatio(RecoPFMET_cutCaloJets_AOD, RecoPFMET_cutCaloJets_miniAOD, c_PFMET_onlycut, "RecoPFMET with CaloJets cut", "AOD/miniAOD", "E1 same", false);
+    }
     // saving
     cout << "saving histos..." << endl;
     ofile->cd();
-    c_PFMET_nocut_ratio->Write();
-    c_PFMET_AODcut_ratio->Write();
     c_PFMET_miniAODcut_ratio->Write();
-    c_PFMET_ratio->Write();
-    c_PFMET_CaloMETcut_ratio->Write();
+    if (isAOD) {
+        c_PFMET_CaloMETcut_ratio->Write();
+        c_PFMET_AODcut_ratio->Write();
+        c_PFMET_ratio->Write();
+        c_PFMET_nocut_ratio->Write();
+    }
     ofile->Close();
 
     return;
@@ -581,7 +641,116 @@ void PFMET_Cut() {
 }
 
 
-void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true) {
+void TrigEff_AODvsMiniAOD() {
+
+    TFile *ofile = new TFile("PlayWithHistos/TrigEff_AODvsMiniAOD.root", "RECREATE");
+
+    TFile *ifile_AOD = new TFile("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", "READ");
+    TFile *ifile_miniAOD = new TFile("../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", "READ");
+
+
+    // input histos
+    TH1F *RecoPFMET_AOD = (TH1F*)ifile_AOD->Get("OnlyMET_RecoPFMET");
+    TH1F *RecoPFMET_miniAOD = (TH1F*)ifile_miniAOD->Get("OnlyMET_RecoPFMET");
+    TH1F *if___orMETtrg___RecoPFMET_AOD = (TH1F*)ifile_AOD->Get("OnlyMET_if___orMETtrg___RecoPFMET");
+    TH1F *if___orMETtrg___RecoPFMET_miniAOD = (TH1F*)ifile_miniAOD->Get("OnlyMET_if___orMETtrg___RecoPFMET");
+
+    TH1F *CaloJets_AOD = (TH1F*)ifile_AOD->Get("OnlyMET_CaloJets");
+    TH1F *CaloJets_miniAOD = (TH1F*)ifile_miniAOD->Get("OnlyMET_CaloJets");
+    TH1F *if___orMETtrg___CaloJets_AOD = (TH1F*)ifile_AOD->Get("OnlyMET_if___orMETtrg___CaloJets");
+    TH1F *if___orMETtrg___CaloJets_miniAOD = (TH1F*)ifile_miniAOD->Get("OnlyMET_if___orMETtrg___CaloJets");
+
+    
+    // setup
+    if___orMETtrg___RecoPFMET_AOD->Sumw2();
+    TH1F *eff_orMETtrg_RecoPFMET_AOD = (TH1F*)if___orMETtrg___RecoPFMET_AOD->Clone("eff_orMETtrg_RecoPFMET_AOD");
+    if___orMETtrg___RecoPFMET_miniAOD->Sumw2();
+    TH1F *eff_orMETtrg_RecoPFMET_miniAOD = (TH1F*)if___orMETtrg___RecoPFMET_miniAOD->Clone("eff_orMETtrg_RecoPFMET_miniAOD");
+    
+    if___orMETtrg___CaloJets_AOD->Sumw2();
+    TH1F *eff_orMETtrg_CaloJets_AOD = (TH1F*)if___orMETtrg___CaloJets_AOD->Clone("eff_orMETtrg_CaloJets_AOD");
+    if___orMETtrg___CaloJets_miniAOD->Sumw2();
+    TH1F *eff_orMETtrg_CaloJets_miniAOD = (TH1F*)if___orMETtrg___CaloJets_miniAOD->Clone("eff_orMETtrg_CaloJets_miniAOD");
+
+    eff_orMETtrg_RecoPFMET_AOD->Divide(RecoPFMET_AOD);
+    eff_orMETtrg_RecoPFMET_miniAOD->Divide(RecoPFMET_miniAOD);
+    eff_orMETtrg_CaloJets_AOD->Divide(CaloJets_AOD);
+    eff_orMETtrg_CaloJets_miniAOD->Divide(CaloJets_miniAOD);
+
+
+    // styling
+    eff_orMETtrg_RecoPFMET_AOD->SetLineColor(kRed);
+    eff_orMETtrg_RecoPFMET_AOD->SetMarkerColor(kRed);
+    eff_orMETtrg_RecoPFMET_AOD->SetMarkerStyle(21);
+    eff_orMETtrg_RecoPFMET_AOD->GetXaxis()->SetTitle("RecoPFMET [GeV]");
+    eff_orMETtrg_RecoPFMET_AOD->GetYaxis()->SetTitle("eff. orMETtrg");
+    eff_orMETtrg_RecoPFMET_AOD->GetXaxis()->SetRangeUser(0, 1500);
+    eff_orMETtrg_RecoPFMET_AOD->GetYaxis()->SetRangeUser(0, 1);
+
+    eff_orMETtrg_RecoPFMET_miniAOD->SetLineColor(kBlue);
+    eff_orMETtrg_RecoPFMET_miniAOD->SetMarkerColor(kBlue);
+    eff_orMETtrg_RecoPFMET_miniAOD->SetMarkerStyle(22);
+    eff_orMETtrg_RecoPFMET_miniAOD->GetXaxis()->SetTitle("RecoPFMET [GeV]");
+    eff_orMETtrg_RecoPFMET_miniAOD->GetYaxis()->SetTitle("eff. orMETtrg");
+    eff_orMETtrg_RecoPFMET_miniAOD->GetXaxis()->SetRangeUser(0, 1500);
+    eff_orMETtrg_RecoPFMET_miniAOD->GetYaxis()->SetRangeUser(0, 1);
+
+    eff_orMETtrg_CaloJets_AOD->SetLineColor(kRed);
+    eff_orMETtrg_CaloJets_AOD->SetMarkerColor(kRed);
+    eff_orMETtrg_CaloJets_AOD->SetMarkerStyle(21);
+    eff_orMETtrg_CaloJets_AOD->GetXaxis()->SetTitle("PseudoMET [GeV]");
+    eff_orMETtrg_CaloJets_AOD->GetYaxis()->SetTitle("eff. orMETtrg");
+    eff_orMETtrg_CaloJets_AOD->GetXaxis()->SetRangeUser(0, 1500);
+    eff_orMETtrg_CaloJets_AOD->GetYaxis()->SetRangeUser(0, 1);
+
+    eff_orMETtrg_CaloJets_miniAOD->SetLineColor(kBlue);
+    eff_orMETtrg_CaloJets_miniAOD->SetMarkerColor(kBlue);
+    eff_orMETtrg_CaloJets_miniAOD->SetMarkerStyle(22);
+    eff_orMETtrg_CaloJets_miniAOD->GetXaxis()->SetTitle("PseudoMET [GeV]");
+    eff_orMETtrg_CaloJets_miniAOD->GetYaxis()->SetTitle("eff. orMETtrg");
+    eff_orMETtrg_CaloJets_miniAOD->GetXaxis()->SetRangeUser(0, 1500);
+    eff_orMETtrg_CaloJets_miniAOD->GetYaxis()->SetRangeUser(0, 1);
+
+
+    // drawing
+    TCanvas *c_PFMET = new TCanvas("c_PFMET","c_PFMET",800,800);
+    c_PFMET->cd();
+    eff_orMETtrg_RecoPFMET_miniAOD->Draw("E1");
+    eff_orMETtrg_RecoPFMET_AOD->Draw("E1 same");
+    TLegend *leg_PFMET = new TLegend(0.6,0.7,0.88,0.88);
+    leg_PFMET->AddEntry(eff_orMETtrg_RecoPFMET_AOD, "AOD", "ep");
+    leg_PFMET->AddEntry(eff_orMETtrg_RecoPFMET_miniAOD, "miniAOD", "ep");
+    leg_PFMET->Draw("same");
+    leg_PFMET->SetBorderSize(0);
+    leg_PFMET->SetFillStyle(0);
+    TCanvas *c_PFMET_ratio = DrawWithRatio(eff_orMETtrg_RecoPFMET_miniAOD, eff_orMETtrg_RecoPFMET_AOD, c_PFMET, "RecoPFMET", "miniAOD/AOD", "E1 same", false);
+
+    TCanvas *c_CaloJets = new TCanvas("c_CaloJets","c_CaloJets",800,800);
+    c_CaloJets->cd();
+    eff_orMETtrg_CaloJets_miniAOD->Draw("E1");
+    eff_orMETtrg_CaloJets_AOD->Draw("E1 same");
+    TLegend *leg_CaloJets = new TLegend(0.6,0.7,0.88,0.88);
+    leg_CaloJets->AddEntry(eff_orMETtrg_CaloJets_AOD, "AOD", "ep");
+    leg_CaloJets->AddEntry(eff_orMETtrg_CaloJets_miniAOD, "miniAOD", "ep");
+    leg_CaloJets->Draw("same");
+    leg_CaloJets->SetBorderSize(0);
+    leg_CaloJets->SetFillStyle(0);
+    TCanvas *c_CaloJets_ratio = DrawWithRatio(eff_orMETtrg_CaloJets_miniAOD, eff_orMETtrg_CaloJets_AOD, c_CaloJets, "CaloJets", "miniAOD/AOD", "E1 same", false);
+
+
+    // saving
+    ofile->cd();
+    c_PFMET->Write();
+    c_PFMET_ratio->Write();
+    c_CaloJets->Write();
+    c_CaloJets_ratio->Write();
+    ofile->Close();
+
+    return;
+}
+
+
+void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true, bool normToOne = false, std::string PseudoMETon="") {
     
     std::string ofile = std::string("PlayWithHistos/EventCutflow");
 
@@ -617,6 +786,13 @@ void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true)
     hminiAOD_NotrackCut->Sumw2();
     hAOD_draw->Sumw2();
     hminiAOD_draw->Sumw2();
+
+    if (normToOne) {
+        hAOD_NotrackCut_draw->Scale(1. / hAOD_NotrackCut_draw->GetBinContent(1));
+        hminiAOD_NotrackCut_draw->Scale(1. / hminiAOD_NotrackCut_draw->GetBinContent(1));
+        hAOD_draw->Scale(1. / hAOD_draw->GetBinContent(1));
+        hminiAOD_draw->Scale(1. / hminiAOD_draw->GetBinContent(1));
+    }
 
     // --- Style
     hAOD_NotrackCut_draw->SetLineWidth(2);
@@ -654,24 +830,34 @@ void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true)
     double ymin = std::min(hAOD_NotrackCut_draw->GetMinimum(), hminiAOD_NotrackCut_draw->GetMinimum());
     hAOD_NotrackCut_draw->SetMaximum(ymax * 3);
     hAOD_NotrackCut_draw->SetMinimum(std::max(0.1, ymin / 2.));
-
     hAOD_NotrackCut_draw->GetXaxis()->SetLabelSize(0);
     hAOD_NotrackCut_draw->GetXaxis()->SetRangeUser(0, 18);
     hAOD_NotrackCut_draw->GetYaxis()->SetTitle("Entries");
+    hAOD_NotrackCut_draw->GetYaxis()->SetTitleSize(0.10);
     hAOD_NotrackCut_draw->GetYaxis()->SetTitleOffset(1.4);
-    hAOD_NotrackCut_draw->Draw("HIST");         // green
-    hAOD_draw->Draw("HIST SAME");               // blue
+
+    hAOD_draw->SetMaximum(std::max(hAOD_draw->GetMaximum(), hAOD_draw->GetMaximum()) * 3);
+    hAOD_draw->SetMinimum(std::min(hAOD_draw->GetMinimum(), hAOD_draw->GetMinimum())/2);    
+    if (normToOne) hAOD_draw->SetMinimum(0.01);
+    hAOD_draw->GetXaxis()->SetLabelSize(0);
+    hAOD_draw->GetXaxis()->SetRangeUser(0, 18);
+    hAOD_draw->GetYaxis()->SetTitle("Events");
+    if (normToOne) hAOD_draw->GetYaxis()->SetTitle("Events (normalized to 1 in bin 1)");
+    hAOD_draw->GetYaxis()->SetTitleSize(0.05);
+    hAOD_draw->GetYaxis()->SetTitleOffset(0.8);
+    //hAOD_NotrackCut_draw->Draw("HIST");         // green
+    hAOD_draw->Draw("HIST");               // blue
     hminiAOD_draw->Draw("HIST SAME");           // red
-    hminiAOD_NotrackCut_draw->Draw("HIST SAME");// magenta
+    //hminiAOD_NotrackCut_draw->Draw("HIST SAME");// magenta
 
     // --- Légende
-    TLegend* leg = new TLegend(0.40, 0.73, 0.90, 0.88);
+    TLegend* leg = new TLegend(0.60, 0.73, 0.90, 0.88);
     leg->SetNColumns(2);
     leg->SetBorderSize(0);
     leg->AddEntry(hAOD_draw, "AOD", "f");
-    leg->AddEntry(hAOD_NotrackCut_draw, "AOD no track cut", "f");
+    //leg->AddEntry(hAOD_NotrackCut_draw, "AOD no track cut", "f");
     leg->AddEntry(hminiAOD_draw, "miniAOD", "l");
-    leg->AddEntry(hminiAOD_NotrackCut_draw, "miniAOD no track cut", "l");
+    //leg->AddEntry(hminiAOD_NotrackCut_draw, "miniAOD no track cut", "l");
     leg->Draw();
 
     // --- Label CMS
@@ -696,7 +882,7 @@ void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true)
 
     ratio->GetYaxis()->SetTitle("miniAOD / AOD");
     ratio->GetYaxis()->SetNdivisions(505);
-    ratio->GetYaxis()->SetTitleSize(0.10);
+    ratio->GetYaxis()->SetTitleSize(0.08);
     ratio->GetYaxis()->SetTitleOffset(0.6);
     ratio->GetYaxis()->SetLabelSize(0.09);
 
@@ -738,7 +924,7 @@ void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true)
     if (HLTMu) xlabel = {"All","HLT_Mu50","METfilters (true)", "CaloMET > 170 (true)", "p_{T}>55","|#eta|<2.4","N_{no-L1 pixel hits}#geq2","f_{valid hits}>0.8",
                 "N_{dEdx hits}#geq10","HighPurity","#chi^{2}/N_{dof}<5","|d_{z}|<0.1","|d_{xy}|<0.02","I^{rel}_{PF iso}<0.02","I^{trk}_{dr03}<15",
                 "E/p<0.3","#sigma_{p_{T}}/p_{T}^{2}<0.0008","F_{i}>0.3","#sigma_{p_{T}}/p_{T}<1","I_{h}>C"};
-    else xlabel = {"All","HLT MET","METfilters", "CaloMET > 170 (true)", "p_{T}>55","|#eta|<2.4","N_{no-L1 pixel hits}#geq2","f_{valid hits}>0.8",
+    else xlabel = {"All","HLT MET","METfilters", "PseudoMET > 170", "p_{T}>55","|#eta|<2.4","N_{no-L1 pixel hits}#geq2","f_{valid hits}>0.8",
                 "N_{dEdx hits}#geq10","HighPurity","#chi^{2}/N_{dof}<5","|d_{z}|<0.1","|d_{xy}|<0.02","I^{rel}_{PF iso}<0.02","I^{trk}_{dr03}<15",
                 "E/p<0.3","#sigma_{p_{T}}/p_{T}^{2}<0.0008","F_{i}>0.3","#sigma_{p_{T}}/p_{T}<1","I_{h}>C"};
 
@@ -752,7 +938,7 @@ void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true)
     ratio->SetLabelSize(0.08, "X");
     ratio->GetXaxis()->SetRangeUser(0, 18);
     ratio->Draw("E1");
-    ratio_Cut->Draw("E1 SAME");
+    //ratio_Cut->Draw("E1 SAME");
 
     // --- ratio values
     for (int i = 1; i <= ratio->GetNbinsX(); i++) {
@@ -763,10 +949,12 @@ void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true)
 
         TLatex txt;
         txt.SetTextAlign(22);
-        txt.SetTextSize(0.07);
+        txt.SetTextSize(0.06);
         txt.SetTextFont(42);
-        txt.SetTextColor(color2);
-        if (i==18) txt.DrawLatex(x, y + err + 0.15, Form("%.2f", y));
+        //txt.SetTextColor(color2);
+        //if (i==18) txt.DrawLatex(x, y + err + 0.15, Form("%.2f", y));
+        txt.SetTextColor(kBlack);
+        txt.DrawLatex(x, y + err + 0.15, Form("%.2f", y));
     }
 
     for (int i = 1; i <= ratio->GetNbinsX(); i++) {
@@ -780,25 +968,41 @@ void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true)
         txt.SetTextSize(0.07);
         txt.SetTextFont(42);
         txt.SetTextColor(color4);
-        if (i==18) txt.DrawLatex(x, y - err - 0.25, Form("%.2f", y));
+        //if (i==18) txt.DrawLatex(x, y - err - 0.25, Form("%.2f", y));
     }
 
     // --- Saving
     ofile += HLTMu ? "_HLTMu" : "_HLTMET";
-    std::string outname = ofile + ".pdf";
+    if (normToOne) ofile += "_normToOne";
+    std::string outname = ofile + PseudoMETon + ".pdf";
 
     c->SaveAs(outname.c_str());
+
+    if (normToOne) {
+        cout << "AOD normalized to 1:" << endl;
+        for (int i = 1; i <= hAOD_draw->GetNbinsX(); i++) {
+            cout << "Bin " << i << " AOD : " << hAOD_draw->GetBinContent(i) << " +/- " << hAOD_draw->GetBinError(i) << endl;
+            cout << "  miniAOD : " << hminiAOD_draw->GetBinContent(i) << " +/- " << hminiAOD_draw->GetBinError(i) << endl;
+        }
+    }
 }
 
 
 void CombineHistos()
 {
-    MET_trg_eff("../output/Gluino2000_miniAOD_FULL_MET_V11p12_Eta2p4.root", false);
-    //MET_trg_eff("../output/Gluino2000_AOD_FULL_MET_V11p12_Eta2p4.root", true);
+    //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", false);
+    //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", true);
+    //PFMET_Cut(false);
+    //TrigEff_AODvsMiniAOD();
 
-    //PFMET_Cut();
-    //Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true);
-    //Cutflows("../output/Gluino2000_AOD_FULL_MET_V11p12_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_MET_V11p12_Eta2p4.root", false);
+    //Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true, false);
+    //Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true, true);
+    
+    Cutflows("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", "../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", false, false);
+    Cutflows("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", "../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", false, true);
+
+    Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, false, "_PseudoMETon");
+    Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, true, "_PseudoMETon");
 
     return;
 }

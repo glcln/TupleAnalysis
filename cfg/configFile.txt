@@ -1,12 +1,20 @@
-#TOF cut - pT cut - eta bins - ih bins - p bins - mass bins - massCut - TOFbins - FPIXbins -         type     -        version
+#pT cut - eta bins - ih bins - p bins - mass bins - massCut - FPIXbins   -          type               -  version
 
-0           70         80        400      1000      400         0        200        20          Gluino2000_miniAOD_Mu50      V11p13
-#0           70         80        400      1000      400         0        200        20          Gluino2000_AOD_Mu50          V11p4
+#70         80        400      1000      400         0          20           GluinoRun2_miniAOD_FULL      V13p0
+#70         80        400      1000      400         0          20           Gluino2000_Run2_METtrgEff      V11p15
+#70         80        400      1000      400         0          20           Gluino2000_Run2_METtrgEff_AOD      V11p15
+70         80        400      1000      400         0          20            Gluino2000_Run2_MET         V11p16
+#70         80        400      1000      400         0          20            Gluino2000_Run2_MET_AOD         V11p16
 
-#0           70         80        400      1000      400         0        200        20          Gluino2000_miniAOD_FULL_Mu50   V11p11
-#0           70         80        400      1000      400         0        200        20          Gluino2000_AOD_FULL_Mu50   V11p11
+#70         80        400      1000      400         0          20          Gluino2000_AOD_Mu50          V11p4
 
-#0           70         80        400      1000      400         0        200        20          Gluino2000_miniAOD_FULL_MET   V11p12
-#0           70         80        400      1000      400         0        200        20          Gluino2000_AOD_FULL_MET   V11p12
+#70         80        400      1000      400         0          20          Gluino2000_miniAOD_FULL_Mu50   V11p11
+#70         80        400      1000      400         0          20          Gluino2000_AOD_FULL_Mu50   V11p11
 
-#0           70         80        400      1000      400         0        200        20          Data2018_miniAOD          V11p2
+#70         80        400      1000      400         0          20          Gluino2000_miniAOD_FULL_MET   V11p12
+#70         80        400      1000      400         0          20          Gluino2000_AOD_FULL_MET   V11p12
+
+#70         80        400      1000      400         0          20          Data2018_miniAOD          V11p2
+#70         80        400      1000      400         0          20          DataMET_2024_test_miniAOD          V12p20
+
+#70         80        400      1000      400         0          20          TTbar2024_partial          V15p1

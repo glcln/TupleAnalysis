@@ -40,16 +40,16 @@ void HSCPSelector::Begin(TTree *tree)
     TObjArray *tx = option.Tokenize(",");
 
     // Output file
-    std::string ext = ".root";
-
-    std::string ptname( ((TObjString *)(tx->At(1)))->String().Data());
-    int ptInt = std::stoi(ptname);
-
-    oFile_ = ((TObjString *)(tx->At(9)))->String().Data();
+    oFile_ = ((TObjString *)(tx->At(7)))->String().Data();
     oFile_ += "_";
-    oFile_ += ((TObjString *)(tx->At(10)))->String().Data();
+    oFile_ += ((TObjString *)(tx->At(8)))->String().Data();
     oFile_ += "_Eta2p4";
-    oFile_ += ext;
+    oFile_ += ".root";
+
+
+    // Options
+    UseFpixel = true;
+
 
     //FILL-SELECTION-VECTOR
 selections_.push_back(&HSCPSelector::PassHSCPpresel_NoCriteria);
@@ -69,8 +69,22 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     TString option = GetOption();
     TObjArray *tx = option.Tokenize(",");
 
-    std::string dataset( ((TObjString *)(tx->At(9)))->String().Data());
+    std::string dataset( ((TObjString *)(tx->At(7)))->String().Data());
     dataset_ = dataset;
+    std::string ptTmp( ((TObjString *)(tx->At(0)))->String().Data());
+    ptcut_ = std::stod(ptTmp);
+    std::string etaTmp( ((TObjString *)(tx->At(1)))->String().Data());
+    etabins_ = std::stoi(etaTmp);
+    std::string ihTmp( ((TObjString *)(tx->At(2)))->String().Data());
+    ihbins_ = std::stoi(ihTmp); 
+    std::string pTmp( ((TObjString *)(tx->At(3)))->String().Data());
+    pbins_ = std::stoi(pTmp);
+    std::string massTmp( ((TObjString *)(tx->At(4)))->String().Data());
+    massbins_ = std::stoi(massTmp);
+    std::string fpixCutTmp( ((TObjString *)(tx->At(6)))->String().Data());
+    fpixbins_ = std::stoi(fpixCutTmp);
+
+
     if(true) {//dataset_ == "Gluino2000"){ 
         K = K_signal2018;
         C = C_signal2018;
@@ -104,42 +118,195 @@ selLabels_.push_back("NoCriteria");
     //-------------------------------------
     for(unsigned int i=0;i<selLabels_.size();i++)
     {
+        if(UseFpixel){
+            //Create names for each plot in each regions (slices in Fpixels)
+            std::string label_FpixAll = regFpixAll + "_" + selLabels_[i]; 
+            
+            std::string label_FpixA_3f4 = regFpixA_3f4 + "_" + selLabels_[i]; 
+            std::string label_FpixA_3f6 = regFpixA_3f6 + "_" + selLabels_[i]; 
+            std::string label_FpixA_3f8 = regFpixA_3f8 + "_" + selLabels_[i]; 
+            std::string label_FpixA_3f9 = regFpixA_3f9 + "_" + selLabels_[i]; 
+            std::string label_FpixA_4f5 = regFpixA_4f5 + "_" + selLabels_[i]; 
+            std::string label_FpixA_5f6 = regFpixA_5f6 + "_" + selLabels_[i]; 
+            std::string label_FpixA_6f7 = regFpixA_6f7 + "_" + selLabels_[i]; 
+            std::string label_FpixA_6f9 = regFpixA_6f9 + "_" + selLabels_[i]; 
+            std::string label_FpixA_7f8 = regFpixA_7f8 + "_" + selLabels_[i]; 
+            std::string label_FpixA_8f9 = regFpixA_8f9 + "_" + selLabels_[i]; 
+            std::string label_FpixA_9f10 = regFpixA_9f10 + "_" + selLabels_[i];
+            std::string label_FpixA_99f10 = regFpixA_99f10 + "_" + selLabels_[i];
+            std::string label_FpixA_999f10 = regFpixA_999f10 + "_" + selLabels_[i];
+
+            std::string label_FpixB_3f4 = regFpixB_3f4 + "_" + selLabels_[i]; 
+            std::string label_FpixB_3f6 = regFpixB_3f6 + "_" + selLabels_[i]; 
+            std::string label_FpixB_3f8 = regFpixB_3f8 + "_" + selLabels_[i]; 
+            std::string label_FpixB_3f9 = regFpixB_3f9 + "_" + selLabels_[i]; 
+            std::string label_FpixB_4f5 = regFpixB_4f5 + "_" + selLabels_[i]; 
+            std::string label_FpixB_5f6 = regFpixB_5f6 + "_" + selLabels_[i]; 
+            std::string label_FpixB_6f7 = regFpixB_6f7 + "_" + selLabels_[i]; 
+            std::string label_FpixB_6f9 = regFpixB_6f9 + "_" + selLabels_[i]; 
+            std::string label_FpixB_7f8 = regFpixB_7f8 + "_" + selLabels_[i]; 
+            std::string label_FpixB_8f9 = regFpixB_8f9 + "_" + selLabels_[i]; 
+            std::string label_FpixB_8f10 = regFpixB_8f10 + "_" + selLabels_[i];
+            std::string label_FpixB_9f10 = regFpixB_9f10 + "_" + selLabels_[i];
+            std::string label_FpixB_99f10 = regFpixB_99f10 + "_" + selLabels_[i];
+            std::string label_FpixB_999f10 = regFpixB_999f10 + "_" + selLabels_[i];
+
+            std::string label_FpixC_3f4 = regFpixC_3f4 + "_" + selLabels_[i]; 
+            std::string label_FpixC_3f6 = regFpixC_3f6 + "_" + selLabels_[i]; 
+            std::string label_FpixC_3f8 = regFpixC_3f8 + "_" + selLabels_[i]; 
+            std::string label_FpixC_3f9 = regFpixC_3f9 + "_" + selLabels_[i]; 
+            std::string label_FpixC_4f5 = regFpixC_4f5 + "_" + selLabels_[i]; 
+            std::string label_FpixC_5f6 = regFpixC_5f6 + "_" + selLabels_[i]; 
+            std::string label_FpixC_6f7 = regFpixC_6f7 + "_" + selLabels_[i]; 
+            std::string label_FpixC_6f9 = regFpixC_6f9 + "_" + selLabels_[i]; 
+            std::string label_FpixC_7f8 = regFpixC_7f8 + "_" + selLabels_[i]; 
+            std::string label_FpixC_8f9 = regFpixC_8f9 + "_" + selLabels_[i]; 
+
+            std::string label_FpixD_3f4 = regFpixD_3f4 + "_" + selLabels_[i];
+            std::string label_FpixD_3f8 = regFpixD_3f8 + "_" + selLabels_[i];
+            std::string label_FpixD_4f5 = regFpixD_4f5 + "_" + selLabels_[i]; 
+            std::string label_FpixD_5f6 = regFpixD_5f6 + "_" + selLabels_[i]; 
+            std::string label_FpixD_6f7 = regFpixD_6f7 + "_" + selLabels_[i]; 
+            std::string label_FpixD_6f9 = regFpixD_6f9 + "_" + selLabels_[i];
+            std::string label_FpixD_7f8 = regFpixD_7f8 + "_" + selLabels_[i]; 
+            std::string label_FpixD_8f9 = regFpixD_8f9 + "_" + selLabels_[i]; 
+            std::string label_FpixD_8f10 = regFpixD_8f10 + "_" + selLabels_[i];
+            std::string label_FpixD_9f10 = regFpixD_9f10 + "_" + selLabels_[i]; 
+            std::string label_FpixD_99f10 = regFpixD_99f10 + "_" + selLabels_[i]; 
+            std::string label_FpixD_999f10 = regFpixD_999f10 + "_" + selLabels_[i]; 
+
+
+            //Create objects RegionMassPlot using the names defined above 
+            RegionMassPlot regAll(label_FpixAll.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+
+            RegionMassPlot regA_3f4(label_FpixA_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C);
+            RegionMassPlot regA_3f6(label_FpixA_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regA_3f8(label_FpixA_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regA_3f9(label_FpixA_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regA_4f5(label_FpixA_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regA_5f6(label_FpixA_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regA_6f7(label_FpixA_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C);
+            RegionMassPlot regA_6f9(label_FpixA_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C);
+            RegionMassPlot regA_7f8(label_FpixA_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C);
+            RegionMassPlot regA_8f9(label_FpixA_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regA_9f10(label_FpixA_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regA_99f10(label_FpixA_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regA_999f10(label_FpixA_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+
+            RegionMassPlot regB_3f4(label_FpixB_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_3f6(label_FpixB_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_3f8(label_FpixB_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_3f9(label_FpixB_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_4f5(label_FpixB_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_5f6(label_FpixB_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_6f7(label_FpixB_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_6f9(label_FpixB_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_7f8(label_FpixB_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C);     
+            RegionMassPlot regB_8f9(label_FpixB_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_8f10(label_FpixB_8f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_9f10(label_FpixB_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_99f10(label_FpixB_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regB_999f10(label_FpixB_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C);
+
+            RegionMassPlot regC_3f4(label_FpixC_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_3f6(label_FpixC_3f6.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_3f8(label_FpixC_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_3f9(label_FpixC_3f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_4f5(label_FpixC_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_5f6(label_FpixC_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_6f7(label_FpixC_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_6f9(label_FpixC_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_7f8(label_FpixC_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regC_8f9(label_FpixC_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+
+            RegionMassPlot regD_3f4(label_FpixD_3f4.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_3f8(label_FpixD_3f8.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_4f5(label_FpixD_4f5.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_5f6(label_FpixD_5f6.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_6f7(label_FpixD_6f7.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_6f9(label_FpixD_6f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_7f8(label_FpixD_7f8.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C);     
+            RegionMassPlot regD_8f9(label_FpixD_8f9.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_8f10(label_FpixD_8f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_9f10(label_FpixD_9f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_99f10(label_FpixD_99f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+            RegionMassPlot regD_999f10(label_FpixD_999f10.c_str(),etabins_,ihbins_,pbins_,massbins_,fpixbins_, C); 
+        
+
+            //push the RegionMassPlot objects created in vectors, because you have a set of different plot for each region, for each selection (defined in the configuration file) 
+
+            vmrp_regionFpix_all.push_back(std::move(regAll));
+            
+            vmrp_regionA_3f4.push_back(std::move(regA_3f4));
+            vmrp_regionA_3f6.push_back(std::move(regA_3f6));
+            vmrp_regionA_3f8.push_back(std::move(regA_3f8));
+            vmrp_regionA_3f9.push_back(std::move(regA_3f9));
+            vmrp_regionA_4f5.push_back(std::move(regA_4f5));
+            vmrp_regionA_5f6.push_back(std::move(regA_5f6));
+            vmrp_regionA_6f7.push_back(std::move(regA_6f7));
+            vmrp_regionA_6f9.push_back(std::move(regA_6f9));
+            vmrp_regionA_7f8.push_back(std::move(regA_7f8));
+            vmrp_regionA_8f9.push_back(std::move(regA_8f9));
+            vmrp_regionA_9f10.push_back(std::move(regA_9f10));
+            vmrp_regionA_99f10.push_back(std::move(regA_99f10));
+            vmrp_regionA_999f10.push_back(std::move(regA_999f10));
+
+            vmrp_regionB_3f4.push_back(std::move(regB_3f4));
+            vmrp_regionB_3f6.push_back(std::move(regB_3f6));
+            vmrp_regionB_3f8.push_back(std::move(regB_3f8));
+            vmrp_regionB_3f9.push_back(std::move(regB_3f9));
+            vmrp_regionB_4f5.push_back(std::move(regB_4f5));
+            vmrp_regionB_5f6.push_back(std::move(regB_5f6));
+            vmrp_regionB_6f7.push_back(std::move(regB_6f7));
+            vmrp_regionB_6f9.push_back(std::move(regB_6f9));
+            vmrp_regionB_7f8.push_back(std::move(regB_7f8));
+            vmrp_regionB_8f9.push_back(std::move(regB_8f9));
+            vmrp_regionB_8f10.push_back(std::move(regB_8f10));
+            vmrp_regionB_9f10.push_back(std::move(regB_9f10));
+            vmrp_regionB_99f10.push_back(std::move(regB_99f10));
+            vmrp_regionB_999f10.push_back(std::move(regB_999f10));
+
+            vmrp_regionC_3f4.push_back(std::move(regC_3f4));
+            vmrp_regionC_3f6.push_back(std::move(regC_3f6));
+            vmrp_regionC_3f8.push_back(std::move(regC_3f8));
+            vmrp_regionC_3f9.push_back(std::move(regC_3f9));    
+            vmrp_regionC_4f5.push_back(std::move(regC_4f5));
+            vmrp_regionC_5f6.push_back(std::move(regC_5f6));
+            vmrp_regionC_6f7.push_back(std::move(regC_6f7));
+            vmrp_regionC_6f9.push_back(std::move(regC_6f9));
+            vmrp_regionC_7f8.push_back(std::move(regC_7f8));
+            vmrp_regionC_8f9.push_back(std::move(regC_8f9));
+
+            vmrp_regionD_3f4.push_back(std::move(regD_3f4));
+            vmrp_regionD_3f8.push_back(std::move(regD_3f8));
+            vmrp_regionD_4f5.push_back(std::move(regD_4f5));
+            vmrp_regionD_5f6.push_back(std::move(regD_5f6));
+            vmrp_regionD_6f7.push_back(std::move(regD_6f7));
+            vmrp_regionD_6f9.push_back(std::move(regD_6f9));
+            vmrp_regionD_7f8.push_back(std::move(regD_7f8));
+            vmrp_regionD_8f9.push_back(std::move(regD_8f9));
+            vmrp_regionD_8f10.push_back(std::move(regD_8f10));
+            vmrp_regionD_9f10.push_back(std::move(regD_9f10));
+            vmrp_regionD_99f10.push_back(std::move(regD_99f10));
+            vmrp_regionD_999f10.push_back(std::move(regD_999f10));
+        }
+
+
+
         CPlots plots;
 
-        plots.AddHisto1D(selLabels_[i]+"_npv", 80, 0, 80);
-
-        plots.AddHisto1D(selLabels_[i]+"_Ih", 200, 0, 20);
-        plots.AddHisto1D(selLabels_[i]+"_Pt", 100, 0, 2000);
-        plots.AddHisto1D(selLabels_[i]+"_Eta", 50, -2.5, 2.5);
-        plots.AddHisto1D(selLabels_[i]+"_NbPixelHit_noL1", 10, 0, 10);
-        plots.AddHisto1D(selLabels_[i]+"_NOM_noL1", 50, 0, 50);
-        plots.AddHisto1D(selLabels_[i]+"_FracOfValidHit", 50, 0, 1.1);
-        plots.AddHisto1D(selLabels_[i]+"_isHighPurityTrack", 2, -0.5, 1.5);
-        plots.AddHisto1D(selLabels_[i]+"_miniRelIsoAll", 50, 0, 1);
-        plots.AddHisto1D(selLabels_[i]+"_IsoSumPt_dr03", 10, 0, 100);
-        plots.AddHisto1D(selLabels_[i]+"_dz", 100, -0.5, 0.5);
-        plots.AddHisto1D(selLabels_[i]+"_dxy", 100, -0.5, 0.5);
-        plots.AddHisto1D(selLabels_[i]+"_normChi2", 10, 0, 10);
-        plots.AddHisto1D(selLabels_[i]+"_EoP", 100, 0, 10);
-        plots.AddHisto1D(selLabels_[i]+"_ptOverptErrptErr", 1000, 0, 0.1);
-        plots.AddHisto1D(selLabels_[i]+"_ptOverptErr", 100, 0, 1);
-        plots.AddHisto1D(selLabels_[i]+"_Fpix", 100, 0, 1);
-        plots.AddHisto1D(selLabels_[i]+"_GStrip", 100, 0, 1);
-        plots.AddHisto1D(selLabels_[i]+"_Flag_allMETFilters", 2, -0.5, 1.5);
-        plots.AddHisto1D(selLabels_[i]+"_HSCP_type", 6, -0.5, 5.5);
-        plots.AddHisto1D(selLabels_[i]+"_PF_type", 250, 0, 250);
-        plots.AddHisto1D(selLabels_[i]+"_PFMET", 100, 0, 500);
-        plots.AddHisto1D(selLabels_[i]+"_PFMET_phi", 50, -3.5, 3.5);
-        plots.AddHisto1D(selLabels_[i]+"_PseudoMET_viaCaloJets", 100, 0, 500);
-
-        plots.AddHisto1D(selLabels_[i]+"_HLT_Mu50", 2, -0.5, 1.5);
-
-        plots.AddHisto1D(selLabels_[i]+"_Pt_PFMuon", 100, 0, 2000);
-        plots.AddHisto1D(selLabels_[i]+"_Pt_PFChgHadron", 100, 0, 2000);
-        plots.AddHisto1D(selLabels_[i]+"_Pt_other", 100, 0, 2000);
+        // mass calibration
+        plots.AddHisto2D(selLabels_[i]+"_Mu_ih_vs_betagamma", 500, 0., 15000., 100, 0., 10.);
+        plots.AddHisto2D(selLabels_[i]+"_Mu_ih_vs_p", 500, 0., 6000., 100, 0.,10.);
+        plots.AddHisto2D(selLabels_[i]+"_KPpi_ih_vs_betagamma", 500, 0., 5000., 100, 0., 10.);
+        plots.AddHisto2D(selLabels_[i]+"_KPpi_ih_vs_p", 500, 0., 3000., 100, 0., 10.);
+        plots.AddHisto2D(selLabels_[i]+"_Gluino_ih_vs_betagamma", 1000, 0., 5., 500, 0., 50.);
+        plots.AddHisto2D(selLabels_[i]+"_Gluino_ih_vs_p", 500, 0., 3000., 500, 0.,50.);
 
 
         // Trigger efficiency
+        plots.AddHisto1D(selLabels_[i]+"_PuppiMET", 100, 0, 2500);
+
         plots.AddHisto1D(selLabels_[i]+"_CaloJets", 100, 0, 2500);
         plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___CaloJets", 100, 0, 2500);
         plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___CaloJets", 100, 0, 2500);
@@ -147,6 +314,7 @@ selLabels_.push_back("NoCriteria");
         plots.AddHisto1D(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___CaloJets", 100, 0, 2500);
 
         plots.AddHisto1D(selLabels_[i]+"_RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_RecoPFMET__CaloJetsCut", 100, 0, 2500);
         plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", 100, 0, 2500);
         plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", 100, 0, 2500);
         plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", 100, 0, 2500);
@@ -154,6 +322,7 @@ selLabels_.push_back("NoCriteria");
 
         plots.AddHisto1D(selLabels_[i]+"_if___orMETtrg___CaloJets", 100, 0, 2500);
         plots.AddHisto1D(selLabels_[i]+"_if___orMETtrg___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1D(selLabels_[i]+"_if___orMETtrg___RecoPFMET__CaloJetsCut", 100, 0, 2500);
 
         plots.AddHisto1D(selLabels_[i]+"_RecoCaloMET", 100, 0, 2500);
         plots.AddHisto1D(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET", 100, 0, 2500);
@@ -170,6 +339,7 @@ selLabels_.push_back("NoCriteria");
     plots.AddHisto1D("CandidateCutflow", 18, 0, 18);
     plots.AddHisto1D("EventCutflow", 18, 0, 18);
     plots.AddHisto1D("EventCutflow_NotrackCut", 20, 0, 20);
+    plots.AddHisto1D("EventCutflow__isGen_lastbin", 2, -0.5, 1.5);
 
     plots.AddHisto1D("Trigger", 3, -1, 2);
 
@@ -206,6 +376,11 @@ selLabels_.push_back("NoCriteria");
     plots.AddHisto1D("LastBinEventCutflow___HSCP_type", 6, -0.5, 5.5);
     plots.AddHisto1D("LastBinEventCutflow___PF_type", 250, 0, 250);
 
+    plots.AddHisto1D("Ih_Strip", 200, 0, 10);
+    plots.AddHisto1D("Ih_Strip_oldCorr", 200, 0, 10);
+    plots.AddHisto1D("GStrip", 200, 0, 1);
+    plots.AddHisto1D("GStrip_oldCorr", 200, 0, 1);
+
 
     // temp
     plots.AddHisto2D("trackPT_vs_trackPseudoTrackPT", 100, 0, 2500, 100, 0, 2500);
@@ -226,8 +401,8 @@ selLabels_.push_back("NoCriteria");
 
 Bool_t HSCPSelector::Process(Long64_t entry)
 {
-    fReader.SetEntry(entry);
-
+    fReader.SetLocalEntry(entry);
+    
     //----------------------------------
     //Loop over all HSCP candidates
     //----------------------------------
@@ -242,18 +417,16 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     bool METfilters = false;
     float CaloMET_pseudoMET = -1;
     if (dataset_.find("Mu50") != std::string::npos) {
-        //trigger = *HLT_Mu50;
-        trigger = *HLT_FilterOR;
+        trigger = *HLT_Mu50;
         METfilters = true; // no MET filters in muon datasets
         CaloMET_pseudoMET = 200; // no CaloMET in muon datasets, set it to pass the cut
     }
     else if (dataset_.find("MET") != std::string::npos) {
-        //trigger = *HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
-        //|| *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50;
-        trigger = *HLT_FilterOR;
+        trigger = *HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
+        || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50;
 
         METfilters = Flag_allMETFilters[0];
-        CaloMET_pseudoMET = 200; // to change with CaloJets[0];
+        CaloMET_pseudoMET = CaloJets[0]; // to change with CaloJets[0];
     }
     vcp_nosel[0].FillHisto1D("CandidateCutflow", 0); // All events
     
@@ -327,6 +500,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         cuts.push_back([&](int i){ return trigger; });
         cuts.push_back([&](int i){ return METfilters; });
         cuts.push_back([&](int i){ return CaloMET_pseudoMET > 170; });
+        //cuts.push_back([&](int i){ return Pt_pseudo[i] > 55.0; });
         cuts.push_back([&](int i){ return Pt[i] > 55.0; });
         cuts.push_back([&](int i){ return fabs(Eta[i]) < 2.4; });
         cuts.push_back([&](int i){ return NbPixelHit_noL1[i] >= 2; });
@@ -341,8 +515,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         cuts.push_back([&](int i){ return EoP[i] < 0.3; });
         cuts.push_back([&](int i){ return ptOverptErrptErr[i] < 0.0008; });
         cuts.push_back([&](int i){ return Fpix[i] > 0.3; });
-        cuts.push_back([&](int i){ return ptOverptErr[i] < 1; });
-        cuts.push_back([&](int i){ return Ih_Strip[i] > 3.14; });
+        //cuts.push_back([&](int i){ return ptOverptErr[i] < 1; });
+        //cuts.push_back([&](int i){ return Ih_Strip[i] > 3.14; });
         
 
             // Event CUTFLOW setup
@@ -359,7 +533,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         cuts_NotrackCut[13] = [&](int i){ return true; }; // IsoSumPt_dr03
         cuts_NotrackCut[14] = [&](int i){ return true; }; // EoP
         cuts_NotrackCut[15] = [&](int i){ return true; }; // ptOverptErrptErr
-        cuts_NotrackCut[17] = [&](int i){ return true; }; // ptOverptErr
+        //cuts_NotrackCut[17] = [&](int i){ return true; }; // ptOverptErr
 
         bool allPassed_NotrackCut = true;
         for (unsigned int j = 0; j < cuts.size(); ++j) {
@@ -396,18 +570,21 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         if (passedCuts[14]) vcp_nosel[0].FillHisto1D("Nm1_EoverP", EoP[i]);
         if (passedCuts[15]) vcp_nosel[0].FillHisto1D("Nm1_PtErr_over_PtPt", ptOverptErrptErr[i]);
         if (passedCuts[16]) vcp_nosel[0].FillHisto1D("Nm1_Fpix", Fpix[i]);
-        if (passedCuts[17]) vcp_nosel[0].FillHisto1D("Nm1_PtErr_over_Pt", ptOverptErr[i]);
-        if (passedCuts[18]) vcp_nosel[0].FillHisto1D("Nm1_Ih_StripOnly", Ih_Strip[i]);
+        //if (passedCuts[17]) vcp_nosel[0].FillHisto1D("Nm1_PtErr_over_Pt", ptOverptErr[i]);
+        //if (passedCuts[18]) vcp_nosel[0].FillHisto1D("Nm1_Ih_StripOnly", Ih_Strip[i]);
 
 
             // Event cutflow last bin: check GenPart info and PF_type
-        if (eventCuts[18]) {
+        if (eventCuts[16]) {
             for (unsigned int j = 0; j < GenPart_pt.GetSize(); j++) {
                 float dEta = GenPart_eta[j] - Eta[i];
                 float dPhi = GenPart_phi[j] - Phi[i];
                 while (dPhi >  M_PI) dPhi -= 2*M_PI;
                 while (dPhi < -M_PI) dPhi += 2*M_PI;
-                if (std::sqrt(dEta*dEta + dPhi*dPhi) < 0.01) vcp_nosel[0].FillHisto2D("LastBinEventCutflow___GenPt_vs_trackPt", GenPart_pt[j], Pt[i]);
+                if (std::sqrt(dEta*dEta + dPhi*dPhi) < 0.01) {
+                    vcp_nosel[0].FillHisto2D("LastBinEventCutflow___GenPt_vs_trackPt", GenPart_pt[j], Pt[i]);
+                    vcp_nosel[0].FillHisto1D("EventCutflow__isGen_lastbin", 1);
+                }
             }
             vcp_nosel[0].FillHisto1D("LastBinEventCutflow___HSCP_type", HSCP_type[i]);
             vcp_nosel[0].FillHisto1D("LastBinEventCutflow___PF_type", PF_type[i]);
@@ -428,25 +605,26 @@ Bool_t HSCPSelector::Process(Long64_t entry)
     }
 
 
-
-    bool AtLeastOneSelPassed = false;
     i = 0;
     for(unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){    // Every candidate
 
         if (!HSCP_hasTrack[j]) continue;
 
-            // temp
+        //vcp_nosel[0].FillHisto1D("Ih_Strip_oldCorr", Ih_Strip_oldCorr[i]);
+        //vcp_nosel[0].FillHisto1D("GStrip_oldCorr", GStrip_oldCorr[i]);
+        vcp_nosel[0].FillHisto1D("Ih_Strip", Ih_Strip[i]);
+        vcp_nosel[0].FillHisto1D("GStrip", GStrip[i]);
+
+        /*
+        // No selections
         vcp_nosel[0].FillHisto2D("trackPT_vs_trackPseudoTrackPT", Pt[i], Pt_pseudo[i]);
         vcp_nosel[0].FillHisto2D("trackETA_vs_trackPseudoTrackETA", Eta[i], Eta_pseudo[i]);
         vcp_nosel[0].FillHisto2D("trackPHI_vs_trackPseudoTrackPHI", Phi[i], Phi_pseudo[i]);
 
-        // loop over the generated particles
         for (unsigned int k = 0; k < GenPart_pt.GetSize(); k++) {
-            float dEta = GenPart_eta[k] - Eta[i];
-            float dPhi = GenPart_phi[k] - Phi[i];
-            while (dPhi >  M_PI) dPhi -= 2*M_PI;
-            while (dPhi < -M_PI) dPhi += 2*M_PI;
-            if (std::sqrt(dEta*dEta + dPhi*dPhi) < 0.01 && fabs(GenPart_pdgId[k]) > 100000 ) {
+            double dRgen = deltaR(Eta[i], Phi[i], GenPart_eta[k], GenPart_phi[k]);
+
+            if (dRgen < 0.01 && fabs(GenPart_pdgId[k]) > 100000 ) {
                 vcp_nosel[0].FillHisto2D("genPT_vs_trackPseudoTrackPT", GenPart_pt[i] , Pt_pseudo[i]);
                 vcp_nosel[0].FillHisto2D("genPT_vs_trackPT", GenPart_pt[i], Pt[i]);
 
@@ -463,70 +641,47 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             ptr = selections_[s];
             if((this->*ptr)(i)){
 
-                AtLeastOneSelPassed = true;
+                float P_pseudo = Pt_pseudo[i]*cosh(Eta[i]);
 
-                //int i = iCand[s];     // most ionising candidate
-                //if (i < 0) continue;
+                // Gen loop: mass calibration on K/pi/proton and gluino
+                for (unsigned int ig = 0; ig < GenPart_pt.GetSize(); ig++) {
+                    double dRgen = deltaR(Eta[i], Phi[i], GenPart_eta[ig], GenPart_phi[ig]);
 
-                /*if (selections_[s]) {
-                    vcp[s].FillHisto1D(selLabels_[s]+"_Ih", Ih_Strip[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_Pt", Pt[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_Eta", Eta[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_NbPixelHit_noL1", NbPixelHit_noL1[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_NOM_noL1", NOM_noL1[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_FracOfValidHit", FracOfValidHit[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_isHighPurityTrack", isHighPurityTrack[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_miniRelIsoAll", miniRelIsoAll[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_IsoSumPt_dr03", IsoSumPt_dr03[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_dz", dz[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_dxy", dxy[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_normChi2", normChi2[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_EoP", EoP[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_ptOverptErrptErr", ptOverptErrptErr[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_ptOverptErr", ptOverptErr[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_Fpix", Fpix[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_GStrip", GStrip[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_HSCP_type", HSCP_type[i]);
-                    vcp[s].FillHisto1D(selLabels_[s]+"_PF_type", PF_type[i]);
-
-                    if (PF_type[i]==13) {
-                        for(unsigned int j=0; j<Muon_pt.GetSize(); j++) {
-                            float dEta = Muon_eta[j] - Eta[i];
-                            float dPhi = Muon_phi[j] - Phi[i];
-                            while (dPhi >  M_PI) dPhi -= 2*M_PI;
-                            while (dPhi < -M_PI) dPhi += 2*M_PI;
-                            if (std::sqrt(dEta*dEta + dPhi*dPhi) < 0.1) { vcp[s].FillHisto1D(selLabels_[s]+"_Pt_PFMuon", Pt[i]); break; }
+                    if (dRgen < 0.01 && (abs(GenPart_pdgId[ig])==211 || abs(GenPart_pdgId[ig])==321 || abs(GenPart_pdgId[ig])==2212)) {
+                        if (abs(GenPart_pdgId[ig])==321 && P_pseudo/0.49367 > 1.5) {
+                            vcp[s].FillHisto2D(selLabels_[s]+"_KPpi_ih_vs_betagamma", P_pseudo/0.49367, Ih_Strip[i]);
+                            vcp[s].FillHisto2D(selLabels_[s]+"_KPpi_ih_vs_p", P_pseudo, Ih_Strip[i]);
+                        }
+                        else if (abs(GenPart_pdgId[ig])==211 && P_pseudo/0.13957 > 1.5) {
+                            vcp[s].FillHisto2D(selLabels_[s]+"_KPpi_ih_vs_betagamma", P_pseudo/0.13957, Ih_Strip[i]);
+                            vcp[s].FillHisto2D(selLabels_[s]+"_KPpi_ih_vs_p", P_pseudo, Ih_Strip[i]);
+                        }
+                        else if (abs(GenPart_pdgId[ig])==2212 && P_pseudo/0.93827 > 1.5) {
+                            vcp[s].FillHisto2D(selLabels_[s]+"_KPpi_ih_vs_betagamma", P_pseudo/0.93827, Ih_Strip[i]);
+                            vcp[s].FillHisto2D(selLabels_[s]+"_KPpi_ih_vs_p", P_pseudo, Ih_Strip[i]);
                         }
                     }
-                    else if (PF_type[i]==211 || PF_type[i]==11) vcp[s].FillHisto1D(selLabels_[s]+"_Pt_PFChgHadron", Pt[i]);
-                    else vcp[s].FillHisto1D(selLabels_[s]+"_Pt_other", Pt[i]);
-                }*/
 
+                    // beta*gamma < 1.5 : gluino part
+                    if (dRgen < 0.01 && abs(GenPart_pdgId[ig]) > 1000000) { // && P_pseudo/GenPart_mass[ig] < 1.5)
+                        vcp[s].FillHisto2D(selLabels_[s]+"_Gluino_ih_vs_betagamma", P_pseudo/GenPart_mass[ig], Ih_Strip[i]);
+                        vcp[s].FillHisto2D(selLabels_[s]+"_Gluino_ih_vs_p", P_pseudo, Ih_Strip[i]);
+                    }
 
-
-            }
-        }
-
-        /*if (isAOD) {
-            for (unsigned int j=0; j<OnlyIn_AOD.size(); j++) {
-                if (*Event == OnlyIn_AOD[j]) {
-                    vcp_nosel[0].FillHisto1D("Pt_lastBin", Pt[i]);
-                    vcp_nosel[0].FillHisto1D("HSCPtype_lastBin", HSCP_type[i]);
-                    vcp_nosel[0].FillHisto1D("PFtype_lastBin", PF_type[i]);
-                    break;
                 }
-            }
-        }
-        if (isMiniAOD) {
-            for (unsigned int j=0; j<OnlyIn_MiniAOD.size(); j++) {
-                if (*Event == OnlyIn_MiniAOD[j]) {
-                    vcp_nosel[0].FillHisto1D("Pt_lastBin", Pt[i]);
-                    vcp_nosel[0].FillHisto1D("HSCPtype_lastBin", HSCP_type[i]);
-                    vcp_nosel[0].FillHisto1D("PFtype_lastBin", PF_type[i]);
-                    break;
+
+                // Muon loop: mass calibration on K/pi/proton and gluino
+                for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
+                    double dRmu = deltaR(Eta[i], Phi[i], muon_eta[im], muon_phi[im]);
+                    if (dRmu < 0.01) {
+                        vcp[s].FillHisto2D(selLabels_[s]+"_Mu_ih_vs_betagamma", P_pseudo/0.10566, Ih_Strip[i]);
+                        vcp[s].FillHisto2D(selLabels_[s]+"_Mu_ih_vs_p", P_pseudo, Ih_Strip[i]);
+                    }
                 }
-            }
-        }*/
+
+            } 
+        } // end of selections
+        */
         i++;
 
     } // End of loop over all candidates
@@ -544,8 +699,11 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         if (SelPassed) {
 
             // Trigger efficiency
-            vcp[s].FillHisto1D(selLabels_[s]+"_CaloJets", CaloJets[0]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_PuppiMET", RecoPuppiMET[0]);
+            vcp[s].FillHisto1D(selLabels_[s]+"_CaloJets", CaloJets[0]);     // usefull for calibration on ttbar
             vcp[s].FillHisto1D(selLabels_[s]+"_RecoPFMET", RecoPFMET[0]);
+            if (CaloJets[0] > 170) vcp[s].FillHisto1D(selLabels_[s]+"_RecoPFMET__CaloJetsCut", RecoPFMET[0]);
+
             if (*HLT_PFMET120_PFMHT120_IDTight) {
                 vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___CaloJets", CaloJets[0]);
                 vcp[s].FillHisto1D(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", RecoPFMET[0]);                
@@ -566,6 +724,9 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) {
                 vcp[s].FillHisto1D(selLabels_[s]+"_if___orMETtrg___CaloJets", CaloJets[0]);
                 vcp[s].FillHisto1D(selLabels_[s]+"_if___orMETtrg___RecoPFMET", RecoPFMET[0]);
+
+                if (CaloJets[0] > 170)
+                    vcp[s].FillHisto1D(selLabels_[s]+"_if___orMETtrg___RecoPFMET__CaloJetsCut", RecoPFMET[0]);
             }
 
             /*if (isAOD) {
@@ -581,6 +742,70 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 
             }*/
 
+
+            if(UseFpixel) {
+                double newWeight = 1.0;
+                double massForRegions = GetMass(Pt[i]*cosh(Eta[i]),Ih_Strip[i],K,C);
+
+                //vmrp_regionFpix_all[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+
+                if(Pt[i] <= ptcut_) {
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionA_3f4[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionA_3f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionA_3f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionA_3f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionA_4f5[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionA_5f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionA_6f7[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionA_6f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionA_7f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionA_8f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionA_9f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionA_99f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionA_999f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionB_3f4[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionB_3f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionB_3f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionB_3f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionB_4f5[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionB_5f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionB_6f7[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionB_6f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionB_7f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionB_8f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix10) ) vmrp_regionB_8f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionB_9f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionB_99f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionB_999f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                }
+                else {
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionC_3f4[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionC_3f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionC_3f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionC_3f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionC_4f5[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionC_5f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionC_6f7[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionC_6f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionC_7f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionC_8f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionD_3f4[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionD_3f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionD_4f5[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionD_5f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionD_6f7[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionD_6f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionD_7f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionD_8f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix10) ) vmrp_regionD_8f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionD_9f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionD_99f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionD_999f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                }
+            }
+
         }
     }
 
@@ -592,6 +817,65 @@ void HSCPSelector::SlaveTerminate()
 {
     for(auto obj: vcp) obj.AddToList(fOutput);
     for(auto obj: vcp_nosel) obj.AddToList(fOutput);
+
+    if(UseFpixel){
+       std::cout<<"We use Fpix for the cut on ionization (based on pixels, uncorellated with Ih_strip)" << std::endl;
+
+       //for(auto obj: vmrp_regionFpix_all) obj.addToList(fOutput);
+
+       for(auto obj: vmrp_regionA_3f4) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_3f6) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_3f8) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_3f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_4f5) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_5f6) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_6f7) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_6f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_7f8) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_8f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionA_999f10) obj.addToList(fOutput);
+
+       for(auto obj: vmrp_regionB_3f4) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_3f6) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_3f8) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_3f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_4f5) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_5f6) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_6f7) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_6f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_7f8) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_8f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_8f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionB_999f10) obj.addToList(fOutput);
+
+       for(auto obj: vmrp_regionC_3f4) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_3f6) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_3f8) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_3f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_4f5) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_5f6) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_6f7) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_6f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_7f8) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionC_8f9) obj.addToList(fOutput);
+
+       for(auto obj: vmrp_regionD_3f4) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_3f8) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_4f5) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_5f6) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_6f7) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_6f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_7f8) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_8f9) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_8f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_9f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_99f10) obj.addToList(fOutput);
+       for(auto obj: vmrp_regionD_999f10) obj.addToList(fOutput);
+   }
 }
 
 void HSCPSelector::Terminate()
