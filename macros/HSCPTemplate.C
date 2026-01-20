@@ -332,7 +332,7 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     plots.AddHisto1D("Nm1_trigger", 4, -1.5, 2.5);
     plots.AddHisto1D("Nm1_METfilters", 2, 0, 2);
     plots.AddHisto1D("Nm1_CaloMET", 100, 0, 1000);
-    plots.AddHisto1D("Nm1_Pt", 100, 0, 2500);
+    plots.AddHisto1D("Nm1_Ptpseudo", 100, 0, 2500);
     plots.AddHisto1D("Nm1_eta", 60, -3, +3);
     plots.AddHisto1D("Nm1_NOPH", 10, 0, 10);
     plots.AddHisto1D("Nm1_FOVH", 50, 0, 1.1);
@@ -366,6 +366,8 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     plots.AddHisto1D("Ih_Strip_oldCorr", 200, 0, 10);
     plots.AddHisto1D("GStrip", 200, 0, 1);
     plots.AddHisto1D("GStrip_oldCorr", 200, 0, 1);
+    plots.AddHisto1D("PthatQCD", 2000, 0, 2000);
+    
 
 
     // temp
@@ -407,7 +409,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         METfilters = true; // no MET filters in muon datasets
         CaloMET_pseudoMET = 200; // no CaloMET in muon datasets, set it to pass the cut
     }
-    else if (dataset_.find("MET") != std::string::npos) {
+    else if (dataset_.find("MET") != std::string::npos || dataset_.find("QCD2024") != std::string::npos || dataset_.find("TTbar2024") != std::string::npos) {
         trigger = *HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
         || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50;
 
@@ -459,7 +461,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         }
 
         // CUTFLOW
-        singleCut[3] = singleCut[2] && (Pt[i] > 55.);
+        singleCut[3] = singleCut[2] && (Pt_pseudo[i] > 55.);
         singleCut[4] = singleCut[3] && (fabs(Eta[i]) < 2.4);
         singleCut[5] = singleCut[4] && (NbPixelHit_noL1[i] >= 2);
         singleCut[6] = singleCut[5] && (FracOfValidHit[i] > 0.8);
@@ -486,8 +488,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         cuts.push_back([&](int i){ return trigger; });
         cuts.push_back([&](int i){ return METfilters; });
         cuts.push_back([&](int i){ return CaloMET_pseudoMET > 170; });
-        //cuts.push_back([&](int i){ return Pt_pseudo[i] > 55.0; });
-        cuts.push_back([&](int i){ return Pt[i] > 55.0; });
+        cuts.push_back([&](int i){ return Pt_pseudo[i] > 55.0; });
         cuts.push_back([&](int i){ return fabs(Eta[i]) < 2.4; });
         cuts.push_back([&](int i){ return NbPixelHit_noL1[i] >= 2; });
         cuts.push_back([&](int i){ return FracOfValidHit[i] > 0.8; });
@@ -542,7 +543,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         if (passedCuts[0]) vcp_nosel[0].FillHisto1D("Nm1_trigger", trigger);
         if (passedCuts[1]) vcp_nosel[0].FillHisto1D("Nm1_METfilters", METfilters);
         if (passedCuts[2]) vcp_nosel[0].FillHisto1D("Nm1_CaloMET", CaloMET_pseudoMET);
-        if (passedCuts[3]) vcp_nosel[0].FillHisto1D("Nm1_Pt", Pt[i]);
+        if (passedCuts[3]) vcp_nosel[0].FillHisto1D("Nm1_Ptpseudo", Pt_pseudo[i]);
         if (passedCuts[4]) vcp_nosel[0].FillHisto1D("Nm1_eta", Eta[i]);
         if (passedCuts[5]) vcp_nosel[0].FillHisto1D("Nm1_NOPH", NbPixelHit_noL1[i]);
         if (passedCuts[6]) vcp_nosel[0].FillHisto1D("Nm1_FOVH", FracOfValidHit[i]);
@@ -568,7 +569,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
                 while (dPhi >  M_PI) dPhi -= 2*M_PI;
                 while (dPhi < -M_PI) dPhi += 2*M_PI;
                 if (std::sqrt(dEta*dEta + dPhi*dPhi) < 0.01) {
-                    vcp_nosel[0].FillHisto2D("LastBinEventCutflow___GenPt_vs_trackPt", GenPart_pt[j], Pt[i]);
+                    vcp_nosel[0].FillHisto2D("LastBinEventCutflow___GenPt_vs_trackPt", GenPart_pt[j], Pt_pseudo[i]);
                     vcp_nosel[0].FillHisto1D("EventCutflow__isGen_lastbin", 1);
                 }
             }
@@ -600,10 +601,12 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         //vcp_nosel[0].FillHisto1D("GStrip_oldCorr", GStrip_oldCorr[i]);
         vcp_nosel[0].FillHisto1D("Ih_Strip", Ih_Strip[i]);
         vcp_nosel[0].FillHisto1D("GStrip", GStrip[i]);
+        vcp_nosel[0].FillHisto1D("PthatQCD", PthatQCD[i]);
+        
 
         /*
         // No selections
-        vcp_nosel[0].FillHisto2D("trackPT_vs_trackPseudoTrackPT", Pt[i], Pt_pseudo[i]);
+        vcp_nosel[0].FillHisto2D("trackPT_vs_trackPseudoTrackPT", Pt_pseudo[i], Pt_pseudo[i]);
         vcp_nosel[0].FillHisto2D("trackETA_vs_trackPseudoTrackETA", Eta[i], Eta_pseudo[i]);
         vcp_nosel[0].FillHisto2D("trackPHI_vs_trackPseudoTrackPHI", Phi[i], Phi_pseudo[i]);
 
@@ -612,7 +615,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
             if (dRgen < 0.01 && fabs(GenPart_pdgId[k]) > 100000 ) {
                 vcp_nosel[0].FillHisto2D("genPT_vs_trackPseudoTrackPT", GenPart_pt[i] , Pt_pseudo[i]);
-                vcp_nosel[0].FillHisto2D("genPT_vs_trackPT", GenPart_pt[i], Pt[i]);
+                vcp_nosel[0].FillHisto2D("genPT_vs_trackPT", GenPart_Pt_pseudo[i], Pt[i]);
 
                 vcp_nosel[0].FillHisto1D("PseudoTrack_m_gen_over_gen", (Pt_pseudo[i]-GenPart_pt[i])/GenPart_pt[i]);
                 vcp_nosel[0].FillHisto2D("gen__vs__PseudoTrack_m_gen_over_gen", GenPart_pt[i], (Pt_pseudo[i]-GenPart_pt[i])/GenPart_pt[i]);
@@ -730,65 +733,66 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
 
             if(UseFpixel) {
+                double overP = 10000./(Pt_pseudo[i]*cosh(Eta[i]));
                 double newWeight = 1.0;
-                double massForRegions = GetMass(Pt[i]*cosh(Eta[i]),Ih_Strip[i],K,C);
+                double massForRegions = GetMass(Pt_pseudo[i]*cosh(Eta[i]),Ih_Strip[i],K,C);
 
-                //vmrp_regionFpix_all[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                //vmrp_regionFpix_all[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
 
-                if(Pt[i] <= ptcut_) {
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionA_3f4[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionA_3f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionA_3f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionA_3f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionA_4f5[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionA_5f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionA_6f7[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionA_6f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionA_7f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionA_8f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionA_9f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionA_99f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionA_999f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                if(Pt_pseudo[i] <= ptcut_) {
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionA_3f4[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionA_3f6[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionA_3f8[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionA_3f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionA_4f5[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionA_5f6[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionA_6f7[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionA_6f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionA_7f8[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionA_8f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionA_9f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionA_99f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionA_999f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
                     
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionB_3f4[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionB_3f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionB_3f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionB_3f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionB_4f5[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionB_5f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionB_6f7[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionB_6f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionB_7f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionB_8f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix10) ) vmrp_regionB_8f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionB_9f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionB_99f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionB_999f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionB_3f4[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionB_3f6[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionB_3f8[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionB_3f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionB_4f5[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionB_5f6[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionB_6f7[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionB_6f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionB_7f8[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionB_8f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix10) ) vmrp_regionB_8f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionB_9f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionB_99f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionB_999f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
                 }
                 else {
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionC_3f4[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionC_3f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionC_3f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionC_3f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionC_4f5[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionC_5f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionC_6f7[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionC_6f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionC_7f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionC_8f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionC_3f4[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix6) ) vmrp_regionC_3f6[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionC_3f8[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix9) ) vmrp_regionC_3f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionC_4f5[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionC_5f6[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionC_6f7[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionC_6f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionC_7f8[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionC_8f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
                     
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionD_3f4[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionD_3f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionD_4f5[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionD_5f6[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionD_6f7[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionD_6f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionD_7f8[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionD_8f9[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix10) ) vmrp_regionD_8f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionD_9f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionD_99f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
-                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionD_999f10[s].fill(Eta[i], NOM_noL1[i], P[i], Pt[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix4) ) vmrp_regionD_3f4[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix3) && (Fpix[i] <= fpix8) ) vmrp_regionD_3f8[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix4) && (Fpix[i] <= fpix5) ) vmrp_regionD_4f5[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix5) && (Fpix[i] <= fpix6) ) vmrp_regionD_5f6[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix7) ) vmrp_regionD_6f7[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix6) && (Fpix[i] <= fpix9) ) vmrp_regionD_6f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix7) && (Fpix[i] <= fpix8) ) vmrp_regionD_7f8[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix9) ) vmrp_regionD_8f9[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix8) && (Fpix[i] <= fpix10) ) vmrp_regionD_8f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix9) && (Fpix[i] <= fpix10) ) vmrp_regionD_9f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix99) && (Fpix[i] <= fpix10) ) vmrp_regionD_99f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+                    if( (Fpix[i] > fpix999) && (Fpix[i] <= fpix10) ) vmrp_regionD_999f10[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
                 }
             }
 

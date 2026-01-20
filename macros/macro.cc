@@ -24,6 +24,21 @@
     ifile.close();
     std::cout << std::endl;
 
+    std::vector<std::string> QCDnames = {
+        "QCD2024_mu_pt15to20",
+        "QCD2024_mu_pt20to30",
+        "QCD2024_mu_pt30to50",
+        "QCD2024_mu_pt50to80",
+        "QCD2024_mu_pt80to120",
+        "QCD2024_mu_pt120to170",
+        "QCD2024_mu_pt170to300",
+        "QCD2024_mu_pt300to470",
+        "QCD2024_mu_pt470to600",
+        "QCD2024_mu_pt600to800",
+        "QCD2024_mu_pt800to1000",
+        "QCD2024_mu_pt1000"
+    };
+
     TChain* chain;
     if(dataset == "Gluino2000_miniAOD_Mu50") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
@@ -128,7 +143,34 @@
             file.close();
         }
     }
-    
+
+    // else if in the dataset names there is "QCD2024"
+    else if (dataset.find("QCD2024") != std::string::npos) {
+        for (size_t i = 0; i < QCDnames.size(); ++i) {
+            if (dataset == QCDnames[i]) {
+
+                chain = new TChain("HSCPMiniAODAnalyzer/Events");
+
+                std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/";
+                std::string fileName = pathData + "V16p0" + std::to_string(i + 1) + ".txt";
+
+                std::ifstream file(fileName);
+                if (!file.is_open()) {
+                    std::cerr << "Failed to open file: " << fileName << std::endl;
+                    break;
+                }
+
+                std::string line;
+                while (std::getline(file, line)) {
+                    if (!line.empty()) chain->AddFile(line.c_str());
+                }
+
+                file.close();
+                break;
+            }
+        }
+    }
+
 
     else if (dataset == "Data2018_miniAOD") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");

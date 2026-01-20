@@ -30,7 +30,7 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-bool PassHSCPpresel_NoCriteria(int hscpIndex);
+bool PassHSCPpresel_METanalysis(int hscpIndex);
 
 
    int etabins_;
@@ -134,6 +134,8 @@ bool PassHSCPpresel_NoCriteria(int hscpIndex);
    TTreeReaderArray<double> GenPart_phi = {fReader, "GenPart_phi"};
    TTreeReaderArray<double> GenPart_mass = {fReader, "GenPart_mass"};
    TTreeReaderArray<int> GenPart_pdgId = {fReader, "GenPart_pdgId"};
+
+   TTreeReaderArray<double> PthatQCD = {fReader, "weight_generatorBinningValues"};
 
 /*
    // muon info

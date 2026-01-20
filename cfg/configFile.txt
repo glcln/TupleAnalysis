@@ -1,20 +1,33 @@
 #pT cut - eta bins - ih bins - p bins - mass bins - massCut - FPIXbins   -          type               -  version
 
 #70         80        400      1000      400         0          20           GluinoRun2_miniAOD_FULL      V13p0
-#70         80        400      1000      400         0          20           Gluino2000_Run2_METtrgEff      V11p15
-#70         80        400      1000      400         0          20           Gluino2000_Run2_METtrgEff_AOD      V11p15
-70         80        400      1000      400         0          20            Gluino2000_Run2_MET         V11p16
-#70         80        400      1000      400         0          20            Gluino2000_Run2_MET_AOD         V11p16
+#70         80        400      1000      400         0          20           Gluino2000_Run2_METtrgEff    V11p15
+#70         80        400      1000      400         0          20           Gluino2000_Run2_METtrgEff_AOD V11p15
+#70         80        400      1000      400         0          20           Gluino2000_Run2_MET          V11p16
+#70         80        400      1000      400         0          20           Gluino2000_Run2_MET_AOD      V11p16
 
-#70         80        400      1000      400         0          20          Gluino2000_AOD_Mu50          V11p4
+#70         80        400      1000      400         0          20           Gluino2000_AOD_Mu50          V11p4
 
-#70         80        400      1000      400         0          20          Gluino2000_miniAOD_FULL_Mu50   V11p11
-#70         80        400      1000      400         0          20          Gluino2000_AOD_FULL_Mu50   V11p11
+#70         80        400      1000      400         0          20           Gluino2000_miniAOD_FULL_Mu50 V11p11
+#70         80        400      1000      400         0          20           Gluino2000_AOD_FULL_Mu50     V11p11
 
-#70         80        400      1000      400         0          20          Gluino2000_miniAOD_FULL_MET   V11p12
-#70         80        400      1000      400         0          20          Gluino2000_AOD_FULL_MET   V11p12
+#70         80        400      1000      400         0          20           Gluino2000_miniAOD_FULL_MET  V11p12
+#70         80        400      1000      400         0          20           Gluino2000_AOD_FULL_MET      V11p12
 
-#70         80        400      1000      400         0          20          Data2018_miniAOD          V11p2
-#70         80        400      1000      400         0          20          DataMET_2024_test_miniAOD          V12p20
+#70         80        400      1000      400         0          20           Data2018_miniAOD             V11p2
+#70         80        400      1000      400         0          20           DataMET_2024_test_miniAOD    V12p20
 
-#70         80        400      1000      400         0          20          TTbar2024_partial          V15p1
+#70         80        400      1000      400         0          20           TTbar2024_partial            V15p1
+
+#70         80        400      1000      400         0          20           QCD2024_mu_pt15to20          V16p01
+#70         80        400      1000      400         0          20           QCD2024_mu_pt20to30          V16p02
+#70         80        400      1000      400         0          20           QCD2024_mu_pt30to50          V16p03
+#70         80        400      1000      400         0          20           QCD2024_mu_pt50to80          V16p04
+#70         80        400      1000      400         0          20           QCD2024_mu_pt80to120         V16p05
+#70         80        400      1000      400         0          20           QCD2024_mu_pt120to170        V16p06
+#70         80        400      1000      400         0          20           QCD2024_mu_pt170to300        V16p07
+#70         80        400      1000      400         0          20           QCD2024_mu_pt300to470        V16p08
+#70         80        400      1000      400         0          20           QCD2024_mu_pt120to170        V16p09
+#70         80        400      1000      400         0          20           QCD2024_mu_pt600to800        V16p010
+#70         80        400      1000      400         0          20           QCD2024_mu_pt800to1000       V16p011
+#70         80        400      1000      400         0          20           QCD2024_mu_pt1000            V16p012

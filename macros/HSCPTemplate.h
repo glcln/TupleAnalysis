@@ -133,6 +133,8 @@ public :
    TTreeReaderArray<double> GenPart_mass = {fReader, "GenPart_mass"};
    TTreeReaderArray<int> GenPart_pdgId = {fReader, "GenPart_pdgId"};
 
+   TTreeReaderArray<double> PthatQCD = {fReader, "weight_generatorBinningValues"};
+
 /*
    // muon info
    TTreeReaderArray<double> muon_pt = {fReader, "muon_pt"};
