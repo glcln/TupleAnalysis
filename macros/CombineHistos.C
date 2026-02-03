@@ -1355,20 +1355,32 @@ void MET_trg_eff(const char *inputfileDATA, const char *inputfileMC) {
     eff_orMETtrg_RecoPFMET__PseudoCaloMETCut_DATA->Draw("E1");
     eff_orMETtrg_RecoPFMET__PseudoCaloMETCut_MC->Draw("E1 same");
     leg->Draw("same");
+
+    TCanvas *cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET = DrawWithRatio(eff_HLT_PFMET120_PseudoCaloMET_DATA, eff_HLT_PFMET120_PseudoCaloMET_MC, c_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET, "HLT_PFMET120_PFMHT120_IDTight", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_HLT_PFMET120_PFMHT120_IDTight___RecoPFMET = DrawWithRatio(eff_HLT_PFMET120_RecoPFMET_DATA, eff_HLT_PFMET120_RecoPFMET_MC, c_HLT_PFMET120_PFMHT120_IDTight___RecoPFMET, "HLT_PFMET120_PFMHT120_IDTight", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET = DrawWithRatio(eff_HLT_PFHT500_PseudoCaloMET_DATA, eff_HLT_PFHT500_PseudoCaloMET_MC, c_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET, "HLT_PFHT500_PFMET100_PFMHT100_IDTight", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET = DrawWithRatio(eff_HLT_PFHT500_RecoPFMET_DATA, eff_HLT_PFHT500_RecoPFMET_MC, c_HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET, "HLT_PFHT500_PFMET100_PFMHT100_IDTight", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET = DrawWithRatio(eff_HLT_PFMETNoMu120_PseudoCaloMET_DATA, eff_HLT_PFMETNoMu120_PseudoCaloMET_MC, c_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET = DrawWithRatio(eff_HLT_PFMETNoMu120_RecoPFMET_DATA, eff_HLT_PFMETNoMu120_RecoPFMET_MC, c_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET = DrawWithRatio(eff_HLT_MET105_PseudoCaloMET_DATA, eff_HLT_MET105_PseudoCaloMET_MC, c_HLT_MET105_IsoTrk50___PseudoCaloMET, "HLT_MET105_IsoTrk50", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_HLT_MET105_IsoTrk50___RecoPFMET = DrawWithRatio(eff_HLT_MET105_RecoPFMET_DATA, eff_HLT_MET105_RecoPFMET_MC, c_HLT_MET105_IsoTrk50___RecoPFMET, "HLT_MET105_IsoTrk50", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_orMETtrg___PseudoCaloMET = DrawWithRatio(eff_orMETtrg_PseudoCaloMET_DATA, eff_orMETtrg_PseudoCaloMET_MC, c_orMETtrg___PseudoCaloMET, "orMETtrg", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_orMETtrg___RecoPFMET = DrawWithRatio(eff_orMETtrg_RecoPFMET_DATA, eff_orMETtrg_RecoPFMET_MC, c_orMETtrg___RecoPFMET, "orMETtrg", "DATA/MC", "E1 same", "E1 same", false);
+    TCanvas *cRatio_orMETtrg___RecoPFMET__PseudoCaloMETCut = DrawWithRatio(eff_orMETtrg_RecoPFMET__PseudoCaloMETCut_DATA, eff_orMETtrg_RecoPFMET__PseudoCaloMETCut_MC, c_orMETtrg___RecoPFMET__PseudoCaloMETCut, "orMETtrg w/PseudoMET>170GeV", "DATA/MC", "E1 same", "E1 same", false);
         
     // saving
     ofile->cd();
-    c_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET->Write();
-    c_HLT_PFMET120_PFMHT120_IDTight___RecoPFMET->Write();
-    c_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET->Write();
-    c_HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET->Write();
-    c_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET->Write();
-    c_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET->Write();
-    c_HLT_MET105_IsoTrk50___PseudoCaloMET->Write();
-    c_HLT_MET105_IsoTrk50___RecoPFMET->Write();
-    c_orMETtrg___PseudoCaloMET->Write();
-    c_orMETtrg___RecoPFMET->Write();
-    c_orMETtrg___RecoPFMET__PseudoCaloMETCut->Write();
+    cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET->Write();
+    cRatio_HLT_PFMET120_PFMHT120_IDTight___RecoPFMET->Write();
+    cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET->Write();
+    cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET->Write();
+    cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET->Write();
+    cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET->Write();
+    cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET->Write();
+    cRatio_HLT_MET105_IsoTrk50___RecoPFMET->Write();
+    cRatio_orMETtrg___PseudoCaloMET->Write();
+    cRatio_orMETtrg___RecoPFMET->Write();
+    cRatio_orMETtrg___RecoPFMET__PseudoCaloMETCut->Write();
     ofile->Close();
 
 
