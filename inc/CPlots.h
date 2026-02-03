@@ -1,8 +1,8 @@
 #ifndef CPlots_h
 #define CPlots_h
 
-#include <TH1F.h>
-#include <TH2F.h>
+#include <TH1D.h>
+#include <TH2D.h>
 #include <TH3F.h>
 #include <TList.h>
 #include <TFile.h>
@@ -12,7 +12,7 @@
 
 /**
  The class CPlots is used to create, store & fill many histograms.
- The current version contains TH1F but should be extended to TH2F and TProfile.
+ The current version contains TH1D but should be extended to TH2D and TProfile.
  It use std::map as container in order is add histo with the method AddHisto1D.
  Several labels are provide to indentify:
   - the selection
@@ -33,12 +33,16 @@ class CPlots: public TObject{
         //CPlots(const CPlots &c);
         ~CPlots();
         void SetLabels(std::string selection, std::string region="", std::string IasQuantile="", std::string moreinfo="");
+        void AddHisto1F(std::string name, int nbins, float xmin, float xmax, std::string title = "");
+        void AddHisto2F(std::string name, int nbinsx, float xmin, float xmax,int nbinsy,float ymin, float ymax,std::string title = "");
         void AddHisto1D(std::string name, int nbins, float xmin, float xmax, std::string title = "");
         void AddHisto2D(std::string name, int nbinsx, float xmin, float xmax,int nbinsy,float ymin, float ymax,std::string title = "");
-        TH1F* GetHisto1D(std::string name);
-        //TH1F GetHisto1D(std::string name);
+        TH1D* GetHisto1D(std::string name);
+        //TH1D GetHisto1D(std::string name);
         bool FillHisto1D(std::string name, float value, float weight = 1);
         bool FillHisto2D(std::string name, float xvalue,float yvalue, float weight = 1);
+        bool FillHisto1F(std::string name, float value, float weight = 1);
+        bool FillHisto2F(std::string name, float xvalue,float yvalue, float weight = 1);
         using TObject::Write;
         bool Write(TFile* ofile);
         bool AddToList(TList* list);	
@@ -48,8 +52,10 @@ class CPlots: public TObject{
         std::string region_;
         std::string IasQuantile_;
         std::string moreinfo_;
-        std::map<std::string,TH1F*> mh1D_;
-        std::map<std::string,TH2F*> mh2D_;
+        std::map<std::string,TH1D*> mh1D_;
+        std::map<std::string,TH1F*> mh1F_;
+        std::map<std::string,TH2D*> mh2D_;
+        std::map<std::string,TH2F*> mh2F_;
 };
 
 #endif

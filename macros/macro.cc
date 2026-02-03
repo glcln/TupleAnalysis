@@ -1,5 +1,6 @@
 {
     gSystem->Load("../libTools.so");
+    ROOT::EnableImplicitMT(4);
 
     ifstream ifile;
     ifile.open("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/cfg/configFile.txt");
@@ -39,6 +40,40 @@
         "QCD2024_mu_pt1000"
     };
 
+    std::vector<std::string> Wjetsnames = {
+        "Wjets2024_1J_pt40to100",
+        "Wjets2024_1J_pt100to200",
+        "Wjets2024_1J_pt200to400",
+        "Wjets2024_1J_pt400to600",
+        "Wjets2024_1J_pt600",
+        "Wjets2024_2J_pt40to100",
+        "Wjets2024_2J_pt100to200",
+        "Wjets2024_2J_pt200to400",
+        "Wjets2024_2J_pt400to600",
+        "Wjets2024_2J_pt600",
+    };
+
+    std::vector<std::string> JetMETnames = {
+        "JetMET2024C",
+        "JetMET2024D",
+        "JetMET2024E",
+        "JetMET2024F",
+        "JetMET2024G",
+        "JetMET2024H",
+        "JetMET2024I"
+    };
+
+    std::vector<std::string> MuonEGnames = {
+        "MuonEG2024C",
+        "MuonEG2024D",
+        "MuonEG2024E",
+        "MuonEG2024F",
+        "MuonEG2024G",
+        "MuonEG2024H",
+        "MuonEG2024I",
+    };
+
+
     TChain* chain;
     if(dataset == "Gluino2000_miniAOD_Mu50") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
@@ -52,7 +87,7 @@
     if (dataset == "DataMET_2024_test_miniAOD") {
        chain = new TChain("HSCPMiniAODAnalyzer/Events");
        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V12p20/";
-       std::string fileNames[] = { (pathData+"V12p20.txt").c_str()};
+       std::string fileNames[] = { (pathData + "V12p20.txt").c_str()};
        
        for (const std::string& fileName : fileNames) {
             std::ifstream file(fileName);
@@ -85,10 +120,7 @@
         chain = new TChain("HSCPFullAODAnalyzer/Events");
         chain->AddFile("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V13p0/Gluino2000_Run2_vcorr_AOD.root");
     }
-    else if(dataset == "Gluino2000_Run2_MET") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V13p0/Gluino2000_Run2_vcorr.root");
-    }
+    
     
     else if (dataset == "Gluino2000_AOD_FULL_Mu50") {
         chain = new TChain("HSCPFullAODAnalyzer/Events");
@@ -99,10 +131,188 @@
         chain->AddFile("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V13p0/Gluino2000_Run2_vcorr.root");
     }
 
+
+    else if(dataset == "JetMET2024") {
+       chain = new TChain("HSCPMiniAODAnalyzer/Events");
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/JetMET2024/";
+       std::string fileNames[] = { (pathData + "V12p21.txt").c_str()};
+       
+       for (const std::string& fileName : fileNames) {
+            std::ifstream file(fileName);
+            if (!file.is_open()) {
+                std::cerr << "Failed to open file: " << fileName << std::endl;
+                continue;
+            }
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty() && line.back() == '\n') {
+                   line.pop_back();
+                }
+                chain->AddFile(line.c_str());
+            }
+            file.close();
+        }
+    }
+
+    else if (dataset.find("JetMET2024") != std::string::npos) {
+        for (size_t i = 0; i < JetMETnames.size(); ++i) {
+            if (dataset == JetMETnames[i]) {
+
+                chain = new TChain("HSCPMiniAODAnalyzer/Events");
+
+                std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/JetMET2024/";
+                std::string fileName = pathData + "V12p21" + std::to_string(i) + ".txt";
+
+                std::ifstream file(fileName);
+                if (!file.is_open()) {
+                    std::cerr << "Failed to open file: " << fileName << std::endl;
+                    break;
+                }
+
+                std::string line;
+                while (std::getline(file, line)) {
+                    if (!line.empty()) chain->AddFile(line.c_str());
+                }
+
+                file.close();
+                break;
+            }
+        }
+    }
+
+    else if (dataset.find("MuonEG2024") != std::string::npos) {
+        for (size_t i = 0; i < MuonEGnames.size(); ++i) {
+            if (dataset == MuonEGnames[i]) {
+
+                chain = new TChain("HSCPMiniAODAnalyzer/Events");
+
+                std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/MuonEG2024/";
+                std::string fileName = pathData + "V17p0" + std::to_string(i) + ".txt";
+
+                std::ifstream file(fileName);
+                if (!file.is_open()) {
+                    std::cerr << "Failed to open file: " << fileName << std::endl;
+                    break;
+                }
+
+                std::string line;
+                while (std::getline(file, line)) {
+                    if (!line.empty()) chain->AddFile(line.c_str());
+                }
+
+                file.close();
+                break;
+            }
+        }
+    }
+
+    else if (dataset == "TestMuonEG") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/MuonEG2024/";
+            std::string fileName = pathData + "testMuonEG.txt";
+
+            std::ifstream file(fileName);
+            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty()) chain->AddFile(line.c_str());
+            }
+
+            file.close();
+    }
+
+
+    else if (dataset == "Mu2024G") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/Mu2024/";
+            std::string fileName = pathData + "V12p22.txt";
+
+            std::ifstream file(fileName);
+            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty()) chain->AddFile(line.c_str());
+            }
+
+            file.close();
+    }
+
+
+    else if (dataset == "TestMu2024G") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/Mu2024/";
+            std::string fileName = pathData + "testMu2024.txt";
+
+            std::ifstream file(fileName);
+            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty()) chain->AddFile(line.c_str());
+            }
+
+            file.close();
+    }
+
+    else if (dataset == "TestMET2024") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/JetMET2024/";
+            std::string fileName = pathData + "testJetMET.txt";
+
+            std::ifstream file(fileName);
+            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty()) chain->AddFile(line.c_str());
+            }
+
+            file.close();
+    }
+    else if (dataset == "TestTTbar2024") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/TTbar2024/";
+            std::string fileName = pathData + "testTTbar.txt";
+
+            std::ifstream file(fileName);
+            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty()) chain->AddFile(line.c_str());
+            }
+
+            file.close();
+    }
+    else if (dataset == "TestWjets") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/Wjets2024/";
+            std::string fileName = pathData + "testWjets.txt";
+
+            std::ifstream file(fileName);
+            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty()) chain->AddFile(line.c_str());
+            }
+
+            file.close();
+    }
+
+
+
+    else if(dataset == "Gluino2000_Run2_MET") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+        chain->AddFile("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/GluinoRun2corr/Gluino2000_Run2_vcorr.root");
+    }
+
     else if(dataset == "GluinoRun2_miniAOD_FULL") {
        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/V13p0/";
-       std::string fileNames[] = { (pathData+"V13p0.txt").c_str()};
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/GluinoRun2corr/";
+       std::string fileNames[] = { (pathData + "V13p0.txt").c_str()};
        
        for (const std::string& fileName : fileNames) {
             std::ifstream file(fileName);
@@ -122,10 +332,10 @@
     }
 
 
-    else if(dataset == "TTbar2024_partial") {
+    else if(dataset == "TTbar2024") {
        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/";
-       std::string fileNames[] = { (pathData+"V15p1.txt").c_str()};
+       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/TTbar2024/";
+       std::string fileNames[] = { (pathData + "V15p2.txt").c_str()};
        
        for (const std::string& fileName : fileNames) {
             std::ifstream file(fileName);
@@ -151,7 +361,7 @@
 
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
 
-                std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/";
+                std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/QCD2024/";
                 std::string fileName = pathData + "V16p0" + std::to_string(i + 1) + ".txt";
 
                 std::ifstream file(fileName);
@@ -171,15 +381,32 @@
         }
     }
 
+    else if (dataset.find("Wjets2024") != std::string::npos) {
+        for (size_t i = 0; i < Wjetsnames.size(); ++i) {
+            if (dataset == Wjetsnames[i]) {
 
-    else if (dataset == "Data2018_miniAOD") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/Mu_Run2.root");
+                chain = new TChain("HSCPMiniAODAnalyzer/Events");
+
+                std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/Wjets2024/";
+                std::string fileName = pathData + "V14p50" + std::to_string(i + 1) + ".txt";
+
+                std::ifstream file(fileName);
+                if (!file.is_open()) {
+                    std::cerr << "Failed to open file: " << fileName << std::endl;
+                    break;
+                }
+
+                std::string line;
+                while (std::getline(file, line)) {
+                    if (!line.empty()) chain->AddFile(line.c_str());
+                }
+
+                file.close();
+                break;
+            }
+        }
     }
-    else if (dataset == "Data2022_miniAOD") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/Mu_Run3.root");
-    }
+
 
     else {
         std::cout << "Dataset not recognized. Exiting." << std::endl;
@@ -195,6 +422,11 @@
     std::cout << "        code version : " << version << std::endl; 
     std::cout << "Defining regions A,B,C,D with pT cut = " << ptcut << std::endl;
 
+    std::cout << "Implicit MT enabled: " << ROOT::IsImplicitMTEnabled() << std::endl;
+
+    chain->SetCacheSize(200 * 1024 * 1024); // 200 MB
+    chain->AddBranchToCache("*", true);
+    
     chain->Process("HSCPSelector.C+",binning.c_str());
 
     delete chain;

@@ -17,10 +17,18 @@ def HSCPSelectorProto(label):
 def HSCPSelectorImpl(label, instruction):
     #content for C file
     content = "bool HSCPSelector::PassHSCPpresel_"+label+"(int i){\n"
-    content+= "   if (i<0 || i>(int)Pt.GetSize()) {\n"
-    content+= "      cout << i << endl;\n"
-    content+= "      return false;\n"
-    content+= "   }\n"
+    
+    if (label == "CalibPseudoMET"): 
+        content+= "   if (i < 0) {\n"
+        content+= "      cout << i << endl;\n"
+        content+= "      return false;\n"
+        content+= "   }\n"
+    else: 
+        content+= "   if (i<0 || i>(int)Pt.GetSize()) {\n"
+        content+= "      cout << i << endl;\n"
+        content+= "      return false;\n"
+        content+= "   }\n"
+    
     content+= "   return "+instruction+";\n"
     content+= "}\n"
     return content

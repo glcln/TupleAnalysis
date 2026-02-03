@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include "ROOT/RConfig.hxx"
 #include "TObjString.h"
 
 #include "../inc/RegionMassPlot.h"
@@ -31,6 +32,8 @@ public :
 
    //ADD-HSCP-SELECTION
 bool PassHSCPpresel_METanalysis(int hscpIndex);
+
+bool PassHSCPpresel_CalibPseudoMET(int hscpIndex);
 
 
    int etabins_;
@@ -68,8 +71,8 @@ bool PassHSCPpresel_METanalysis(int hscpIndex);
    TTreeReaderValue<bool> HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 = {fReader, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60"};
    TTreeReaderValue<bool> HLT_MET105_IsoTrk50 = {fReader, "HLT_MET105_IsoTrk50"};
 
-   //TTreeReaderValue<bool> HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ = {fReader, "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"};
-   //TTreeReaderValue<bool> HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL = {fReader, "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL"};
+   TTreeReaderValue<bool> HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ = {fReader, "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"};
+   TTreeReaderValue<bool> HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL = {fReader, "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL"};
    
 
    // EVENT INFO
@@ -104,8 +107,8 @@ bool PassHSCPpresel_METanalysis(int hscpIndex);
    TTreeReaderArray<float> Fpix = {fReader, "DeDx_FiPixelNoL1"};
    TTreeReaderArray<float> GStrip = {fReader, "DeDx_GiStrip"};
 
-   //TTreeReaderArray<float> Ih_Strip_oldCorr = {fReader, "DeDx_IhStrip_oldCorr"};
-   //TTreeReaderArray<float> GStrip_oldCorr = {fReader, "DeDx_GiStrip_oldCorr"};
+   TTreeReaderArray<float> Ih_Strip_oldCorr = {fReader, "DeDx_IhStrip_oldCorr"};
+   TTreeReaderArray<float> GStrip_oldCorr = {fReader, "DeDx_GiStrip_oldCorr"};
 
    TTreeReaderArray<float> miniRelIsoAll = {fReader, "IsoTrack_pfMiniRelIsoAll"};
    TTreeReaderArray<float> miniRelIsoChg = {fReader, "IsoTrack_pfMiniRelIsoChg"};
@@ -114,15 +117,10 @@ bool PassHSCPpresel_METanalysis(int hscpIndex);
    TTreeReaderArray<bool> Flag_allMETFilters = {fReader, "Flag_allMETFilters"};
    TTreeReaderArray<double> RecoPFMET = {fReader, "RecoPFMET"};
    TTreeReaderArray<double> RecoPFMET_phi = {fReader, "RecoPFMET_phi"};
-   TTreeReaderArray<double> CaloJets = {fReader, "PseudoMET_viaCaloJets"};
+   TTreeReaderArray<double> PseudoCaloMET = {fReader, "PseudoMET_viaCaloJets"};
    TTreeReaderArray<double> RecoPuppiMET = {fReader, "RecoPuppiMET"};
 
-   //TTreeReaderArray<double> Muon_pt = {fReader, "Muon_pt"};
-   //TTreeReaderArray<double> Muon_eta = {fReader, "Muon_eta"};
-   //TTreeReaderArray<double> Muon_phi = {fReader, "Muon_phi"};
-   //TTreeReaderArray<bool> hasMuon = {fReader, "HSCP_hasMuon"};
-
-   // temp
+   // Pseudo variable (reco in miniAOD)
    TTreeReaderArray<double> Pt_pseudo = {fReader, "IsoTrack_PseudoTrack_pt"};
    //TTreeReaderArray<double> Eta_pseudo = {fReader, "IsoTrack_PseudoTrack_eta"};
    //TTreeReaderArray<double> Phi_pseudo = {fReader, "IsoTrack_PseudoTrack_phi"};
@@ -137,18 +135,23 @@ bool PassHSCPpresel_METanalysis(int hscpIndex);
 
    TTreeReaderArray<double> PthatQCD = {fReader, "weight_generatorBinningValues"};
 
-/*
+
    // muon info
    TTreeReaderArray<double> muon_pt = {fReader, "muon_pt"};
    TTreeReaderArray<double> muon_eta = {fReader, "muon_eta"};
    TTreeReaderArray<double> muon_phi = {fReader, "muon_phi"};
-
+   TTreeReaderArray<bool> muon_isLoose = {fReader, "muon_isLoose"};
+   TTreeReaderArray<bool> muon_isMedium = {fReader, "muon_isMedium"};
+   TTreeReaderArray<bool> muon_isTight = {fReader, "muon_isTight"};
 
    // electron info
    TTreeReaderArray<double> electron_pt = {fReader, "electron_pt"};
    TTreeReaderArray<double> electron_eta = {fReader, "electron_eta"};
    TTreeReaderArray<double> electron_phi = {fReader, "electron_phi"};
-*/
+   TTreeReaderArray<float> electron_isLoose = {fReader, "electron_isLoose"};
+   TTreeReaderArray<float> electron_isMedium = {fReader, "electron_isMedium"};
+   TTreeReaderArray<float> electron_isTight = {fReader, "electron_isTight"};
+
    // only in AOD : 
    //TTreeReaderArray<double> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};
    //TTreeReaderArray<double> RecoCaloMET = {fReader, "RecoCaloMET"};

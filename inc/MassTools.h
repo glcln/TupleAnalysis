@@ -7,8 +7,8 @@
 #include <TFile.h>
 #include <TRandom3.h>
 #include <TMath.h>
-#include <TH1F.h>
-#include <TH2F.h>
+#include <TH1D.h>
+#include <TH2D.h>
 #include <TProfile.h>
 #include <TCanvas.h>
 #include <iostream>
@@ -26,7 +26,7 @@
 
 
 // Function
-TH2F* BetheBlochForMass(float mass);
+TH2D* BetheBlochForMass(float mass);
 
 // Function returning the MassErr as function momentum, dEdx, and errors on momentum and dEdx
 // Not take into account any erros coming from K&C factors because this function is used to see the impact of binning in p and dedx on mass error
@@ -42,9 +42,11 @@ double calculateErrorOnMass(double df_dedx, double df_dp, double sigma_dedx, dou
 float deltaR(float eta1, float phi1, float eta2, float phi2);
 float GetCombMass(float mBeta, float mDeDx);
 float GetCombMassWeighted(float mBeta, float mDeDx,float stdBeta, float stdDeDx);
+void crossHistos(TH2D* res, TH1D* h1, TH1D* h2);
 void crossHistos(TH2F* res, TH1F* h1, TH1F* h2);
 // Function doing the crossing between 1D-histograms of dEdx and momentum and returning a 2D-histogram (p,ih),
 // and respecting the eta binning as in the mass distribution calculation 
+void crossHistosEtaBinning(TH2D* res, TH2D* eta_1oP, TH2D* ih_eta);
 void crossHistosEtaBinning(TH2F* res, TH2F* eta_1oP, TH2F* ih_eta);
 std::vector<double> readScaleFactors(const std::string& fileName);
 double findScaleFactor(double value, const std::vector<std::pair<double, double>>& binRanges, const std::vector<double>& scaleFactors);
