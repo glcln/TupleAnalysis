@@ -10,7 +10,7 @@
 #include "TGraph.h"
 #include <iostream>
 
-TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, std::string RatioTitle, std::string OptionDraw, bool logy) {
+TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, std::string RatioTitle, std::string OptionDraw_h1, std::string OptionDraw_h2, bool logy) {
     if (!h1 || !h2) {
         std::cerr << "DrawWithRatio: h1 or h2 is null! Returning nullptr.\n";
         return nullptr;
@@ -40,8 +40,11 @@ TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, s
         return nullptr;
     }
     h1c->SetTitle(CanvasTitle.c_str());
-    h1c->Draw(OptionDraw.c_str());
-    h2c->Draw("E1 same");
+    h1c->Draw(OptionDraw_h1.c_str());
+    h2c->Draw(OptionDraw_h2.c_str());
+    double overallMax = (h1c->GetMaximum() > h2c->GetMaximum()) ? h1c->GetMaximum() : h2c->GetMaximum();
+    h1c->SetMaximum(overallMax * 1.2);
+
 
     // save the legend and draw it on the new canvas
     TLegend* leg = nullptr;
@@ -67,14 +70,14 @@ TCanvas* DrawWithRatio(TH1* h1, TH1* h2, TCanvas* c1, std::string CanvasTitle, s
 
     // Draw ratio
     pad2->cd();
-    TH1* h_ratio = (TH1*)h2c->Clone(TString("h_ratio_") + CanvasTitle.c_str());
+    TH1* h_ratio = (TH1*)h1c->Clone(TString("h_ratio_") + CanvasTitle.c_str());
     if (!h_ratio) {
         std::cerr << "DrawWithRatio: ratio clone failed.\n";
         return c_new;
     }
-    h_ratio_DATA->Sumw2();
-    h1c_DATA->Sumw2();
-    h_ratio->Divide(h1c);
+    h_ratio->Sumw2();
+    h1c->Sumw2();
+    h_ratio->Divide(h2c);
 
     h_ratio->SetTitle("");
     h_ratio->GetYaxis()->SetTitle(RatioTitle.c_str());
@@ -446,19 +449,19 @@ void MET_trg_eff(const char *ifileName, bool isAOD = false) {
         eff_orMETtrg_RecoCaloMET->Draw("E1");
 
         c_orMETtrg_RecoCaloMET_PseudoCaloMET = DrawWithRatio(eff_orMETtrg_RecoCaloMET, eff_orMETtrg_PseudoCaloMET, c_orMETtrg___RecoCaloMET, "orMETtrg RecoCaloMET vs PseudoCaloMET",
-                        "RecoCaloMET/PseudoCaloMET", "E1 same", false);
+                        "RecoCaloMET/PseudoCaloMET", "E1 same", "E1 same", false);
 
         c_HLT_MET105_IsoTrk50_RecoCaloMET_PseudoCaloMET = DrawWithRatio(eff_HLT_MET105_RecoCaloMET, eff_HLT_MET105_PseudoCaloMET, c_HLT_MET105_IsoTrk50___RecoCaloMET, "HLT_MET105 RecoCaloMET vs PseudoCaloMET",
-                        "RecoCaloMET/PseudoCaloMET", "E1 same", false);
+                        "RecoCaloMET/PseudoCaloMET", "E1 same", "E1 same", false);
         
         c_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_RecoCaloMET_PseudoCaloMET = DrawWithRatio(eff_HLT_PFMETNoMu120_RecoCaloMET, eff_HLT_PFMETNoMu120_PseudoCaloMET, c_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoCaloMET, "HLT_PFMETNoMu120 RecoCaloMET vs PseudoCaloMET",
-                        "RecoCaloMET/PseudoCaloMET", "E1 same", false);
+                        "RecoCaloMET/PseudoCaloMET", "E1 same", "E1 same", false);
 
         c_HLT_PFHT500_PFMET100_PFMHT100_IDTight_RecoCaloMET_PseudoCaloMET = DrawWithRatio(eff_HLT_PFHT500_RecoCaloMET, eff_HLT_PFHT500_PseudoCaloMET, c_HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoCaloMET, "HLT_PFHT500 RecoCaloMET vs PseudoCaloMET",
-                        "RecoCaloMET/PseudoCaloMET", "E1 same", false);
+                        "RecoCaloMET/PseudoCaloMET", "E1 same", "E1 same", false);
 
         c_HLT_PFMET120_PFMHT120_IDTight_RecoCaloMET_PseudoCaloMET = DrawWithRatio(eff_HLT_PFMET120_RecoCaloMET, eff_HLT_PFMET120_PseudoCaloMET, c_HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET, "HLT_PFMET120 RecoCaloMET vs PseudoCaloMET",
-                        "RecoCaloMET/PseudoCaloMET", "E1 same", false);
+                        "RecoCaloMET/PseudoCaloMET", "E1 same", "E1 same", false);
     }
 
 
@@ -566,7 +569,7 @@ void PFMET_Cut(bool isAOD=false) {
         leg_PFMET_nocut->Draw("same");
         leg_PFMET_nocut->SetBorderSize(0);
         leg_PFMET_nocut->SetFillStyle(0);
-        c_PFMET_nocut_ratio = DrawWithRatio(RecoPFMET_AOD, RecoPFMET_miniAOD, c_PFMET_nocut, "RecoPFMET AOD vs miniAOD", "AOD/miniAOD", "E1 same", false);
+        c_PFMET_nocut_ratio = DrawWithRatio(RecoPFMET_AOD, RecoPFMET_miniAOD, c_PFMET_nocut, "RecoPFMET AOD vs miniAOD", "AOD/miniAOD", "E1 same", "E1 same", false);
 
         cout << "c_PFMET_AODcut" << endl;
         TCanvas *c_PFMET_AODcut = new TCanvas("c_PFMET_AODcut","c_PFMET_AODcut",800,800);
@@ -579,7 +582,7 @@ void PFMET_Cut(bool isAOD=false) {
         leg_PFMET_AODcut->Draw("same");
         leg_PFMET_AODcut->SetBorderSize(0);
         leg_PFMET_AODcut->SetFillStyle(0);
-        c_PFMET_AODcut_ratio = DrawWithRatio(RecoPFMET_AOD, RecoPFMET_cutPseudoCaloMET_AOD, c_PFMET_AODcut, "RecoPFMET AOD cut", "wo cut/cut", "E1 same", false);
+        c_PFMET_AODcut_ratio = DrawWithRatio(RecoPFMET_AOD, RecoPFMET_cutPseudoCaloMET_AOD, c_PFMET_AODcut, "RecoPFMET AOD cut", "wo cut/cut", "E1 same", "E1 same", false);
     }
 
     cout << "c_PFMET_miniAODcut" << endl;
@@ -593,7 +596,7 @@ void PFMET_Cut(bool isAOD=false) {
     leg_PFMET_miniAODcut->Draw("same");
     leg_PFMET_miniAODcut->SetBorderSize(0);
     leg_PFMET_miniAODcut->SetFillStyle(0);
-    TCanvas *c_PFMET_miniAODcut_ratio = DrawWithRatio(RecoPFMET_miniAOD, RecoPFMET_cutPseudoCaloMET_miniAOD, c_PFMET_miniAODcut, "RecoPFMET miniAOD cut", "wo cut/cut", "E1 same", false);
+    TCanvas *c_PFMET_miniAODcut_ratio = DrawWithRatio(RecoPFMET_miniAOD, RecoPFMET_cutPseudoCaloMET_miniAOD, c_PFMET_miniAODcut, "RecoPFMET miniAOD cut", "wo cut/cut", "E1 same", "E1 same", false);
 
 
     TCanvas *c_PFMET_CaloMETcut_ratio; TCanvas *c_PFMET_ratio;
@@ -609,7 +612,7 @@ void PFMET_Cut(bool isAOD=false) {
         leg_PFMET_CaloMETcut->Draw("same");
         leg_PFMET_CaloMETcut->SetBorderSize(0);
         leg_PFMET_CaloMETcut->SetFillStyle(0);
-        c_PFMET_CaloMETcut_ratio = DrawWithRatio(RecoPFMET_cutPseudoCaloMET_AOD, RecoPFMET_cutRecoCaloMET_AOD, c_PFMET_CaloMETcut, "RecoPFMET AOD", "PseudoCaloMET cut/RecoCaloMET cut", "E1 same", false);
+        c_PFMET_CaloMETcut_ratio = DrawWithRatio(RecoPFMET_cutPseudoCaloMET_AOD, RecoPFMET_cutRecoCaloMET_AOD, c_PFMET_CaloMETcut, "RecoPFMET AOD", "PseudoCaloMET cut/RecoCaloMET cut", "E1 same", "E1 same", false);
     
             cout << "c_PFMET_onlycut" << endl;
         TCanvas *c_PFMET_onlycut = new TCanvas("c_PFMET_onlycut","c_PFMET_onlycut",800,800);
@@ -622,7 +625,7 @@ void PFMET_Cut(bool isAOD=false) {
         leg_PFMET->Draw("same");
         leg_PFMET->SetBorderSize(0);
         leg_PFMET->SetFillStyle(0);
-        c_PFMET_ratio = DrawWithRatio(RecoPFMET_cutPseudoCaloMET_AOD, RecoPFMET_cutPseudoCaloMET_miniAOD, c_PFMET_onlycut, "RecoPFMET with PseudoCaloMET cut", "AOD/miniAOD", "E1 same", false);
+        c_PFMET_ratio = DrawWithRatio(RecoPFMET_cutPseudoCaloMET_AOD, RecoPFMET_cutPseudoCaloMET_miniAOD, c_PFMET_onlycut, "RecoPFMET with PseudoCaloMET cut", "AOD/miniAOD", "E1 same", "E1 same",false);
     }
     // saving
     cout << "saving histos..." << endl;
@@ -723,7 +726,7 @@ void TrigEff_AODvsMiniAOD() {
     leg_PFMET->Draw("same");
     leg_PFMET->SetBorderSize(0);
     leg_PFMET->SetFillStyle(0);
-    TCanvas *c_PFMET_ratio = DrawWithRatio(eff_orMETtrg_RecoPFMET_miniAOD, eff_orMETtrg_RecoPFMET_AOD, c_PFMET, "RecoPFMET", "miniAOD/AOD", "E1 same", false);
+    TCanvas *c_PFMET_ratio = DrawWithRatio(eff_orMETtrg_RecoPFMET_miniAOD, eff_orMETtrg_RecoPFMET_AOD, c_PFMET, "RecoPFMET", "miniAOD/AOD", "E1 same", "E1 same",false);
 
     TCanvas *c_PseudoCaloMET = new TCanvas("c_PseudoCaloMET","c_PseudoCaloMET",800,800);
     c_PseudoCaloMET->cd();
@@ -735,7 +738,7 @@ void TrigEff_AODvsMiniAOD() {
     leg_PseudoCaloMET->Draw("same");
     leg_PseudoCaloMET->SetBorderSize(0);
     leg_PseudoCaloMET->SetFillStyle(0);
-    TCanvas *c_PseudoCaloMET_ratio = DrawWithRatio(eff_orMETtrg_PseudoCaloMET_miniAOD, eff_orMETtrg_PseudoCaloMET_AOD, c_PseudoCaloMET, "PseudoCaloMET", "miniAOD/AOD", "E1 same", false);
+    TCanvas *c_PseudoCaloMET_ratio = DrawWithRatio(eff_orMETtrg_PseudoCaloMET_miniAOD, eff_orMETtrg_PseudoCaloMET_AOD, c_PseudoCaloMET, "PseudoCaloMET", "miniAOD/AOD", "E1 same", "E1 same",false);
 
 
     // saving
@@ -999,6 +1002,7 @@ void MET_trg_eff(const char *inputfileDATA, const char *inputfileMC) {
     // input histos
     TH1F *PseudoCaloMET_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_PseudoCaloMET");
     TH1F *RecoPFMET_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_RecoPFMET");
+    TH1F *RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_RecoPFMET__PseudoCaloMETCut");
     TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET");
     TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET");            
     TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET");
@@ -1009,10 +1013,11 @@ void MET_trg_eff(const char *inputfileDATA, const char *inputfileMC) {
     TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_if___HLT_MET105_IsoTrk50___RecoPFMET");
     TH1F *if___orMETtrg___PseudoCaloMET_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_if___orMETtrg___PseudoCaloMET");
     TH1F *if___orMETtrg___RecoPFMET_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_if___orMETtrg___RecoPFMET");
-    TH1F *if___orMETtrg___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get("OnlyMET_if___orMETtrg___RecoPFMET__PseudoCaloMETCut");
+    TH1F *if___orMETtrg___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_if___orMETtrg___RecoPFMET__PseudoCaloMETCut");
 
     TH1F *PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_PseudoCaloMET");
     TH1F *RecoPFMET_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_RecoPFMET");
+    TH1F *RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_RecoPFMET__PseudoCaloMETCut");
     TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET");
     TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET");            
     TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET");
@@ -1023,7 +1028,7 @@ void MET_trg_eff(const char *inputfileDATA, const char *inputfileMC) {
     TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_if___HLT_MET105_IsoTrk50___RecoPFMET");
     TH1F *if___orMETtrg___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_if___orMETtrg___PseudoCaloMET");
     TH1F *if___orMETtrg___RecoPFMET_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_if___orMETtrg___RecoPFMET");
-    TH1F *if___orMETtrg___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get("OnlyMET_if___orMETtrg___RecoPFMET__PseudoCaloMETCut");
+    TH1F *if___orMETtrg___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_if___orMETtrg___RecoPFMET__PseudoCaloMETCut");
     
 
     // setup 
@@ -1277,7 +1282,7 @@ void MET_trg_eff(const char *inputfileDATA, const char *inputfileMC) {
     eff_orMETtrg_RecoPFMET__PseudoCaloMETCut_MC->GetYaxis()->SetRangeUser(0, 1);
 
     // legend
-    Tlegend *leg = new TLegend(0.75,0.75,0.85,0.85);
+    TLegend *leg = new TLegend(0.75,0.75,0.85,0.85);
     leg->AddEntry(eff_HLT_PFMET120_PseudoCaloMET_DATA,"DATA","lep");
     leg->AddEntry(eff_HLT_PFMET120_PseudoCaloMET_MC,"MC","lep");
     leg->SetBorderSize(0);
@@ -1381,13 +1386,13 @@ void Comp_ttbar_muonEG(const char *inputfileDATA, const char *inputfileMC) {
     TH1F *electron_pt_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_electron_pt");
     TH1F *electron_eta_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_electron_eta");
     TH1F *electron_phi_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_electron_phi");
-    TH1F *electron_pt_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_electron_pt");
-    TH1F *electron_eta_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_electron_eta");
-    TH1F *electron_phi_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_electron_phi");
-
     TH1F *muon_pt_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_muon_pt");
     TH1F *muon_eta_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_muon_eta");
     TH1F *muon_phi_DATA = (TH1F*)ifileDATA->Get("CalibPseudoMET_muon_phi");
+
+    TH1F *electron_pt_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_electron_pt");
+    TH1F *electron_eta_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_electron_eta");
+    TH1F *electron_phi_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_electron_phi");
     TH1F *muon_pt_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_muon_pt");
     TH1F *muon_eta_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_muon_eta");
     TH1F *muon_phi_MC = (TH1F*)ifileMC->Get("CalibPseudoMET_muon_phi");
@@ -1399,7 +1404,6 @@ void Comp_ttbar_muonEG(const char *inputfileDATA, const char *inputfileMC) {
     electron_eta_DATA->SetMarkerColor(kBlack);
     electron_phi_DATA->SetLineColor(kBlack);
     electron_phi_DATA->SetMarkerColor(kBlack);
-
     muon_pt_DATA->SetLineColor(kBlack);
     muon_pt_DATA->SetMarkerColor(kBlack);
     muon_eta_DATA->SetLineColor(kBlack);
@@ -1416,7 +1420,6 @@ void Comp_ttbar_muonEG(const char *inputfileDATA, const char *inputfileMC) {
     electron_phi_MC->SetLineColor(kAzure+7);
     electron_phi_MC->SetFillColor(kAzure+7);
     electron_phi_MC->SetFillStyle(4050);
-
     muon_pt_MC->SetLineColor(kAzure+7);
     muon_pt_MC->SetFillColor(kAzure+7);
     muon_pt_MC->SetFillStyle(4050);
@@ -1451,49 +1454,61 @@ void Comp_ttbar_muonEG(const char *inputfileDATA, const char *inputfileMC) {
     // canvas 
     TCanvas *c_electron_pt = new TCanvas("c_electron_pt", "c_electron_pt", 800, 800);
     c_electron_pt->cd();
+    electron_pt_DATA->GetYaxis()->SetTitle("Number of tracks (normalized)");
+    electron_pt_DATA->GetXaxis()->SetTitle("Electron p_{T} [GeV]");
     electron_pt_DATA->Draw("E1");
     electron_pt_MC->Draw("HIST same");
     leg->Draw("same");
 
     TCanvas *c_electron_eta = new TCanvas("c_electron_eta", "c_electron_eta", 800, 800);
     c_electron_eta->cd();
+    electron_eta_DATA->GetYaxis()->SetTitle("Number of tracks (normalized)");
+    electron_eta_DATA->GetXaxis()->SetTitle("Electron #eta");
     electron_eta_DATA->Draw("E1");
     electron_eta_MC->Draw("HIST same");
     leg->Draw("same");
 
     TCanvas *c_electron_phi = new TCanvas("c_electron_phi", "c_electron_phi", 800, 800);
     c_electron_phi->cd();
+    electron_phi_DATA->GetYaxis()->SetTitle("Number of tracks (normalized)");
+    electron_phi_DATA->GetXaxis()->SetTitle("Electron #phi");
     electron_phi_DATA->Draw("E1");
     electron_phi_MC->Draw("HIST same");
     leg->Draw("same");
 
     TCanvas *c_muon_pt = new TCanvas("c_muon_pt", "c_muon_pt", 800, 800);
     c_muon_pt->cd();
+    muon_pt_DATA->GetYaxis()->SetTitle("Number of tracks (normalized)");
+    muon_pt_DATA->GetXaxis()->SetTitle("Muon p_{T} [GeV]");
     muon_pt_DATA->Draw("E1");
     muon_pt_MC->Draw("HIST same");
     leg->Draw("same");
 
     TCanvas *c_muon_eta = new TCanvas("c_muon_eta", "c_muon_eta", 800, 800);
     c_muon_eta->cd();
+    muon_eta_DATA->GetYaxis()->SetTitle("Number of tracks (normalized)");
+    muon_eta_DATA->GetXaxis()->SetTitle("Muon #eta");
     muon_eta_DATA->Draw("E1");
     muon_eta_MC->Draw("HIST same");
     leg->Draw("same");
 
     TCanvas *c_muon_phi = new TCanvas("c_muon_phi", "c_muon_phi", 800, 800);
     c_muon_phi->cd();
+    muon_phi_DATA->GetYaxis()->SetTitle("Number of tracks (normalized)");
+    muon_phi_DATA->GetXaxis()->SetTitle("Muon #phi");
     muon_phi_DATA->Draw("E1");
     muon_phi_MC->Draw("HIST same");
     leg->Draw("same");
 
 
     //draw with ratio
-    TCanvas *c_RATIO_electron_pt = DrawWithRatio(electron_pt_DATA, electron_pt_MC, c_electron_pt, "Electron p_{T}", "DATA/MC", "E1 same", false);
-    TCanvas *c_RATIO_electron_eta = DrawWithRatio(electron_eta_DATA, electron_eta_MC, c_electron_eta, "Electron #eta", "DATA/MC", "E1 same", false);
-    TCanvas *c_RATIO_electron_phi = DrawWithRatio(electron_phi_DATA, electron_phi_MC, c_electron_phi, "Electron #phi", "DATA/MC", "E1 same", false);
+    TCanvas *c_RATIO_electron_pt = DrawWithRatio(electron_pt_DATA, electron_pt_MC, c_electron_pt, "Electron p_{T}", "DATA/MC", "E1 same", "hist same", false);
+    TCanvas *c_RATIO_electron_eta = DrawWithRatio(electron_eta_DATA, electron_eta_MC, c_electron_eta, "Electron #eta", "DATA/MC", "E1 same", "hist same", false);
+    TCanvas *c_RATIO_electron_phi = DrawWithRatio(electron_phi_DATA, electron_phi_MC, c_electron_phi, "Electron #phi", "DATA/MC", "E1 same", "hist same", false);
 
-    TCanvas *c_RATIO_muon_pt = DrawWithRatio(muon_pt_DATA, muon_pt_MC, c_muon_pt, "Muon p_{T}", "DATA/MC", "E1 same", false);
-    TCanvas *c_RATIO_muon_eta = DrawWithRatio(muon_eta_DATA, muon_eta_MC, c_muon_eta, "Muon #eta", "DATA/MC", "E1 same", false);
-    TCanvas *c_RATIO_muon_phi = DrawWithRatio(muon_phi_DATA, muon_phi_MC, c_muon_phi, "Muon #phi", "DATA/MC", "E1 same", false);
+    TCanvas *c_RATIO_muon_pt = DrawWithRatio(muon_pt_DATA, muon_pt_MC, c_muon_pt, "Muon p_{T}", "DATA/MC", "E1 same", "hist same", false);
+    TCanvas *c_RATIO_muon_eta = DrawWithRatio(muon_eta_DATA, muon_eta_MC, c_muon_eta, "Muon #eta", "DATA/MC", "E1 same", "hist same", false);
+    TCanvas *c_RATIO_muon_phi = DrawWithRatio(muon_phi_DATA, muon_phi_MC, c_muon_phi, "Muon #phi", "DATA/MC", "E1 same", "hist same", false);
 
 
 
@@ -1506,7 +1521,7 @@ void Comp_ttbar_muonEG(const char *inputfileDATA, const char *inputfileMC) {
     c_RATIO_muon_pt->Write();
     c_RATIO_muon_eta->Write();
     c_RATIO_muon_phi->Write();
-    ofile->close();
+    ofile->Close();
 
     return;
 }
@@ -1529,8 +1544,8 @@ void CombineHistos()
     //Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, false, "_PseudoMETon");
     //Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, true, "_PseudoMETon");
 
-    //MET_trg_eff("../output/MuonEG_V17/MuonEG2024_V17p0_Eta2p4.root", "../output/TTbar2024_V15/TTbar2024_V15p2_Eta2p4.root")
-    Comp_ttbar_muonEG("../output/MuonEG_V17/MuonEG2024_V17p0_Eta2p4.root", "../output/TTbar2024_V15/TTbar2024_V15p2_Eta2p4.root")
+    MET_trg_eff("../output/MuonEG_V17/MuonEG2024_V17p0_Eta2p4.root", "../output/TTbar2024_V15/TTbar2024_V15p2_Eta2p4.root");
+    //Comp_ttbar_muonEG("../output/MuonEG_V17/MuonEG2024_V17p0_Eta2p4.root", "../output/TTbar2024_V15/TTbar2024_V15p2_Eta2p4.root");
 
     return;
 }
