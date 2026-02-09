@@ -1,6 +1,2 @@
-output/*
-output/MuonEG_V17/*
-output/QCD2024_V16/*
-output/TTbar2024_V15/*
-output/Wjets2024_V14/*
-macros/*.root
+*.root
+output/

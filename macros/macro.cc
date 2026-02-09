@@ -3,6 +3,7 @@
     ROOT::EnableImplicitMT(4);
 
     ifstream ifile;
+    // /opt/sbg/cms/safe1/cms/gcoulon
     ifile.open("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/cfg/configFile.txt");
     if(!ifile) std::cout << "Error when opening config file " <<  std::endl;
     std::string line;
@@ -77,11 +78,11 @@
     TChain* chain;
     if(dataset == "Gluino2000_miniAOD_Mu50") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/output_SameminiAOD.root");
+        chain->AddFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/output_SameminiAOD.root");
     }
     else if (dataset == "Gluino2000_AOD_Mu50") {
         chain = new TChain("HSCPFullAODAnalyzer/Events");
-        chain->AddFile("/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/output_SameAOD.root");
+        chain->AddFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/output_SameAOD.root");
     }
 
     if (dataset == "DataMET_2024_test_miniAOD") {
@@ -187,7 +188,7 @@
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
 
                 std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/MuonEG2024/";
-                std::string fileName = pathData + "V17p0" + std::to_string(i) + ".txt";
+                std::string fileName = pathData + "V17p1" + std::to_string(i) + ".txt";
 
                 std::ifstream file(fileName);
                 if (!file.is_open()) {
@@ -335,7 +336,7 @@
     else if(dataset == "TTbar2024") {
        chain = new TChain("HSCPMiniAODAnalyzer/Events");
        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/TTbar2024/";
-       std::string fileNames[] = { (pathData + "V15p2.txt").c_str()};
+       std::string fileNames[] = { (pathData + "V15p3.txt").c_str()};
        
        for (const std::string& fileName : fileNames) {
             std::ifstream file(fileName);
