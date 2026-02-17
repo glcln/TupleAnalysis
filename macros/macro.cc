@@ -64,6 +64,16 @@
         "JetMET2024I"
     };
 
+    std::vector<std::string> Munames = {
+        "Mu2024C",
+        "Mu2024D",
+        "Mu2024E",
+        "Mu2024F",
+        "Mu2024G",
+        "Mu2024H",
+        "Mu2024I"
+    };
+
     std::vector<std::string> MuonEGnames = {
         "MuonEG2024C",
         "MuonEG2024D",
@@ -73,6 +83,57 @@
         "MuonEG2024H",
         "MuonEG2024I",
     };
+
+    std::vector<TString> GluinonamesPythia = {
+        "Gluino_Run3_MET_pythia_1000",
+        "Gluino_Run3_MET_pythia_1200",
+        "Gluino_Run3_MET_pythia_1400",
+        "Gluino_Run3_MET_pythia_1600",
+        "Gluino_Run3_MET_pythia_1800",
+        "Gluino_Run3_MET_pythia_2000",
+        "Gluino_Run3_MET_pythia_2200",
+        "Gluino_Run3_MET_pythia_2400",
+        "Gluino_Run3_MET_pythia_2600"
+    };
+
+    std::vector<TString> GluinonamesMadgraph = {
+        "Gluino_Run3_MET_madgraph_1100",
+        "Gluino_Run3_MET_madgraph_1200",
+        "Gluino_Run3_MET_madgraph_1300",
+        "Gluino_Run3_MET_madgraph_1400",
+        "Gluino_Run3_MET_madgraph_1600",
+        "Gluino_Run3_MET_madgraph_1800",
+        "Gluino_Run3_MET_madgraph_2000",
+        "Gluino_Run3_MET_madgraph_2200",
+        "Gluino_Run3_MET_madgraph_2400",
+        "Gluino_Run3_MET_madgraph_2600"
+    };
+
+    std::vector<TString> GluinoInputnamesPythia = {
+        Form("Par-M-1000_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1200_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1400_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1600_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1800_Code%s_merged.root", version.c_str()),
+        Form("Par-M-2000_Code%s_merged.root", version.c_str()),
+        Form("Par-M-2200_Code%s_merged.root", version.c_str()),
+        Form("Par-M-2400_Code%s_merged.root", version.c_str()),
+        Form("Par-M-2600_Code%s_merged.root", version.c_str())
+    };
+
+    std::vector<TString> GluinoInputnamesMadgraph = {
+        Form("Par-M-1100_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1200_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1300_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1400_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1600_Code%s_merged.root", version.c_str()),
+        Form("Par-M-1800_Code%s_merged.root", version.c_str()),
+        Form("Par-M-2000_Code%s_merged.root", version.c_str()),
+        Form("Par-M-2200_Code%s_merged.root", version.c_str()),
+        Form("Par-M-2400_Code%s_merged.root", version.c_str()),
+        Form("Par-M-2600_Code%s_merged.root", version.c_str())
+    };
+
 
 
     TChain* chain;
@@ -133,27 +194,26 @@
     }
 
 
-    else if(dataset == "JetMET2024") {
-       chain = new TChain("HSCPMiniAODAnalyzer/Events");
-       std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/JetMET2024/";
-       std::string fileNames[] = { (pathData + "V12p21.txt").c_str()};
-       
-       for (const std::string& fileName : fileNames) {
-            std::ifstream file(fileName);
-            if (!file.is_open()) {
-                std::cerr << "Failed to open file: " << fileName << std::endl;
-                continue;
-            }
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty() && line.back() == '\n') {
-                   line.pop_back();
+    else if (dataset.find("Gluino_Run3") != std::string::npos) {
+        if (version=="V19p0") {
+            for (size_t i = 0; i < GluinonamesPythia.size(); ++i) {
+                if (dataset == GluinonamesPythia[i]) {
+                    chain = new TChain("HSCPMiniAODAnalyzer/Events");
+                    chain->AddFile(Form("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/SIGNAL/Gluino_Run3_pythia/%s", GluinoInputnamesPythia[i].Data()));
                 }
-                chain->AddFile(line.c_str());
             }
-            file.close();
+        }
+        else if (version=="V19p1") {
+            for (size_t i = 0; i < GluinonamesMadgraph.size(); ++i) {
+                if (dataset == GluinonamesMadgraph[i]) {
+                    chain = new TChain("HSCPMiniAODAnalyzer/Events");
+                    chain->AddFile(Form("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/SIGNAL/Gluino_Run3_madgraph/%s", GluinoInputnamesMadgraph[i].Data()));
+                }
+            }
         }
     }
+    
+
 
     else if (dataset.find("JetMET2024") != std::string::npos) {
         for (size_t i = 0; i < JetMETnames.size(); ++i) {
@@ -162,7 +222,33 @@
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
 
                 std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/JetMET2024/";
-                std::string fileName = pathData + "V12p21" + std::to_string(i) + ".txt";
+                std::string fileName = pathData + "V12p24" + std::to_string(i) + ".txt";
+
+                std::ifstream file(fileName);
+                if (!file.is_open()) {
+                    std::cerr << "Failed to open file: " << fileName << std::endl;
+                    break;
+                }
+
+                std::string line;
+                while (std::getline(file, line)) {
+                    if (!line.empty()) chain->AddFile(line.c_str());
+                }
+
+                file.close();
+                break;
+            }
+        }
+    }
+
+    else if (dataset.find("Mu2024") != std::string::npos) {
+        for (size_t i = 0; i < Munames.size(); ++i) {
+            if (dataset == Munames[i]) {
+
+                chain = new TChain("HSCPMiniAODAnalyzer/Events");
+
+                std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/Mu2024/";
+                std::string fileName = pathData + "V18p0" + std::to_string(i) + ".txt";
 
                 std::ifstream file(fileName);
                 if (!file.is_open()) {
@@ -188,7 +274,7 @@
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
 
                 std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/MuonEG2024/";
-                std::string fileName = pathData + "V17p1" + std::to_string(i) + ".txt";
+                std::string fileName = pathData + "V17p3" + std::to_string(i) + ".txt";
 
                 std::ifstream file(fileName);
                 if (!file.is_open()) {
@@ -223,25 +309,7 @@
             file.close();
     }
 
-
-    else if (dataset == "Mu2024G") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/Mu2024/";
-            std::string fileName = pathData + "V12p22.txt";
-
-            std::ifstream file(fileName);
-            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
-
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty()) chain->AddFile(line.c_str());
-            }
-
-            file.close();
-    }
-
-
-    else if (dataset == "TestMu2024G") {
+    else if (dataset == "TestMuon2024") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
             std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/Mu2024/";
             std::string fileName = pathData + "testMu2024.txt";
@@ -336,7 +404,7 @@
     else if(dataset == "TTbar2024") {
        chain = new TChain("HSCPMiniAODAnalyzer/Events");
        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/TTbar2024/";
-       std::string fileNames[] = { (pathData + "V15p3.txt").c_str()};
+       std::string fileNames[] = { (pathData + "V15p5.txt").c_str()};
        
        for (const std::string& fileName : fileNames) {
             std::ifstream file(fileName);
@@ -389,7 +457,7 @@
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
 
                 std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/Wjets2024/";
-                std::string fileName = pathData + "V14p50" + std::to_string(i + 1) + ".txt";
+                std::string fileName = pathData + "V14p60" + std::to_string(i + 1) + ".txt";
 
                 std::ifstream file(fileName);
                 if (!file.is_open()) {
@@ -411,6 +479,12 @@
 
     else {
         std::cout << "Dataset not recognized. Exiting." << std::endl;
+        return;
+    }
+
+
+    if (!chain) {
+        std::cerr << "ERROR: chain is null before processing!" << std::endl;
         return;
     }
 

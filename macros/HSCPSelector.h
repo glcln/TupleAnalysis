@@ -31,6 +31,10 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
+bool PassHSCPpresel_CalibPseudoMET_MuWaynocutPt(int hscpIndex);
+
+bool PassHSCPpresel_CalibPseudoMET_MuWay(int hscpIndex);
+
 bool PassHSCPpresel_METanalysis_Eta2p4(int hscpIndex);
 
 bool PassHSCPpresel_METanalysis_Eta1_2p4(int hscpIndex);
@@ -66,6 +70,7 @@ bool PassHSCPpresel_METanalysis_Eta1(int hscpIndex);
 
    // TRIGGERS
    TTreeReaderValue<bool> HLT_Mu50 = {fReader, "HLT_Mu50"};
+   TTreeReaderValue<bool> HLT_IsoMu27 = {fReader, "HLT_IsoMu27"};
    TTreeReaderValue<bool> HLT_FilterOR = {fReader, "HLT_FilterOR"};
 
    TTreeReaderValue<bool> HLT_PFMET120_PFMHT120_IDTight = {fReader, "HLT_PFMET120_PFMHT120_IDTight"};
@@ -73,8 +78,8 @@ bool PassHSCPpresel_METanalysis_Eta1(int hscpIndex);
    TTreeReaderValue<bool> HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 = {fReader, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60"};
    TTreeReaderValue<bool> HLT_MET105_IsoTrk50 = {fReader, "HLT_MET105_IsoTrk50"};
 
-   // TTreeReaderValue<bool> HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ = {fReader, "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"};
-   // TTreeReaderValue<bool> HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL = {fReader, "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL"};
+   TTreeReaderValue<bool> HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ = {fReader, "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ"};
+   TTreeReaderValue<bool> HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL = {fReader, "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL"};
 
    TTreeReaderArray<double> L1MET = {fReader, "L1MET"};
    TTreeReaderArray<float> HLTCaloMET = {fReader, "HLTCaloMET"};
@@ -144,25 +149,25 @@ bool PassHSCPpresel_METanalysis_Eta1(int hscpIndex);
 
 
    // muon info
-   // TTreeReaderArray<double> muon_pt = {fReader, "muon_pt"};
-   // TTreeReaderArray<double> muon_eta = {fReader, "muon_eta"};
-   // TTreeReaderArray<double> muon_phi = {fReader, "muon_phi"};
-   // TTreeReaderArray<bool> muon_isLoose = {fReader, "muon_isLoose"};
-   // TTreeReaderArray<bool> muon_isMedium = {fReader, "muon_isMedium"};
-   // TTreeReaderArray<bool> muon_isTight = {fReader, "muon_isTight"};
-   // TTreeReaderArray<float> muon_trackIso_dr04 = {fReader, "muon_trackIso_dr04"};
-   // TTreeReaderArray<float> muon_pfMiniRelIsoAll = {fReader, "muon_pfMiniRelIsoAll"};
+   TTreeReaderArray<double> muon_pt = {fReader, "muon_pt"};
+   TTreeReaderArray<double> muon_eta = {fReader, "muon_eta"};
+   TTreeReaderArray<double> muon_phi = {fReader, "muon_phi"};
+   TTreeReaderArray<bool> muon_isLoose = {fReader, "muon_isLoose"};
+   TTreeReaderArray<bool> muon_isMedium = {fReader, "muon_isMedium"};
+   TTreeReaderArray<bool> muon_isTight = {fReader, "muon_isTight"};
+   TTreeReaderArray<float> muon_trackIso_dr04 = {fReader, "muon_trackIso_dr04"};
+   TTreeReaderArray<float> muon_pfMiniRelIsoAll = {fReader, "muon_pfMiniRelIsoAll"};
 
 
    // electron info
-   // TTreeReaderArray<double> electron_pt = {fReader, "electron_pt"};
-   // TTreeReaderArray<double> electron_eta = {fReader, "electron_eta"};
-   // TTreeReaderArray<double> electron_phi = {fReader, "electron_phi"};
-   // TTreeReaderArray<float> electron_isLoose = {fReader, "electron_isLoose"};
-   // TTreeReaderArray<float> electron_isMedium = {fReader, "electron_isMedium"};
-   // TTreeReaderArray<float> electron_isTight = {fReader, "electron_isTight"};
-   // TTreeReaderArray<float> electron_trackIso_dr04 = {fReader, "electron_trackIso_dr04"};
-   // TTreeReaderArray<float> electron_pfMiniRelIsoAll = {fReader, "electron_pfMiniRelIsoAll"};
+   TTreeReaderArray<double> electron_pt = {fReader, "electron_pt"};
+   TTreeReaderArray<double> electron_eta = {fReader, "electron_eta"};
+   TTreeReaderArray<double> electron_phi = {fReader, "electron_phi"};
+   TTreeReaderArray<float> electron_isLoose = {fReader, "electron_isLoose"};
+   TTreeReaderArray<float> electron_isMedium = {fReader, "electron_isMedium"};
+   TTreeReaderArray<float> electron_isTight = {fReader, "electron_isTight"};
+   TTreeReaderArray<float> electron_trackIso_dr04 = {fReader, "electron_trackIso_dr04"};
+   TTreeReaderArray<float> electron_pfMiniRelIsoAll = {fReader, "electron_pfMiniRelIsoAll"};
 
    // only in AOD : 
    //TTreeReaderArray<double> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};

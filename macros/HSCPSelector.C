@@ -24,12 +24,28 @@ float K_data2024(2.8202), C_data2024(2.9784); //Data 2024
 
 
 //ADD-SELECTION-METHODS
+bool HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWaynocutPt(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( *HLT_IsoMu27 && muon_pt.GetSize()==1 && Flag_allMETFilters[0] ));
+}
+
+bool HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWay(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( *HLT_IsoMu27 && muon_pt.GetSize()==1 && Flag_allMETFilters[0] ));
+}
+
 bool HSCPSelector::PassHSCPpresel_METanalysis_Eta2p4(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
       return false;
    }
-   return (( (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) && (Flag_allMETFilters[0] == true) && (PseudoCaloMET[0] > 170.) && (Pt[i] > 55.0) && (Pt_pseudo[i] > 55.0) && (abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (abs(dz[i]) < 0.1) && (abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
+   return (( (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) && (Flag_allMETFilters[0] == true) && (PseudoCaloMET[0] > 170.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (abs(dz[i]) < 0.1) && (abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
 }
 
 bool HSCPSelector::PassHSCPpresel_METanalysis_Eta1_2p4(int i){
@@ -37,7 +53,7 @@ bool HSCPSelector::PassHSCPpresel_METanalysis_Eta1_2p4(int i){
       cout << i << endl;
       return false;
    }
-   return (( (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) && (Flag_allMETFilters[0] == true) && (PseudoCaloMET[0] > 170.) && (Pt[i] > 55.0) && (Pt_pseudo[i] > 55.0) && (abs(Eta[i]) < 2.4) && (abs(Eta[i]) >= 1) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (abs(dz[i]) < 0.1) && (abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
+   return (( (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) && (Flag_allMETFilters[0] == true) && (PseudoCaloMET[0] > 170.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (abs(Eta[i]) < 2.4) && (abs(Eta[i]) >= 1) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (abs(dz[i]) < 0.1) && (abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
 }
 
 bool HSCPSelector::PassHSCPpresel_METanalysis_Eta1(int i){
@@ -45,7 +61,7 @@ bool HSCPSelector::PassHSCPpresel_METanalysis_Eta1(int i){
       cout << i << endl;
       return false;
    }
-   return (( (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) && (Flag_allMETFilters[0] == true) && (PseudoCaloMET[0] > 170.) && (Pt[i] > 55.0) && (Pt_pseudo[i] > 55.0) && (abs(Eta[i]) < 1) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (abs(dz[i]) < 0.1) && (abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
+   return (( (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) && (Flag_allMETFilters[0] == true) && (PseudoCaloMET[0] > 170.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (abs(Eta[i]) < 1) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (abs(dz[i]) < 0.1) && (abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
 }
 
 
@@ -67,6 +83,12 @@ void HSCPSelector::Begin(TTree *tree)
 
 
     //FILL-SELECTION-VECTOR
+selections_.push_back(&HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWaynocutPt);
+selLabels_.push_back("CalibPseudoMET_MuWaynocutPt");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWay);
+selLabels_.push_back("CalibPseudoMET_MuWay");
+
 selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_Eta2p4);
 selLabels_.push_back("METanalysis_Eta2p4");
 
@@ -106,7 +128,7 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     fpixbins_ = std::stoi(fpixCutTmp);
 
 
-    if(dataset_.find("2024") != std::string::npos) {//dataset_ == "Gluino2000"){ 
+    if(dataset_.find("2024") != std::string::npos || dataset_.find("Gluino") != std::string::npos) {//dataset_ == "Gluino2000"){ 
         K = K_data2024;
         C = C_data2024;
     }
@@ -115,6 +137,12 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     //-------------------------------------
     //Add selections into a vector - to be updated
     //FILL-SELECTION-VECTOR
+selections_.push_back(&HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWaynocutPt);
+selLabels_.push_back("CalibPseudoMET_MuWaynocutPt");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWay);
+selLabels_.push_back("CalibPseudoMET_MuWay");
+
 selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_Eta2p4);
 selLabels_.push_back("METanalysis_Eta2p4");
 
@@ -326,44 +354,45 @@ selLabels_.push_back("METanalysis_Eta1");
         plots.AddHisto1F(selLabels_[i]+"_PuppiMET", 100, 0, 2500);
         
         plots.AddHisto1F(selLabels_[i]+"_PseudoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___PseudoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___PseudoCaloMET", 100, 0, 2500);
 
         plots.AddHisto1F(selLabels_[i]+"_RecoPFMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___RecoPFMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___RecoPFMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___RecoPFMET", 100, 0, 2500);
 
         plots.AddHisto1F(selLabels_[i]+"_PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", 100, 0, 2500); 
 
         plots.AddHisto1F(selLabels_[i]+"_RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500);         
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
-        // plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500);         
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
+        plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
 
         plots.AddHisto1F(selLabels_[i]+"_RecoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___RecoCaloMET", 100, 0, 2500);
-        // plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___HLT_MET105_IsoTrk50___RecoCaloMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i]+"_if___orMETtrg___RecoCaloMET", 100, 0, 2500);
         
 
         // General plots
         plots.AddHisto1F(selLabels_[i]+"_Ptpseudo", 300, 0, 5000);
         plots.AddHisto1F(selLabels_[i]+"_P", 200, 0, 8000);
+        plots.AddHisto1F(selLabels_[i]+"_pT", 200, 0, 8000);
         plots.AddHisto1F(selLabels_[i]+"_10000oP", 300, 0, 300);
         plots.AddHisto2F(selLabels_[i]+"_10000oP_vs_Eta", 300, 0, 300, 60, -3, +3);
         plots.AddHisto1F(selLabels_[i]+"_eta", 60, -3, +3);
@@ -578,7 +607,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         }
 
         // CUTFLOW
-        singleCut[3] = singleCut[2] && (Pt_pseudo[i] > 55.) && (Pt[i] > 55.);
+        singleCut[3] = singleCut[2] && (Pt_pseudo[i] > 50.) && (Pt[i] > 50.);
         singleCut[4] = singleCut[3] && (fabs(Eta[i]) < 2.4);
         singleCut[5] = singleCut[4] && (NbPixelHit_noL1[i] >= 2);
         singleCut[6] = singleCut[5] && (FracOfValidHit[i] > 0.8);
@@ -605,7 +634,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
         cuts.push_back([&](int i){ return trigger; });
         cuts.push_back([&](int i){ return METfilters; });
         cuts.push_back([&](int i){ return CaloMET_pseudoMET > 170; });
-        cuts.push_back([&](int i){ return (Pt_pseudo[i] > 55.0); }); // && (Pt[i] > 55.0); });
+        cuts.push_back([&](int i){ return (Pt_pseudo[i] > 50.0); }); // && (Pt[i] > 50.0); });
         cuts.push_back([&](int i){ return fabs(Eta[i]) < 2.4; });
         cuts.push_back([&](int i){ return NbPixelHit_noL1[i] >= 2; });
         cuts.push_back([&](int i){ return FracOfValidHit[i] > 0.8; });
@@ -712,101 +741,197 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
 
     // PseudoCaloMET variable calibration
-    // for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
-    //     vcp_nosel[0].FillHisto1F("Nosel_muon_pt", muon_pt[im]);
-    //     vcp_nosel[0].FillHisto1F("Nosel_muon_eta", muon_eta[im]);
-    //     vcp_nosel[0].FillHisto1F("Nosel_muon_phi", muon_phi[im]);
-    //     vcp_nosel[0].FillHisto1F("Nosel_muon_trackIso_dr04", muon_trackIso_dr04[im]);
-    //     vcp_nosel[0].FillHisto1F("Nosel_muon_pfMiniRelIsoAll", muon_pfMiniRelIsoAll[im]);
-    // }
-    // for (unsigned int ie = 0; ie < electron_pt.GetSize(); ie++) {
-    //     vcp_nosel[0].FillHisto1F("Nosel_electron_pt", electron_pt[ie]);
-    //     vcp_nosel[0].FillHisto1F("Nosel_electron_eta", electron_eta[ie]);
-    //     vcp_nosel[0].FillHisto1F("Nosel_electron_phi", electron_phi[ie]);
-    //     vcp_nosel[0].FillHisto1F("Nosel_electron_trackIso_dr04", electron_trackIso_dr04[ie]);
-    //     vcp_nosel[0].FillHisto1F("Nosel_electron_pfMiniRelIsoAll", electron_pfMiniRelIsoAll[ie]);
-    // }
-    // for(unsigned int s=0;s<selections_.size();s++) {
-    //     if (selLabels_[s] == "CalibPseudoMET") {
-    //         bool BasicSel = false;
-    //         unsigned int hasPasseMuon = 0;
-    //         bool atLeastOne_inElectron = false;
+    for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
+        vcp_nosel[0].FillHisto1F("Nosel_muon_pt", muon_pt[im]);
+        vcp_nosel[0].FillHisto1F("Nosel_muon_eta", muon_eta[im]);
+        vcp_nosel[0].FillHisto1F("Nosel_muon_phi", muon_phi[im]);
+        vcp_nosel[0].FillHisto1F("Nosel_muon_trackIso_dr04", muon_trackIso_dr04[im]);
+        vcp_nosel[0].FillHisto1F("Nosel_muon_pfMiniRelIsoAll", muon_pfMiniRelIsoAll[im]);
+    }
+    for (unsigned int ie = 0; ie < electron_pt.GetSize(); ie++) {
+        vcp_nosel[0].FillHisto1F("Nosel_electron_pt", electron_pt[ie]);
+        vcp_nosel[0].FillHisto1F("Nosel_electron_eta", electron_eta[ie]);
+        vcp_nosel[0].FillHisto1F("Nosel_electron_phi", electron_phi[ie]);
+        vcp_nosel[0].FillHisto1F("Nosel_electron_trackIso_dr04", electron_trackIso_dr04[ie]);
+        vcp_nosel[0].FillHisto1F("Nosel_electron_pfMiniRelIsoAll", electron_pfMiniRelIsoAll[ie]);
+    }
+    for(unsigned int s=0;s<selections_.size();s++) {
+        if (selLabels_[s] == "CalibPseudoMET") {
+            bool BasicSel = false;
+            unsigned int hasPassedMuon = 0;
+            unsigned int hasPassedElectron = 0;
+            unsigned int hadPassedHSCP = 0;
 
-    //         if (*HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ && 
-    //             *HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL && 
-    //             muon_pt.GetSize()>0 && electron_pt.GetSize()>0) BasicSel = true;
+            if (*HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ && 
+                *HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL && 
+                muon_pt.GetSize()>0 && electron_pt.GetSize()>0 && Flag_allMETFilters[0]) BasicSel = true;
 
-    //         for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
-    //             if (muon_isTight[im] && muon_pt[im]>50 && muon_pfMiniRelIsoAll[im]<0.15) hasPasseMuon++;
-    //         }
-    //         for (unsigned int ie = 0; ie < electron_pt.GetSize(); ie++) {
-    //             if (electron_isTight[ie]==1 && electron_pt[ie]>20 && electron_pfMiniRelIsoAll[ie]<0.15) atLeastOne_inElectron = true;
-    //         }
+            for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
+                if (muon_isTight[im] && muon_pt[im]>50 && muon_pfMiniRelIsoAll[im]<0.15) hasPassedMuon++;
+            }
+            for (unsigned int ie = 0; ie < electron_pt.GetSize(); ie++) {
+                if (electron_isTight[ie]==1 && electron_pt[ie]>20 && electron_pfMiniRelIsoAll[ie]<0.15) hasPassedElectron++;
+            }
+
+            unsigned int i_track = 0;
+            for(unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){    
+
+                if (!HSCP_hasTrack[j]) continue;
+
+                if ( (Pt[i_track] > 50.0) && (Pt_pseudo[i_track] > 50.0) && (abs(Eta[i_track]) < 2.4) && (NbPixelHit_noL1[i_track] >= 2) && (FracOfValidHit[i_track] > 0.8) && 
+                (NOM_noL1[i_track] >= 10) && (isHighPurityTrack[i_track] == true) && (normChi2[i_track] < 5.0) && (abs(dz[i_track]) < 0.1) && (abs(dxy[i_track]) < 0.02) && 
+                (miniRelIsoAll[i_track] < 0.02) && (IsoSumPt_dr03[i_track] < 15) && (ptOverptErrptErr[i_track] < 0.0008) ) hadPassedHSCP++;
+
+                i_track++;
+            }
             
-    //         if (BasicSel && hasPasseMuon==1 && atLeastOne_inElectron) {
+            if (BasicSel && hasPassedMuon==1 && hasPassedElectron==1 && hadPassedHSCP>0) {
 
-    //             for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
-    //                 if (muon_isTight[im] && muon_pt[im]>50 && muon_pfMiniRelIsoAll[im]<0.15) {
-    //                     vcp[s].FillHisto1F(selLabels_[s]+"_muon_pt", muon_pt[im]);
-    //                     vcp[s].FillHisto1F(selLabels_[s]+"_muon_eta", muon_eta[im]);
-    //                     vcp[s].FillHisto1F(selLabels_[s]+"_muon_phi", muon_phi[im]);
-    //                 }
-    //             }
-    //             for (unsigned int ie = 0; ie < electron_pt.GetSize(); ie++) {
-    //                 if (electron_isTight[ie]==1 && electron_pt[ie]>20 && electron_pfMiniRelIsoAll[ie]<0.15) {
-    //                     vcp[s].FillHisto1F(selLabels_[s]+"_electron_pt", electron_pt[ie]);
-    //                     vcp[s].FillHisto1F(selLabels_[s]+"_electron_eta", electron_eta[ie]);
-    //                     vcp[s].FillHisto1F(selLabels_[s]+"_electron_phi", electron_phi[ie]);
-    //                 }
-    //             }
+                for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
+                    if (muon_isTight[im] && muon_pt[im]>50 && muon_pfMiniRelIsoAll[im]<0.15) {
+                        vcp[s].FillHisto1F(selLabels_[s]+"_muon_pt", muon_pt[im]);
+                        vcp[s].FillHisto1F(selLabels_[s]+"_muon_eta", muon_eta[im]);
+                        vcp[s].FillHisto1F(selLabels_[s]+"_muon_phi", muon_phi[im]);
+                    }
+                }
+                for (unsigned int ie = 0; ie < electron_pt.GetSize(); ie++) {
+                    if (electron_isTight[ie]==1 && electron_pt[ie]>20 && electron_pfMiniRelIsoAll[ie]<0.15) {
+                        vcp[s].FillHisto1F(selLabels_[s]+"_electron_pt", electron_pt[ie]);
+                        vcp[s].FillHisto1F(selLabels_[s]+"_electron_eta", electron_eta[ie]);
+                        vcp[s].FillHisto1F(selLabels_[s]+"_electron_phi", electron_phi[ie]);
+                    }
+                }
                 
-    //             vcp[s].FillHisto1F(selLabels_[s]+"_PuppiMET", RecoPuppiMET[0]);
-    //             vcp[s].FillHisto1F(selLabels_[s]+"_PseudoCaloMET", PseudoCaloMET[0]);
-    //             vcp[s].FillHisto1F(selLabels_[s]+"_RecoPFMET", RecoPFMET[0]);
-    //             if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
-    //             if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
-    //             vcp[s].FillHisto1F(selLabels_[s]+"_L1MET", L1MET[0]);
-    //             vcp[s].FillHisto1F(selLabels_[s]+"_HLTCaloMET", HLTCaloMET[0]);
-    //             vcp[s].FillHisto1F(selLabels_[s]+"_HLTCaloMHT", HLTCaloMHT[0]);
-    //             vcp[s].FillHisto1F(selLabels_[s]+"_HLTPFMHT", HLTPFMHT[0]);
-    //             vcp[s].FillHisto1F(selLabels_[s]+"_HLTPFMET", HLTPFMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_PuppiMET", RecoPuppiMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_PseudoCaloMET", PseudoCaloMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_RecoPFMET", RecoPFMET[0]);
+                if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_L1MET", L1MET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_HLTCaloMET", HLTCaloMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_HLTCaloMHT", HLTCaloMHT[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_HLTPFMHT", HLTPFMHT[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_HLTPFMET", HLTPFMET[0]);
 
-    //             if (*HLT_PFMET120_PFMHT120_IDTight) {
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", PseudoCaloMET[0]);
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", RecoPFMET[0]);
-    //                 if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
-    //                 if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
-    //             }
-    //             if (*HLT_PFHT500_PFMET100_PFMHT100_IDTight) {
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", PseudoCaloMET[0]);
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", RecoPFMET[0]);
-    //                 if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
-    //                 if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
-    //             }
-    //             if (*HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60) {
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", PseudoCaloMET[0]);
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", RecoPFMET[0]);
-    //                 if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
-    //                 if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
-    //             }
-    //             if (*HLT_MET105_IsoTrk50) {
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET", PseudoCaloMET[0]);
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___RecoPFMET", RecoPFMET[0]);
-    //                 if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
-    //                 if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
-    //             }
-    //             if (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
-    //                 || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) {
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___PseudoCaloMET", PseudoCaloMET[0]);
-    //                 vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___RecoPFMET", RecoPFMET[0]);
-    //                 if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
-    //                 if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
-    //             }
+                if (*HLT_PFMET120_PFMHT120_IDTight) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+                if (*HLT_PFHT500_PFMET100_PFMHT100_IDTight) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+                if (*HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+                if (*HLT_MET105_IsoTrk50) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+                if (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
+                    || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
                 
-    //         }
+            }
 
-    //     }
-    // }
+        }
+    }
+
+
+    // using Wjets and Muon dataset
+    for(unsigned int s=0;s<selections_.size();s++) {
+        if (selLabels_[s] == "CalibPseudoMET_MuWay" || selLabels_[s] == "CalibPseudoMET_MuWaynocutPt") {
+            bool BasicSel = false;
+            unsigned int hasPassedMuon = 0;
+            unsigned int hadPassedHSCP = 0;
+
+            if (*HLT_IsoMu27 && muon_pt.GetSize()==1 && Flag_allMETFilters[0]) BasicSel = true;
+
+            for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
+                if (muon_isTight[im] && muon_pt[im]>30 && ((selLabels_[s] == "CalibPseudoMET_MuWay") ? muon_pt[im]<100 : true) && muon_pfMiniRelIsoAll[im]<0.15) hasPassedMuon++;
+            }
+
+            unsigned int i_track = 0;
+            for(unsigned int j=0; j<HSCP_hasTrack.GetSize(); j++){    
+
+                if (!HSCP_hasTrack[j]) continue;
+
+                if ( (Pt[i_track] > 50.0) && (Pt_pseudo[i_track] > 50.0) && (abs(Eta[i_track]) < 2.4) && (NbPixelHit_noL1[i_track] >= 2) && (FracOfValidHit[i_track] > 0.8) && 
+                (NOM_noL1[i_track] >= 10) && (isHighPurityTrack[i_track] == true) && (normChi2[i_track] < 5.0) && (abs(dz[i_track]) < 0.1) && (abs(dxy[i_track]) < 0.02) && 
+                (miniRelIsoAll[i_track] < 0.02) && (EoP[i_track] < 0.3) && (IsoSumPt_dr03[i_track] < 15) && (ptOverptErrptErr[i_track] < 0.0008) && (Fpix[i_track] < 0.9)) hadPassedHSCP++;
+
+                i_track++;
+            }
+            
+            if (BasicSel && hasPassedMuon==1 && hadPassedHSCP>0) {
+
+                for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
+                    if (muon_isTight[im] && muon_pt[im]>30 && ((selLabels_[s] == "CalibPseudoMET_MuWay") ? muon_pt[im]<100 : true) && muon_pfMiniRelIsoAll[im]<0.15) {
+                        vcp[s].FillHisto1F(selLabels_[s]+"_muon_pt", muon_pt[im]);
+                        vcp[s].FillHisto1F(selLabels_[s]+"_muon_eta", muon_eta[im]);
+                        vcp[s].FillHisto1F(selLabels_[s]+"_muon_phi", muon_phi[im]);
+                    }
+                }
+
+                vcp[s].FillHisto1F(selLabels_[s]+"_PuppiMET", RecoPuppiMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_PseudoCaloMET", PseudoCaloMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_RecoPFMET", RecoPFMET[0]);
+                if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_L1MET", L1MET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_HLTCaloMET", HLTCaloMET[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_HLTCaloMHT", HLTCaloMHT[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_HLTPFMHT", HLTPFMHT[0]);
+                vcp[s].FillHisto1F(selLabels_[s]+"_HLTPFMET", HLTPFMET[0]);
+
+                if (*HLT_PFMET120_PFMHT120_IDTight) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+                if (*HLT_PFHT500_PFMET100_PFMHT100_IDTight) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+                if (*HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+                if (*HLT_MET105_IsoTrk50) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+                if (*HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight
+                    || *HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 || *HLT_MET105_IsoTrk50) {
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___PseudoCaloMET", PseudoCaloMET[0]);
+                    vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___RecoPFMET", RecoPFMET[0]);
+                    if (PseudoCaloMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", RecoPFMET[0]);
+                    if (RecoPFMET[0] > 170) vcp[s].FillHisto1F(selLabels_[s]+"_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", PseudoCaloMET[0]);
+                }
+
+            }
+        }
+    }
 
 
 
@@ -861,6 +986,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
                 vcp[s].FillHisto1F(selLabels_[s]+"_Ptpseudo", Pt_pseudo[i_track]);
                 vcp[s].FillHisto1F(selLabels_[s]+"_P", Pt_pseudo[i_track]*cosh(Eta[i_track]));
+                vcp[s].FillHisto1F(selLabels_[s]+"_Pt", Pt_pseudo[i_track]);
                 vcp[s].FillHisto1F(selLabels_[s]+"_10000oP", 10000./(Pt_pseudo[i_track]*cosh(Eta[i_track])));
                 vcp[s].FillHisto2F(selLabels_[s]+"_10000oP_vs_Eta", 10000./(Pt_pseudo[i_track]*cosh(Eta[i_track])), Eta[i_track]);
                 vcp[s].FillHisto1F(selLabels_[s]+"_eta", Eta[i_track]);
@@ -1048,7 +1174,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             if ((this->*selections_[s])(j)) SelPassed = true;
         }
 
-        if (SelPassed && selLabels_[s] == "METanalysis_Eta2p4_EffTrg") { // at least one candidate passes the selection
+        if (SelPassed && (selLabels_[s]!="METanalysis_Eta2p4_EffTrg" || selLabels_[s]!="CalibPseudoMET" || selLabels_[s]!="CalibPseudoMET_MuWay")) { // at least one candidate passes the selection
 
             // Trigger efficiency
             vcp[s].FillHisto1F(selLabels_[s]+"_PuppiMET", RecoPuppiMET[0]);
@@ -1061,6 +1187,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             vcp[s].FillHisto1F(selLabels_[s]+"_HLTCaloMHT", HLTCaloMHT[0]);
             vcp[s].FillHisto1F(selLabels_[s]+"_HLTPFMHT", HLTPFMHT[0]);
             vcp[s].FillHisto1F(selLabels_[s]+"_HLTPFMET", HLTPFMET[0]);
+
 
     //         if (*HLT_PFMET120_PFMHT120_IDTight) {
     //             vcp[s].FillHisto1F(selLabels_[s]+"_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", PseudoCaloMET[0]);

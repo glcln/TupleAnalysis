@@ -10,6 +10,38 @@
 #include "TGraph.h"
 #include <iostream>
 
+TH2F* TransposeTH2(const TH2F* h_in)
+{
+    int nx = h_in->GetNbinsX();
+    int ny = h_in->GetNbinsY();
+
+    const TAxis* ax = h_in->GetXaxis();
+    const TAxis* ay = h_in->GetYaxis();
+
+    std::vector<double> new_xbins, new_ybins;
+
+    for (int j = 1; j <= ny+1; ++j) new_xbins.push_back(ay->GetBinLowEdge(j));
+    for (int i = 1; i <= nx+1; ++i) new_ybins.push_back(ax->GetBinLowEdge(i));
+
+    TH2F* h_out = new TH2F(
+        Form("%s_transposed", h_in->GetName()),
+        Form("%s transposed", h_in->GetTitle()),
+        ny, new_xbins.data(),
+        nx, new_ybins.data()
+    );
+
+    for (int ix = 1; ix <= nx; ++ix) {
+        for (int iy = 1; iy <= ny; ++iy) {
+            double content = h_in->GetBinContent(ix, iy);
+            double error = h_in->GetBinError(ix, iy);
+            h_out->SetBinContent(iy, ix, content);  // swap X <-> Y
+            h_out->SetBinError(iy, ix, error);
+        }
+    }
+
+    return h_out;
+}
+
 
 double GetMinNonZero(const TH1* h) {
     double min = std::numeric_limits<double>::max();
@@ -103,8 +135,8 @@ TCanvas *DrawCanvas(TH1* h,
     hc->SetTitle(CanvasTitle.c_str());
     hc->GetXaxis()->SetTitle(XaxisTitle.c_str());
     hc->GetYaxis()->SetTitle(YaxisTitle.c_str());
-    hc->SetLineColor(kRed);
-    hc->SetMarkerColor(kRed);
+    hc->SetLineColor(kBlack);
+    hc->SetMarkerColor(kBlack);
     hc->Draw(OptionDraw.c_str());
     hc->GetXaxis()->SetRangeUser(Xmin, Xmax);
     if (Ymax == -1) Ymax = 1.2*hc->GetMaximum();
@@ -1245,9 +1277,9 @@ void MET_trg_eff(const char *label, const char *ofilename, const char *inputfile
 }
 
 
-void Comp_ttbar_muonEG(const char *inputfileDATA, const char *inputfileMC) {
+void Comp_muonEG(const char *inputfileDATA, const char *inputfileMC) {
 
-    TFile *ofile = new TFile("PlayWithHistos/Comp_ttbar_muonEG.root", "RECREATE");
+    TFile *ofile = new TFile("PlayWithHistos/Comp_muonEG.root", "RECREATE");
 
     TFile *ifileDATA = new TFile(Form("%s", inputfileDATA), "READ");
     TFile *ifileMC = new TFile(Form("%s", inputfileMC), "READ");
@@ -1389,24 +1421,304 @@ void Comp_ttbar_muonEG(const char *inputfileDATA, const char *inputfileMC) {
 }
 
 
+void Old_vs_New_fits(const char *inputfile) {
+
+    TFile *ofile = new TFile("PlayWithHistos/Old_vs_New_fits.root", "RECREATE");
+    TFile *ifile = new TFile(Form("%s", inputfile), "READ");
+
+    // histograms
+    TH1F* Ih = (TH1F*)ifile->Get("METanalysis_Eta2p4_Ih");
+    TH1F* oP = (TH1F*)ifile->Get("METanalysis_Eta2p4_10000oP");
+
+    TH1F* Ih_new = (TH1F*)Ih->Clone("Ih_new");
+    TH1F* oP_new = (TH1F*)oP->Clone("oP_new");
+
+
+    // 1oP fit
+    float rangemax_p = 30;
+    if (oP->GetBinCenter(oP->GetMaximumBin()) < rangemax_p) rangemax_p = 0.8 * oP->GetBinCenter(oP->GetMaximumBin());
+    TF1 f_p_old("f_p_old","[0]*([1]+erf((log(x)-[2])/[3]))",0,rangemax_p);
+    f_p_old.SetParameter(0,560);
+    f_p_old.FixParameter(1,1.0);
+    f_p_old.SetParameter(2,3.50116e+00);
+    f_p_old.SetParameter(3,0.60152e+00);
+    oP->Fit(&f_p_old,"RL","",0,rangemax_p);
+
+    TF1 f_p_new("f_p_new", "0.5*(exp([0]*x*x+[1]*x)+exp(-[0]*x*x-[1]*x))-1", 0, rangemax_p);
+    float end1oPFit = 0.4 * oP->GetBinCenter(oP->GetMaximumBin());
+    if (end1oPFit > 25) end1oPFit = 25;
+    oP_new->Fit(&f_p_new, "R", "", 0, end1oPFit);
+
+    // Ih fit
+    float max_ih = Ih_new->GetBinCenter(Ih_new->GetMaximumBin());
+    TF1 f_ih_old("f_ih_old", "gaus", 3, 8);
+    f_ih_old.SetParameter(0, 0.5*Ih->Integral());
+    f_ih_old.SetParameter(1, max_ih);
+    f_ih_old.SetParameter(2, Ih->GetStdDev());
+    Ih->Fit(&f_ih_old, "RL", "", 3, 8);
+
+    float start_fit = 1.2*max_ih;
+    int lastBinContent = Ih->GetNbinsX();
+    while(Ih->GetBinContent(lastBinContent)==0) lastBinContent--;
+    if(start_fit > Ih->GetBinCenter(lastBinContent)) start_fit = max_ih;
+    TF1 f_ih_new("f_ih_new", "gaus", start_fit, 6);
+    f_ih_new.SetParameter(0, 0.5*Ih->Integral());
+    f_ih_new.SetParameter(1, max_ih);
+    f_ih_new.SetParameter(2, Ih->GetStdDev());
+    Ih_new->Fit(&f_ih_new, "RL", "", start_fit, 6);
+
+
+    TCanvas *cIhold = DrawCanvas(Ih, "Ih old fit", "Ih [MeV/cm]", "Number of tracks", "E1", 0, 10, 0, -1, false);
+    TCanvas *coPold = DrawCanvas(oP, "oP old fit", "10^{4}/p [GeV^{-1}]", "Number of tracks", "E1", 0, 200, 0, -1, false);
+    TCanvas *cIhnew = DrawCanvas(Ih_new, "Ih new fit", "Ih [MeV/cm]", "Number of tracks", "E1", 0, 10, 0, -1, false);
+    TCanvas *coPnew = DrawCanvas(oP_new, "oP new fit", "10^{4}/p [GeV^{-1}]", "Number of tracks", "E1", 0, 200, 0, -1, false);
+
+    ofile->cd();
+    cIhold->Write();
+    coPold->Write();
+    cIhnew->Write();
+    coPnew->Write();
+    ofile->Close();
+
+
+    return;
+}
+
+
+void BKGdependency(const char *inputname, const char *ofilename) {
+
+    TFile *ofile = new TFile(Form("PlayWithHistos/BKGdependency_%s.root", ofilename), "RECREATE");
+    TFile *ifile = new TFile(Form("%s", inputname), "READ");
+
+    TH2F *pT_vs_fpix = (TH2F*)ifile->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
+
+    TH2F *eta_vs_1oP_A3fp9 = (TH2F*)ifile->Get("eta_1oP_regionA_3fp9_METanalysis_Eta2p4");
+    TH2F *eta_vs_1oP_A9fp10 = (TH2F*)ifile->Get("eta_1oP_regionA_9fp10_METanalysis_Eta2p4");
+    TH2F *eta_vs_1oP_D3fp8 = (TH2F*)ifile->Get("eta_1oP_regionD_3fp8_METanalysis_Eta2p4");
+    TH2F *eta_vs_1oP_D8fp9 = (TH2F*)ifile->Get("eta_1oP_regionD_8fp9_METanalysis_Eta2p4");
+    TH2F *eta_vs_1oP_D9fp10 = (TH2F*)ifile->Get("eta_1oP_regionD_9fp10_METanalysis_Eta2p4");
+
+    TH2F *ih_vs_eta_A3fp9 = (TH2F*)ifile->Get("ih_eta_regionA_3fp9_METanalysis_Eta2p4");
+    TH2F *ih_vs_eta_A9fp10 = (TH2F*)ifile->Get("ih_eta_regionA_9fp10_METanalysis_Eta2p4");
+    TH2F *ih_vs_eta_D3fp8 = (TH2F*)ifile->Get("ih_eta_regionD_3fp8_METanalysis_Eta2p4");
+    TH2F *ih_vs_eta_D8fp9 = (TH2F*)ifile->Get("ih_eta_regionD_8fp9_METanalysis_Eta2p4");
+    TH2F *ih_vs_eta_D9fp10 = (TH2F*)ifile->Get("ih_eta_regionD_9fp10_METanalysis_Eta2p4");
+
+    // add the 4 histograms together
+    TH2F *eta_vs_1oP = (TH2F*)eta_vs_1oP_A3fp9->Clone("eta_vs_1oP");
+    eta_vs_1oP->Add(eta_vs_1oP_A9fp10);
+    eta_vs_1oP->Add(eta_vs_1oP_D3fp8);
+    eta_vs_1oP->Add(eta_vs_1oP_D8fp9);
+    if (strstr(inputname, "TTbar") != nullptr) eta_vs_1oP->Add(eta_vs_1oP_D9fp10);
+    eta_vs_1oP->RebinY(4);
+
+    TH2F *ih_vs_eta = (TH2F*)ih_vs_eta_A3fp9->Clone("ih_vs_eta");
+    ih_vs_eta->Add(ih_vs_eta_A9fp10);
+    ih_vs_eta->Add(ih_vs_eta_D3fp8);
+    ih_vs_eta->Add(ih_vs_eta_D8fp9);
+    if (strstr(inputname, "TTbar") != nullptr) ih_vs_eta->Add(ih_vs_eta_D9fp10);
+    ih_vs_eta->RebinX(4);
+
+    // plot the profile
+    TH2F *oP_vs_eta = TransposeTH2(eta_vs_1oP);
+    TProfile *profile_1oP_vs_eta = oP_vs_eta->ProfileX("profile_1oP_vs_eta");
+    TProfile *profile_ih_vs_eta = ih_vs_eta->ProfileX("profile_ih_vs_eta");
+    TProfile *profile_pT_vs_fpix = pT_vs_fpix->ProfileX("profile_pT_vs_fpix");
+
+    TCanvas *c_eta_vs_1oP = new TCanvas("c_eta_vs_1oP", "c_eta_vs_1oP", 800, 600);
+    oP_vs_eta->GetXaxis()->SetTitle("10^{4}/p [GeV^{-1}]");
+    oP_vs_eta->GetYaxis()->SetTitle("#eta");
+    oP_vs_eta->Draw("COLZ");
+    profile_1oP_vs_eta->SetMarkerStyle(20);
+    profile_1oP_vs_eta->SetMarkerColor(kRed);
+    profile_1oP_vs_eta->SetLineColor(kRed);
+    profile_1oP_vs_eta->Draw("sameP");
+
+    TCanvas *c_ih_vs_eta = new TCanvas("c_ih_vs_eta", "c_ih_vs_eta", 800, 600);
+    ih_vs_eta->GetXaxis()->SetTitle("#eta");
+    ih_vs_eta->GetYaxis()->SetTitle("I_{h} [MeV/cm]");
+    ih_vs_eta->Draw("COLZ");
+    profile_ih_vs_eta->SetMarkerStyle(20);
+    profile_ih_vs_eta->SetMarkerColor(kRed);
+    profile_ih_vs_eta->SetLineColor(kRed);
+    profile_ih_vs_eta->Draw("sameP");
+
+    TCanvas *c_pT_vs_fpix = new TCanvas("c_pT_vs_fpix", "c_pT_vs_fpix", 800, 600);
+    pT_vs_fpix->GetXaxis()->SetTitle("F_{pixel}");
+    pT_vs_fpix->GetYaxis()->SetTitle("p_{T} [GeV]");
+    pT_vs_fpix->Draw("COLZ");
+    profile_pT_vs_fpix->SetMarkerStyle(20);
+    profile_pT_vs_fpix->SetMarkerColor(kRed);
+    profile_pT_vs_fpix->SetLineColor(kRed);
+    profile_pT_vs_fpix->Draw("sameP");
+
+
+    ofile->cd();
+    c_eta_vs_1oP->Write();
+    c_ih_vs_eta->Write();
+    c_pT_vs_fpix->Write();
+    ofile->Close();
+
+    return;
+}
+
+void GluinoP_mass(bool isPythia) {
+
+    TFile *ofile = new TFile(Form("PlayWithHistos/GluinoP_mass_%s.root", isPythia ? "pythia" : "madgraph"), "RECREATE");
+
+    // create a std::vector of ifile where to retrieve the pT vs Fpixel histograms in each:
+    std::vector<TFile*> ifiles;
+    std::vector<TString> labels;
+    if (isPythia) labels = {"1000", "1200", "1400", "1600", "1800", "2000", "2200", "2400", "2600"};
+    else labels = {"1100", "1200", "1300", "1400", "1600", "1800", "2000", "2200", "2400", "2600"};
+
+    for (unsigned int i=0; i<labels.size(); i++) ifiles.push_back(new TFile(Form("../output/Gluino_V19/Gluino_Run3_MET_%s%s_V19p%s.root", isPythia ? "" : "madgraph_", labels[i].Data(), isPythia ? "0" : "1"), "READ"));
+
+    // retrieve the p histogram and plot on the same canvas with different color (+legend)
+    TCanvas *c_p = new TCanvas("c_p", "c_p", 800, 600);
+    TLegend *legend = new TLegend(0.7, 0.5, 0.85, 0.9);
+    for (size_t i = 0; i < ifiles.size(); i++) {
+        TH1F *p = (TH1F*)ifiles[i]->Get("METanalysis_Eta2p4_P");
+        p->SetLineColor(kOrange+i);
+        p->SetLineWidth(2);
+        if (i == 0) p->Draw("HIST");
+        else p->Draw("HIST same");
+        legend->AddEntry(p, Form("#tilde{g} m=%s",labels[i].Data()), "l");
+    }
+    legend->Draw();
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+    c_p->SetLogy();
+
+    // retrieve the pT vs Fpixel histograms, sum all the TH2 together and plot it
+    TH2F *pT_vs_Fpixel_sum = nullptr;
+    float fpix_cut = 0.7;
+    std::vector <TH1D*> pT_distributions;
+    std::vector <TH1D*> pT_distributions_Fpix_cut;
+    std::vector <TH1D*> Fpixel_distributions;
+    for (size_t i = 0; i < ifiles.size(); i++) {
+        TH2F *pT_vs_Fpixel = (TH2F*)ifiles[i]->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
+
+        int nEntries_CR = 0;
+        for (int xbin = 1; xbin <= pT_vs_Fpixel->GetNbinsX(); xbin++) {
+            for (int ybin = 1; ybin <= pT_vs_Fpixel->GetNbinsY(); ybin++) {
+                if (pT_vs_Fpixel->GetXaxis()->GetBinCenter(xbin) <= fpix_cut || pT_vs_Fpixel->GetYaxis()->GetBinCenter(ybin) <= 70) {
+                    nEntries_CR += pT_vs_Fpixel->GetBinContent(xbin, ybin);
+                }
+            }
+        }
+        cout << "Number of entries in the CR (pT<=70 and Fpix<=" << fpix_cut << ") for m=" << labels[i].Data() << ": " << nEntries_CR << " / " << pT_vs_Fpixel->GetEntries() << " (" << 100.0*nEntries_CR/pT_vs_Fpixel->GetEntries() << "%)" << endl;
+
+        TH1D *proj_pT = pT_vs_Fpixel->ProjectionY(Form("pT_%s", labels[i].Data()));
+        TH1D *proj_Fpixel = pT_vs_Fpixel->ProjectionX(Form("Fpixel_%s", labels[i].Data()));
+        pT_distributions.push_back(proj_pT);
+        Fpixel_distributions.push_back(proj_Fpixel);
+
+        // do the proj of pT but with a Fpix cut on the TH2 before
+        TH1D *proj_pT_Fpix_cut = new TH1D(Form("pT_%s_Fpix_cut", labels[i].Data()), Form("pT_%s_Fpix_cut", labels[i].Data()), pT_vs_Fpixel->GetYaxis()->GetNbins(), pT_vs_Fpixel->GetYaxis()->GetXmin(), pT_vs_Fpixel->GetYaxis()->GetXmax());
+        for (int xbin = 1; xbin <= pT_vs_Fpixel->GetNbinsX(); xbin++) {
+            for (int ybin = 1; ybin <= pT_vs_Fpixel->GetNbinsY(); ybin++) {
+                if (pT_vs_Fpixel->GetXaxis()->GetBinCenter(xbin) <= fpix_cut) {
+                    proj_pT_Fpix_cut->Fill(pT_vs_Fpixel->GetYaxis()->GetBinCenter(ybin), pT_vs_Fpixel->GetBinContent(xbin, ybin));
+                }
+            }
+        }
+        pT_distributions_Fpix_cut.push_back(proj_pT_Fpix_cut);
+
+
+        if (pT_vs_Fpixel_sum == nullptr) pT_vs_Fpixel_sum = (TH2F*)pT_vs_Fpixel->Clone("pT_vs_Fpixel_sum");
+        else pT_vs_Fpixel_sum->Add(pT_vs_Fpixel);
+    }
+    TCanvas *c_pT_vs_Fpixel = new TCanvas("c_pT_vs_Fpixel", "c_pT_vs_Fpixel", 800, 600);
+    pT_vs_Fpixel_sum->GetXaxis()->SetTitle("F_{pixel}");
+    pT_vs_Fpixel_sum->GetYaxis()->SetTitle("p_{T} [GeV]");
+    pT_vs_Fpixel_sum->Draw("COLZ");
+    c_pT_vs_Fpixel->SetLogz();
+
+    int nEntries_CR = 0;
+    for (int xbin = 1; xbin <= pT_vs_Fpixel_sum->GetNbinsX(); xbin++) {
+        for (int ybin = 1; ybin <= pT_vs_Fpixel_sum->GetNbinsY(); ybin++) {
+            if (pT_vs_Fpixel_sum->GetXaxis()->GetBinCenter(xbin) <= fpix_cut || pT_vs_Fpixel_sum->GetYaxis()->GetBinCenter(ybin) <= 70) {
+                nEntries_CR += pT_vs_Fpixel_sum->GetBinContent(xbin, ybin);
+            }
+        }
+    }
+    cout << "Number of entries in the CR (pT<=70 and Fpix<=" << fpix_cut << ") (TOTAL): " << nEntries_CR << " / " << pT_vs_Fpixel_sum->GetEntries() << " (" << 100.0*nEntries_CR/pT_vs_Fpixel_sum->GetEntries() << "%)" << endl;
+
+    // plot pT_distributions on the same canvas with different color (+legend)
+    TCanvas *c_pT = new TCanvas("c_pT", "c_pT", 800, 600);
+    TLegend *legend_pT = new TLegend(0.7, 0.5, 0.85, 0.9);
+    for (size_t i = 0; i < pT_distributions.size(); i++) {
+        pT_distributions[i]->SetLineColor(kOrange+i);
+        pT_distributions[i]->SetLineWidth(2);
+        if (i == 0) pT_distributions[i]->Draw("HIST");
+        else pT_distributions[i]->Draw("HIST same");
+        legend_pT->AddEntry(pT_distributions[i], Form("#tilde{g} m=%s",labels[i].Data()), "l");
+    }
+    legend_pT->Draw();
+    legend_pT->SetBorderSize(0);
+    legend_pT->SetFillStyle(0);
+
+    // plot Fpixel_distributions on the same canvas with different color (+legend)
+    TCanvas *c_Fpixel = new TCanvas("c_Fpixel", "c_Fpixel", 800, 600);
+    TLegend *legend_Fpixel = new TLegend(0.7, 0.5, 0.85, 0.9);
+    for (size_t i = 0; i < Fpixel_distributions.size(); i++) {
+        Fpixel_distributions[i]->SetLineColor(kOrange+i);
+        Fpixel_distributions[i]->SetLineWidth(2);
+        if (i == 0) Fpixel_distributions[i]->Draw("HIST");
+        else Fpixel_distributions[i]->Draw("HIST same");
+        legend_Fpixel->AddEntry(Fpixel_distributions[i], Form("#tilde{g} m=%s",labels[i].Data()), "l");
+    }
+    legend_Fpixel->Draw();
+    legend_Fpixel->SetBorderSize(0);
+    legend_Fpixel->SetFillStyle(0);
+
+    TCanvas *c_pT2 = new TCanvas("c_pT2", "c_pT2", 800, 600);
+    for (size_t i = 0; i < pT_distributions_Fpix_cut.size(); i++) {
+        pT_distributions_Fpix_cut[i]->SetLineColor(kOrange+i);
+        pT_distributions_Fpix_cut[i]->SetLineWidth(2);
+        if (i == 0) pT_distributions_Fpix_cut[i]->Draw("HIST");
+        else pT_distributions_Fpix_cut[i]->Draw("HIST same");
+    }
+    legend_pT->Draw();
+
+
+
+    ofile->cd();
+    c_p->Write();
+    pT_vs_Fpixel_sum->Write();
+    c_pT->Write();
+    c_Fpixel->Write();
+    c_pT2->Write();
+    ofile->Close();
+
+}
+
+
 
 void CombineHistos()
 {
-    // MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", false);
-    // MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", true);
-    // PFMET_Cut(false);
-    // TrigEff_AODvsMiniAOD();
+    //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", false);
+    //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", true);
+    //PFMET_Cut(false);
+    //TrigEff_AODvsMiniAOD();
 
-    // Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true, false);
-    // Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true, true);
+    //Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true, false);
+    //Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true, true);
     
-    // Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, false, "_PseudoMETon");
-    // Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, true, "_PseudoMETon");
+    //Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, false, "_PseudoMETon");
+    //Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, true, "_PseudoMETon");
 
-    // MET_trg_eff("CalibPseudoMET", "MET_trg_eff_MC_vs_data", "../output/MuonEG_V17/MuonEG2024_V17p1.root", "../output/TTbar2024_V15/TTbar2024_V15p2.root");
-    MET_trg_eff("METanalysis_Eta2p4_EffTrg", "../output/Gluino_V13/Gluino2000_Run2_MET_V13p1.root", false);
-    // Comp_ttbar_muonEG("../output/MuonEG_V17/MuonEG2024_V17p1.root", "../output/TTbar2024_V15/TTbar2024_V15p2.root");
+    //MET_trg_eff("CalibPseudoMET", "MET_trg_eff_MC_vs_data", "../output/MuonEG_V17/MuonEG2024_V17p3.root", "../output/TTbar2024_V15/TTbar2024_V15p5.root");
+    //MET_trg_eff("METanalysis_Eta2p4_EffTrg", "../output/Gluino_V13/Gluino2000_Run2_MET_V13p1.root", false);
+    //Comp_muonEG("../output/MuonEG_V17/MuonEG2024_V17p3.root", "../output/TTbar2024_V15/TTbar2024_V15p5.root");
 
+    //Old_vs_New_fits("../output/JetMET2024_V12/JetMET2024_V12p24.root");
+    //BKGdependency("../output/TTbar2024_V15/TTbar2024_V15p5.root", "TTbar");
+    //BKGdependency("../output/TTbar2024_V15/.root", "Wjets");
+
+    GluinoP_mass(true);
+    GluinoP_mass(false);
 
     return;
 }
