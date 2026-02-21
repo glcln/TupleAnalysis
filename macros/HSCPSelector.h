@@ -31,10 +31,6 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-bool PassHSCPpresel_CalibPseudoMET_MuWaynocutPt(int hscpIndex);
-
-bool PassHSCPpresel_CalibPseudoMET_MuWay(int hscpIndex);
-
 bool PassHSCPpresel_METanalysis_Eta2p4(int hscpIndex);
 
 bool PassHSCPpresel_METanalysis_Eta1_2p4(int hscpIndex);

@@ -24,22 +24,6 @@ float K_data2024(2.8202), C_data2024(2.9784); //Data 2024
 
 
 //ADD-SELECTION-METHODS
-bool HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWaynocutPt(int i){
-   if (i<0 || i>(int)Pt.GetSize()) {
-      cout << i << endl;
-      return false;
-   }
-   return (( *HLT_IsoMu27 && muon_pt.GetSize()==1 && Flag_allMETFilters[0] ));
-}
-
-bool HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWay(int i){
-   if (i<0 || i>(int)Pt.GetSize()) {
-      cout << i << endl;
-      return false;
-   }
-   return (( *HLT_IsoMu27 && muon_pt.GetSize()==1 && Flag_allMETFilters[0] ));
-}
-
 bool HSCPSelector::PassHSCPpresel_METanalysis_Eta2p4(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
@@ -83,12 +67,6 @@ void HSCPSelector::Begin(TTree *tree)
 
 
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWaynocutPt);
-selLabels_.push_back("CalibPseudoMET_MuWaynocutPt");
-
-selections_.push_back(&HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWay);
-selLabels_.push_back("CalibPseudoMET_MuWay");
-
 selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_Eta2p4);
 selLabels_.push_back("METanalysis_Eta2p4");
 
@@ -137,12 +115,6 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     //-------------------------------------
     //Add selections into a vector - to be updated
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWaynocutPt);
-selLabels_.push_back("CalibPseudoMET_MuWaynocutPt");
-
-selections_.push_back(&HSCPSelector::PassHSCPpresel_CalibPseudoMET_MuWay);
-selLabels_.push_back("CalibPseudoMET_MuWay");
-
 selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_Eta2p4);
 selLabels_.push_back("METanalysis_Eta2p4");
 
@@ -518,6 +490,7 @@ selLabels_.push_back("METanalysis_Eta1");
     
     vcp_nosel.push_back(std::move(plots));
 
+    std::cout << std::endl;
     std::cout << "Got ouf of loop on selections_" <<std::endl;
 }
 
@@ -871,7 +844,8 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
                 if ( (Pt[i_track] > 50.0) && (Pt_pseudo[i_track] > 50.0) && (abs(Eta[i_track]) < 2.4) && (NbPixelHit_noL1[i_track] >= 2) && (FracOfValidHit[i_track] > 0.8) && 
                 (NOM_noL1[i_track] >= 10) && (isHighPurityTrack[i_track] == true) && (normChi2[i_track] < 5.0) && (abs(dz[i_track]) < 0.1) && (abs(dxy[i_track]) < 0.02) && 
-                (miniRelIsoAll[i_track] < 0.02) && (EoP[i_track] < 0.3) && (IsoSumPt_dr03[i_track] < 15) && (ptOverptErrptErr[i_track] < 0.0008) && (Fpix[i_track] < 0.9)) hadPassedHSCP++;
+                (miniRelIsoAll[i_track] < 0.02) && (EoP[i_track] < 0.3) && (IsoSumPt_dr03[i_track] < 15) && (ptOverptErrptErr[i_track] < 0.0008) && 
+                (Fpix[i_track] < 0.9)) hadPassedHSCP++;
 
                 i_track++;
             }
@@ -1174,7 +1148,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             if ((this->*selections_[s])(j)) SelPassed = true;
         }
 
-        if (SelPassed && (selLabels_[s]!="METanalysis_Eta2p4_EffTrg" || selLabels_[s]!="CalibPseudoMET" || selLabels_[s]!="CalibPseudoMET_MuWay")) { // at least one candidate passes the selection
+        if (SelPassed && (selLabels_[s]=="METanalysis_Eta2p4" || selLabels_[s]=="METanalysis_Eta1_2p4" || selLabels_[s]=="METanalysis_Eta1")) { // at least one candidate passes the selection
 
             // Trigger efficiency
             vcp[s].FillHisto1F(selLabels_[s]+"_PuppiMET", RecoPuppiMET[0]);
@@ -1242,6 +1216,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
 void HSCPSelector::SlaveTerminate()
 {
+    std::cout << std::endl;
     cout << "SlaveTerminate called" << endl;
     for(auto obj: vcp) obj.AddToList(fOutput);
     for(auto obj: vcp_nosel) obj.AddToList(fOutput);

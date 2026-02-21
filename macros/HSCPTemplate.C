@@ -448,6 +448,7 @@ void HSCPSelector::SlaveBegin(TTree *tree)
     
     vcp_nosel.push_back(std::move(plots));
 
+    std::cout << std::endl;
     std::cout << "Got ouf of loop on selections_" <<std::endl;
 }
 
@@ -1105,7 +1106,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
             if ((this->*selections_[s])(j)) SelPassed = true;
         }
 
-        if (SelPassed && (selLabels_[s]!="METanalysis_Eta2p4_EffTrg" || selLabels_[s]!="CalibPseudoMET" || selLabels_[s]!="CalibPseudoMET_MuWay")) { // at least one candidate passes the selection
+        if (SelPassed && (selLabels_[s]=="METanalysis_Eta2p4" || selLabels_[s]=="METanalysis_Eta1_2p4" || selLabels_[s]=="METanalysis_Eta1")) { // at least one candidate passes the selection
 
             // Trigger efficiency
             vcp[s].FillHisto1F(selLabels_[s]+"_PuppiMET", RecoPuppiMET[0]);
@@ -1173,6 +1174,7 @@ Bool_t HSCPSelector::Process(Long64_t entry)
 
 void HSCPSelector::SlaveTerminate()
 {
+    std::cout << std::endl;
     cout << "SlaveTerminate called" << endl;
     for(auto obj: vcp) obj.AddToList(fOutput);
     for(auto obj: vcp_nosel) obj.AddToList(fOutput);

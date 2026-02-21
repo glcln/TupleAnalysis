@@ -1492,47 +1492,50 @@ void BKGdependency(const char *inputname, const char *ofilename) {
 
     TH2F *pT_vs_fpix = (TH2F*)ifile->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
 
-    TH2F *eta_vs_1oP_A3fp9 = (TH2F*)ifile->Get("eta_1oP_regionA_3fp9_METanalysis_Eta2p4");
-    TH2F *eta_vs_1oP_A9fp10 = (TH2F*)ifile->Get("eta_1oP_regionA_9fp10_METanalysis_Eta2p4");
-    TH2F *eta_vs_1oP_D3fp8 = (TH2F*)ifile->Get("eta_1oP_regionD_3fp8_METanalysis_Eta2p4");
-    TH2F *eta_vs_1oP_D8fp9 = (TH2F*)ifile->Get("eta_1oP_regionD_8fp9_METanalysis_Eta2p4");
-    TH2F *eta_vs_1oP_D9fp10 = (TH2F*)ifile->Get("eta_1oP_regionD_9fp10_METanalysis_Eta2p4");
-
     TH2F *ih_vs_eta_A3fp9 = (TH2F*)ifile->Get("ih_eta_regionA_3fp9_METanalysis_Eta2p4");
     TH2F *ih_vs_eta_A9fp10 = (TH2F*)ifile->Get("ih_eta_regionA_9fp10_METanalysis_Eta2p4");
     TH2F *ih_vs_eta_D3fp8 = (TH2F*)ifile->Get("ih_eta_regionD_3fp8_METanalysis_Eta2p4");
     TH2F *ih_vs_eta_D8fp9 = (TH2F*)ifile->Get("ih_eta_regionD_8fp9_METanalysis_Eta2p4");
     TH2F *ih_vs_eta_D9fp10 = (TH2F*)ifile->Get("ih_eta_regionD_9fp10_METanalysis_Eta2p4");
 
-    // add the 4 histograms together
-    TH2F *eta_vs_1oP = (TH2F*)eta_vs_1oP_A3fp9->Clone("eta_vs_1oP");
-    eta_vs_1oP->Add(eta_vs_1oP_A9fp10);
-    eta_vs_1oP->Add(eta_vs_1oP_D3fp8);
-    eta_vs_1oP->Add(eta_vs_1oP_D8fp9);
-    if (strstr(inputname, "TTbar") != nullptr) eta_vs_1oP->Add(eta_vs_1oP_D9fp10);
-    eta_vs_1oP->RebinY(4);
+    TH2F *fpix_vs_ih_A3fp9 = (TH2F*)ifile->Get("fpix_ih_regionA_3fp9_METanalysis_Eta2p4");
+    TH2F *fpix_vs_ih_A9fp10 = (TH2F*)ifile->Get("fpix_ih_regionA_9fp10_METanalysis_Eta2p4");
+    TH2F *fpix_vs_ih_D3fp8 = (TH2F*)ifile->Get("fpix_ih_regionD_3fp8_METanalysis_Eta2p4");
+    TH2F *fpix_vs_ih_D8fp9 = (TH2F*)ifile->Get("fpix_ih_regionD_8fp9_METanalysis_Eta2p4");
+    TH2F *fpix_vs_ih_D9fp10 = (TH2F*)ifile->Get("fpix_ih_regionD_9fp10_METanalysis_Eta2p4");
 
+    TH2F *oP_vs_fpix_A3fp9 = (TH2F*)ifile->Get("oP_fpix_regionA_3fp9_METanalysis_Eta2p4");
+    TH2F *oP_vs_fpix_A9fp10 = (TH2F*)ifile->Get("oP_fpix_regionA_9fp10_METanalysis_Eta2p4");
+    TH2F *oP_vs_fpix_D3fp8 = (TH2F*)ifile->Get("oP_fpix_regionD_3fp8_METanalysis_Eta2p4");
+    TH2F *oP_vs_fpix_D8fp9 = (TH2F*)ifile->Get("oP_fpix_regionD_8fp9_METanalysis_Eta2p4");
+    TH2F *oP_vs_fpix_D9fp10 = (TH2F*)ifile->Get("oP_fpix_regionD_9fp10_METanalysis_Eta2p4");
+
+    // add the histograms together
     TH2F *ih_vs_eta = (TH2F*)ih_vs_eta_A3fp9->Clone("ih_vs_eta");
     ih_vs_eta->Add(ih_vs_eta_A9fp10);
     ih_vs_eta->Add(ih_vs_eta_D3fp8);
     ih_vs_eta->Add(ih_vs_eta_D8fp9);
-    if (strstr(inputname, "TTbar") != nullptr) ih_vs_eta->Add(ih_vs_eta_D9fp10);
+    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || || strstr(inputname, "QCD") != nullptr) ih_vs_eta->Add(ih_vs_eta_D9fp10);
     ih_vs_eta->RebinX(4);
 
-    // plot the profile
-    TH2F *oP_vs_eta = TransposeTH2(eta_vs_1oP);
-    TProfile *profile_1oP_vs_eta = oP_vs_eta->ProfileX("profile_1oP_vs_eta");
-    TProfile *profile_ih_vs_eta = ih_vs_eta->ProfileX("profile_ih_vs_eta");
-    TProfile *profile_pT_vs_fpix = pT_vs_fpix->ProfileX("profile_pT_vs_fpix");
+    TH2F *fpix_vs_ih = (TH2F*)fpix_vs_ih_A3fp9->Clone("fpix_vs_ih");
+    fpix_vs_ih->Add(fpix_vs_ih_A9fp10);
+    fpix_vs_ih->Add(fpix_vs_ih_D3fp8);
+    fpix_vs_ih->Add(fpix_vs_ih_D8fp9);
+    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || || strstr(inputname, "QCD") != nullptr) fpix_vs_ih->Add(fpix_vs_ih_D9fp10);
 
-    TCanvas *c_eta_vs_1oP = new TCanvas("c_eta_vs_1oP", "c_eta_vs_1oP", 800, 600);
-    oP_vs_eta->GetXaxis()->SetTitle("10^{4}/p [GeV^{-1}]");
-    oP_vs_eta->GetYaxis()->SetTitle("#eta");
-    oP_vs_eta->Draw("COLZ");
-    profile_1oP_vs_eta->SetMarkerStyle(20);
-    profile_1oP_vs_eta->SetMarkerColor(kRed);
-    profile_1oP_vs_eta->SetLineColor(kRed);
-    profile_1oP_vs_eta->Draw("sameP");
+    TH2F *oP_vs_fpix = (TH2F*)oP_vs_fpix_A3fp9->Clone("oP_vs_fpix");
+    oP_vs_fpix->Add(oP_vs_fpix_A9fp10);
+    oP_vs_fpix->Add(oP_vs_fpix_D3fp8);
+    oP_vs_fpix->Add(oP_vs_fpix_D8fp9);
+    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || || strstr(inputname, "QCD") != nullptr) oP_vs_fpix->Add(oP_vs_fpix_D9fp10);
+    TH2F *fpix_vs_oP = TransposeTH2(oP_vs_fpix);
+
+    // plot the profile
+    TProfile *profile_ih_vs_eta = ih_vs_eta->ProfileX("profile_ih_vs_eta");
+    TProfile *profile_fpix_vs_ih = fpix_vs_ih->ProfileX("profile_fpix_vs_ih");
+    TProfile *profile_fpix_vs_oP = fpix_vs_oP->ProfileX("profile_fpix_vs_oP");
+    TProfile *profile_pT_vs_fpix = pT_vs_fpix->ProfileX("profile_pT_vs_fpix");
 
     TCanvas *c_ih_vs_eta = new TCanvas("c_ih_vs_eta", "c_ih_vs_eta", 800, 600);
     ih_vs_eta->GetXaxis()->SetTitle("#eta");
@@ -1542,6 +1545,24 @@ void BKGdependency(const char *inputname, const char *ofilename) {
     profile_ih_vs_eta->SetMarkerColor(kRed);
     profile_ih_vs_eta->SetLineColor(kRed);
     profile_ih_vs_eta->Draw("sameP");
+
+    TCanvas *c_fpix_vs_ih = new TCanvas("c_fpix_vs_ih", "c_fpix_vs_ih", 800, 600);
+    fpix_vs_ih->GetXaxis()->SetTitle("F_{pixel}");
+    fpix_vs_ih->GetYaxis()->SetTitle("I_{h} [MeV/cm]");
+    fpix_vs_ih->Draw("COLZ");
+    profile_fpix_vs_ih->SetMarkerStyle(20);
+    profile_fpix_vs_ih->SetMarkerColor(kRed);
+    profile_fpix_vs_ih->SetLineColor(kRed);
+    profile_fpix_vs_ih->Draw("sameP");
+
+    TCanvas *c_oP_vs_fpix = new TCanvas("c_oP_vs_fpix", "c_oP_vs_fpix", 800, 600);
+    fpix_vs_oP->GetXaxis()->SetTitle("F_{pixel}");
+    fpix_vs_oP->GetYaxis()->SetTitle("10^{4}/p [GeV^{-1}]");
+    fpix_vs_oP->Draw("COLZ");
+    profile_fpix_vs_oP->SetMarkerStyle(20);
+    profile_fpix_vs_oP->SetMarkerColor(kRed);
+    profile_fpix_vs_oP->SetLineColor(kRed);
+    profile_fpix_vs_oP->Draw("sameP");
 
     TCanvas *c_pT_vs_fpix = new TCanvas("c_pT_vs_fpix", "c_pT_vs_fpix", 800, 600);
     pT_vs_fpix->GetXaxis()->SetTitle("F_{pixel}");
@@ -1553,9 +1574,12 @@ void BKGdependency(const char *inputname, const char *ofilename) {
     profile_pT_vs_fpix->Draw("sameP");
 
 
+
+
     ofile->cd();
-    c_eta_vs_1oP->Write();
     c_ih_vs_eta->Write();
+    c_fpix_vs_ih->Write();
+    c_oP_vs_fpix->Write();
     c_pT_vs_fpix->Write();
     ofile->Close();
 
@@ -1695,11 +1719,58 @@ void GluinoP_mass(bool isPythia) {
 }
 
 
+void CompareMaping() {
+
+    TFile *ofile = new TFile("PlayWithHistos/CompareMapping.root", "RECREATE");
+
+    TFile *ifileTTbar2024 = new TFile("../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "READ");
+    TFile *ifileWjets2024 = new TFile("../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root", "READ");
+    TFile *ifileQCD2024 = new TFile("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "READ");
+    TFile *GluinoRun3madgraph = new TFile("PlayWithHistos/GluinoP_mass_madgraph.root", "READ");
+
+
+    // load histograms
+    TH2F *pT_vs_fpix_ttbar = (TH2F*)ifileTTbar2024->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
+    TH2F *pT_vs_fpix_wjets = (TH2F*)ifileWjets2024->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
+    TH2F *pT_vs_fpix_qcd = (TH2F*)ifileQCD2024->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
+    TH2F *pT_vs_fpix_gluino = (TH2F*)GluinoRun3madgraph->Get("pT_vs_Fpixel_sum");
+
+    // sum the MC backgrounds together
+    TH2F *pT_vs_fpix_bkg = (TH2F*)pT_vs_fpix_ttbar->Clone("pT_vs_fpix_bkg");
+    pT_vs_fpix_bkg->Add(pT_vs_fpix_wjets);
+    pT_vs_fpix_bkg->Add(pT_vs_fpix_qcd);
+
+    // divide the gluino histogram by the bkg histogram to see where the signal is enhanced
+    TH2F *pT_vs_fpix_ratio = (TH2F*)pT_vs_fpix_gluino->Clone("pT_vs_fpix_ratio");
+    pT_vs_fpix_ratio->Divide(pT_vs_fpix_bkg);
+
+    // canvas of the ratio
+    TCanvas *c_ratio = new TCanvas("c_ratio", "c_ratio", 800, 600);
+    pT_vs_fpix_ratio->GetXaxis()->SetTitle("F_{pixel}");
+    pT_vs_fpix_ratio->GetYaxis()->SetTitle("p_{T} [GeV]");
+    pT_vs_fpix_ratio->Draw("COLZ");
+
+    Tcanvas *c_bkg_gluino = new TCanvas("c_bkg_gluino", "c_bkg_gluino", 800, 600);
+    pT_vs_fpix_bkg->GetXaxis()->SetTitle("F_{pixel}");
+    pT_vs_fpix_bkg->GetYaxis()->SetTitle("p_{T} [GeV]");
+    pT_vs_fpix_bkg->Draw("COLZ");
+    pT_vs_fpix_gluino->SetLineColor(kRed);
+    pT_vs_fpix_gluino->Draw("COLZ same");
+
+    ofile->cd();
+    c_ratio->Write();
+    c_bkg_gluino->Write();
+    ofile->Close();
+
+    return;
+}
+
 
 void CombineHistos()
 {
     //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", false);
     //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", true);
+    MET_trg_eff("../output/Gluino_V19/Gluino_Run3_MET_2000_V19p0.root", false);
     //PFMET_Cut(false);
     //TrigEff_AODvsMiniAOD();
 
@@ -1712,13 +1783,19 @@ void CombineHistos()
     //MET_trg_eff("CalibPseudoMET", "MET_trg_eff_MC_vs_data", "../output/MuonEG_V17/MuonEG2024_V17p3.root", "../output/TTbar2024_V15/TTbar2024_V15p5.root");
     //MET_trg_eff("METanalysis_Eta2p4_EffTrg", "../output/Gluino_V13/Gluino2000_Run2_MET_V13p1.root", false);
     //Comp_muonEG("../output/MuonEG_V17/MuonEG2024_V17p3.root", "../output/TTbar2024_V15/TTbar2024_V15p5.root");
+    //MET_trg_eff("CalibPseudoMET_MuWay", "MET_trg_eff_MCwjet_vs_data", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root");
+    //MET_trg_eff("CalibPseudoMET_MuWaynocutPt", "MET_trg_eff_MCwjetNoptcut_vs_data", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root");
+    
 
     //Old_vs_New_fits("../output/JetMET2024_V12/JetMET2024_V12p24.root");
-    //BKGdependency("../output/TTbar2024_V15/TTbar2024_V15p5.root", "TTbar");
-    //BKGdependency("../output/TTbar2024_V15/.root", "Wjets");
+    BKGdependency("../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "TTbar");
+    BKGdependency("../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root", "Wjets");
+    BKGdependency("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "QCD");
 
-    GluinoP_mass(true);
-    GluinoP_mass(false);
+    CompareMaping();
+
+    //GluinoP_mass(true);
+    //GluinoP_mass(false);
 
     return;
 }

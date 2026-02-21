@@ -431,7 +431,7 @@
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
 
                 std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/QCD2024/";
-                std::string fileName = pathData + "V16p0" + std::to_string(i + 1) + ".txt";
+                std::string fileName = pathData + "V16p1" + std::to_string(i + 1) + ".txt";
 
                 std::ifstream file(fileName);
                 if (!file.is_open()) {

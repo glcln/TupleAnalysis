@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG=/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/cfg/configFile.txt
+CONFIG=/opt/sbg/cms/safe1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/cfg/configFile.txt
 
 # Build the selector
 cd python
