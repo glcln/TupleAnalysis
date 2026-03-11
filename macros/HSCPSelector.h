@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include "ROOT/RConfig.hxx"
 #include "TObjString.h"
 
@@ -31,11 +32,9 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-bool PassHSCPpresel_METanalysis_Eta2p4(int hscpIndex);
+bool PassHSCPpresel_CalibPseudoMET(int hscpIndex);
 
-bool PassHSCPpresel_METanalysis_Eta1_2p4(int hscpIndex);
-
-bool PassHSCPpresel_METanalysis_Eta1(int hscpIndex);
+bool PassHSCPpresel_CalibPseudoMET_isRescaled(int hscpIndex);
 
 
    int etabins_;
@@ -57,7 +56,14 @@ bool PassHSCPpresel_METanalysis_Eta1(int hscpIndex);
    std::vector<unsigned int> OnlyIn_MiniAOD;
    bool isAOD = false;
    bool isMiniAOD = false;
-   
+
+   // DATA-MC SF for the signal (derived from the trigg. eff.)
+   std::vector <float> SF_triggerEff;
+   std::vector <float> SF_PseudoMETvalue;
+   bool SFisUp;
+   bool SFisDown;
+   std::vector <float> SF_triggerEff_NOTrescaled;
+   std::vector <float> SF_PseudoMETvalue_NOTrescaled;
 
    TFile* fout;
 
@@ -88,11 +94,14 @@ bool PassHSCPpresel_METanalysis_Eta1(int hscpIndex);
    TTreeReaderValue<uint32_t> Run = {fReader, "run"};
    TTreeReaderValue<uint32_t> Lumi = {fReader, "luminosityBlock"};
    TTreeReaderValue<uint32_t> PV_npvsGood = {fReader, "PV_npvsGood"};
+   TTreeReaderValue<int> trueNPV = {fReader, "trueNPV"};
+   TTreeReaderValue<uint32_t> HSCP_n = {fReader, "HSCP_n"};
+   TTreeReaderValue<float> weightPU = {fReader, "weightPU"};
+   
 
    // TRACK INFO
    TTreeReaderArray<int> PF_type = {fReader, "IsoTrack_pfType"};
    TTreeReaderArray<int> HSCP_type = {fReader, "HSCP_type"};
-   TTreeReaderArray<uint32_t> HSCP_n = {fReader, "HSCP_n"};
    TTreeReaderArray<bool> HSCP_hasTrack = {fReader, "HSCP_hasTrack"};
    TTreeReaderArray<bool> HSCP_hasDeDx = {fReader, "HSCP_hasDeDx"};
    TTreeReaderArray<double> P = {fReader, "IsoTrack_p"};
@@ -109,13 +118,15 @@ bool PassHSCPpresel_METanalysis_Eta1(int hscpIndex);
    TTreeReaderArray<double> ptOverptErr = {fReader, "IsoTrack_ptErrOverPt"};
    
    TTreeReaderArray<float> Ih_Strip = {fReader, "DeDx_IhStrip"};
+   TTreeReaderArray<float> Ih_Strip_noSF = {fReader, "DeDx_IhStrip_noSF"};
+   TTreeReaderArray<float> Ih_Strip_oldCorr = {fReader, "DeDx_IhStrip_oldCorr"};
+
    TTreeReaderArray<uint32_t> NbPixelHit_noL1 = {fReader, "DeDx_PixelNoL1NOM"};
    TTreeReaderArray<uint32_t> NOM_noL1 = {fReader, "DeDx_NoL1NOM"};
    TTreeReaderArray<double> FracOfValidHit = {fReader, "IsoTrack_fractionOfValidHits"};
+   
    TTreeReaderArray<float> Fpix = {fReader, "DeDx_FiPixelNoL1"};
    TTreeReaderArray<float> GStrip = {fReader, "DeDx_GiStrip"};
-
-   TTreeReaderArray<float> Ih_Strip_oldCorr = {fReader, "DeDx_IhStrip_oldCorr"};
    TTreeReaderArray<float> GStrip_oldCorr = {fReader, "DeDx_GiStrip_oldCorr"};
 
    TTreeReaderArray<float> miniRelIsoAll = {fReader, "IsoTrack_pfMiniRelIsoAll"};

@@ -51,4 +51,5 @@ void crossHistosEtaBinning(TH2F* res, TH2F* eta_1oP, TH2F* ih_eta);
 std::vector<double> readScaleFactors(const std::string& fileName);
 double findScaleFactor(double value, const std::vector<std::pair<double, double>>& binRanges, const std::vector<double>& scaleFactors);
 double SF_betaError(double beta);
+void loadSF(const std::string& filepath, bool SFisUp, bool SFisDown, std::vector<float>& SF_PseudoMETvalue, std::vector<float>& SF_triggerEff);
 #endif

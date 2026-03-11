@@ -274,7 +274,7 @@
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
 
                 std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/MuonEG2024/";
-                std::string fileName = pathData + "V17p3" + std::to_string(i) + ".txt";
+                std::string fileName = pathData + "V17p4" + std::to_string(i) + ".txt";
 
                 std::ifstream file(fileName);
                 if (!file.is_open()) {
@@ -359,6 +359,21 @@
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
             std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/Wjets2024/";
             std::string fileName = pathData + "testWjets.txt";
+
+            std::ifstream file(fileName);
+            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty()) chain->AddFile(line.c_str());
+            }
+
+            file.close();
+    }
+    else if (dataset == "TestWjetsMuNu") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/Wjets2024/";
+            std::string fileName = pathData + "testWjetsMuNu.txt";
 
             std::ifstream file(fileName);
             if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
@@ -475,6 +490,23 @@
             }
         }
     }
+
+    else if (dataset == "WjetMuNu2024") {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/Wjets2024/";
+            std::string fileName = pathData + "V14p8.txt";
+
+            std::ifstream file(fileName);
+            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+
+            std::string line;
+            while (std::getline(file, line)) {
+                if (!line.empty()) chain->AddFile(line.c_str());
+            }
+
+            file.close();
+    }
+
 
 
     else {

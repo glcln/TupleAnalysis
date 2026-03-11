@@ -49,11 +49,6 @@ RegionMassPlot::RegionMassPlot(std::string suffix,int etabins,int ihbins,int pbi
     momentumDistribM1000=0;
     dedxDistribM1000=0;
     suffix_ = suffix;
-    std::cout << "init " + suffix << 
-                 " with eta bins : " << etabins <<
-                 " , ih bins : " << ihbins <<
-                 " , p bins : " << pbins <<
-                 " , and mass bins : " << massbins << std::endl;
 
     initHisto(etabins,ihbins,pbins,massbins,fpixbins,C_parameter);
 

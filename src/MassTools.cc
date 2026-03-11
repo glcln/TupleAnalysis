@@ -3,6 +3,10 @@
 
 #include <string>
 #include <sstream>
+#include <fstream>
+#include <iostream>
+
+using namespace std;
 
 
 
@@ -244,3 +248,29 @@ double SF_betaError(double beta){
     return 2.44128 - beta*0.637;
 }
 
+
+void loadSF(const std::string& filepath,
+            bool SFisUp,
+            bool SFisDown,
+            std::vector<float>& SF_PseudoMETvalue,
+            std::vector<float>& SF_triggerEff) {
+                
+    SF_PseudoMETvalue.clear();
+    SF_triggerEff.clear();
+
+    std::ifstream file(filepath);
+    if (!file.is_open())
+        throw std::runtime_error("Cannot open file: " + filepath);
+
+    float pseudoMET, sfDown, sf, sfUp;
+    cout << "Loading SF from file: " << filepath << endl;
+    while (file >> pseudoMET >> sfDown >> sf >> sfUp) {
+        SF_PseudoMETvalue.push_back(pseudoMET);
+
+        if      (SFisUp)   SF_triggerEff.push_back(sfUp);
+        else if (SFisDown) SF_triggerEff.push_back(sfDown);
+        else               SF_triggerEff.push_back(sf);
+    }
+
+    return;
+}

@@ -42,7 +42,6 @@ TH2F* TransposeTH2(const TH2F* h_in)
     return h_out;
 }
 
-
 double GetMinNonZero(const TH1* h) {
     double min = std::numeric_limits<double>::max();
 
@@ -90,7 +89,7 @@ TCanvas* DrawWithRatio(TH1* h1,
     h_ratio->SetTitle("");
     h_ratio->GetYaxis()->SetTitle(RatioTitle.c_str());
     h_ratio->GetXaxis()->SetTitle(XaxisTitle.c_str());
-    h_ratio->GetYaxis()->SetRangeUser(0, 2);
+    h_ratio->GetYaxis()->SetRangeUser(0.5, 1.5);
     h_ratio->SetMarkerStyle(8);
     h_ratio->GetYaxis()->SetNdivisions(505);
     h_ratio->GetYaxis()->SetTitleSize(0.08);
@@ -102,6 +101,7 @@ TCanvas* DrawWithRatio(TH1* h1,
     h_ratio->SetLineColor(kBlack);
     h_ratio->SetMarkerColor(kBlack);
     gPad->SetTickx(0);
+    gStyle->SetOptStat(0);
     h_ratio->LabelsOption("v", "X");
     h_ratio->Draw("E0");
     h_ratio->GetXaxis()->SetRangeUser(Xmin, Xmax);
@@ -116,6 +116,74 @@ TCanvas* DrawWithRatio(TH1* h1,
     return c_new;
 }
 
+TCanvas* DrawWithRatio(TH1* h1,
+                       TH1* h2,
+                       TH1* h3,
+                       TCanvas* c1,
+                       std::string CanvasTitle,
+                       std::string RatioTitle,  // h1/h2
+                       std::string XaxisTitle,
+                       float Xmin,
+                       float Xmax) {
+    TCanvas* c_new = new TCanvas(CanvasTitle.c_str(), CanvasTitle.c_str(), 800, 800);
+
+    // Define pads
+    TPad* pad1 = new TPad("pad1", "pad1", 0.0, 0.3, 1.0, 1.0);
+    pad1->SetBottomMargin(0.03);
+    pad1->Draw();
+
+    TPad* pad2 = new TPad("pad2", "pad2", 0.0, 0.0, 1.0, 0.3);
+    pad2->SetTopMargin(0.02);
+    pad2->SetBottomMargin(0.3);
+    pad2->Draw();
+
+    // Draw upper plot: draw h1 then h2 (use OptionDraw for h1, and "E1 same" for h2)
+    pad1->cd();
+    c1->DrawClonePad();
+
+    // Draw ratio
+    TH1F *h1c = (TH1F*)h1->Clone(TString(h1->GetName()) + "_" + CanvasTitle.c_str() + "_h1");
+    TH1F *h2c = (TH1F*)h2->Clone(TString(h2->GetName()) + "_" + CanvasTitle.c_str() + "_h2");
+    TH1F *h3c = (TH1F*)h3->Clone(TString(h3->GetName()) + "_" + CanvasTitle.c_str() + "_h3");
+    pad2->cd();
+    TH1* h_ratio = (TH1*)h1c->Clone(TString("h_ratio_") + CanvasTitle.c_str());
+    TH1* h_ratiobis = (TH1*)h1c->Clone(TString("h_ratio_") + CanvasTitle.c_str());
+    h_ratio->Divide(h2c);
+    h_ratiobis->Divide(h3c);
+
+    h_ratio->SetTitle("");
+    h_ratio->GetYaxis()->SetTitle(RatioTitle.c_str());
+    h_ratio->GetXaxis()->SetTitle(XaxisTitle.c_str());
+    h_ratio->GetYaxis()->SetRangeUser(0.5, 1.5);
+    h_ratio->SetMarkerStyle(8);
+    h_ratiobis->SetMarkerStyle(22);
+    h_ratio->GetYaxis()->SetNdivisions(505);
+    h_ratio->GetYaxis()->SetTitleSize(0.08);
+    h_ratio->GetYaxis()->SetTitleOffset(0.3);
+    h_ratio->GetXaxis()->SetTitleSize(0.08);
+    h_ratio->GetXaxis()->SetTitleOffset(1);
+    h_ratio->GetYaxis()->SetLabelSize(0.06);
+    h_ratio->GetXaxis()->SetLabelSize(0.06);
+    h_ratio->SetLineColor(kBlack);
+    h_ratio->SetMarkerColor(kBlack);
+    h_ratiobis->SetLineColor(kRed);
+    h_ratiobis->SetMarkerColor(kRed);
+    gPad->SetTickx(0);
+    gStyle->SetOptStat(0);
+    h_ratio->LabelsOption("v", "X");
+    h_ratio->Draw("E0");
+    h_ratiobis->Draw("E0 same");
+    h_ratio->GetXaxis()->SetRangeUser(Xmin, Xmax);
+
+    TLine* line = new TLine(Xmin, 1, Xmax, 1);
+    line->SetLineColor(kBlack);
+    line->SetLineStyle(2);
+    line->Draw("same");
+
+    c_new->Update();
+    cout << "Canvas " << CanvasTitle << " drawn with ratio of h1: " << h1->GetName() << " to h2: " << h2->GetName() << " and h3: " << h3->GetName() << endl;
+    return c_new;
+}
 
 TCanvas *DrawCanvas(TH1* h,
                     std::string CanvasTitle,
@@ -305,6 +373,67 @@ TCanvas *DrawCanvas(TH1* h1,
     c_new->Update();
     cout << "Canvas " << CanvasTitle << " drawn with h1: " << h1->GetName() << " and h2: " << h2->GetName() << " and h3: " << h3->GetName() << endl;
     return c_new;
+}
+
+void ExtractSF (const char *ofiletxt, const char *labelData, const char *labelMC, const char *inputfileDATA, const char *inputfileMC) {
+
+    TFile *ifileDATA = new TFile(Form("%s", inputfileDATA), "READ");
+    TFile *ifileMC   = new TFile(Form("%s", inputfileMC), "READ");
+
+    TH1F *htemp_pseudoCaloMET_data = (TH1F*)ifileDATA->Get(Form("%s_PseudoCaloMET", labelData));
+    TH1F *htemp_orMETtrigger_data = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___PseudoCaloMET", labelData));
+    TH1F *htemp_pseudoCaloMET_MC   = (TH1F*)ifileMC->Get(Form("%s_PseudoCaloMET", labelMC));
+    TH1F *htemp_orMETtrigger_MC   = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___PseudoCaloMET", labelMC));
+
+    ofstream outfile(Form("PlayWithHistos/SF_%s.txt", ofiletxt), ios::out);
+
+    // Construction des edges
+    const TAxis* ax = htemp_orMETtrigger_data->GetXaxis();
+    const int nBins = ax->GetNbins();
+
+    int nNewBins = 0;
+    for (int i = 1; i <= nBins; i++) {
+        if (ax->GetBinLowEdge(i) < 400) nNewBins++;
+    }
+    nNewBins++; // bin [400, +inf]
+
+    double* new_bins = new double[nNewBins + 1];
+    int idx = 0;
+    for (int i = 1; i <= nBins; i++) {
+        if (ax->GetBinLowEdge(i) < 400)
+            new_bins[idx++] = ax->GetBinLowEdge(i);
+    }
+    new_bins[idx++] = 400.0;
+    new_bins[idx]   = ax->GetBinUpEdge(nBins);
+
+    // Rebin
+    htemp_orMETtrigger_data  = (TH1F*) htemp_orMETtrigger_data ->Rebin(nNewBins, "htemp_orMETtrigger_data",  new_bins);
+    htemp_pseudoCaloMET_data = (TH1F*) htemp_pseudoCaloMET_data->Rebin(nNewBins, "htemp_pseudoCaloMET_data", new_bins);
+    htemp_orMETtrigger_MC   = (TH1F*) htemp_orMETtrigger_MC   ->Rebin(nNewBins, "htemp_orMETtrigger_MC",    new_bins);
+    htemp_pseudoCaloMET_MC  = (TH1F*) htemp_pseudoCaloMET_MC  ->Rebin(nNewBins, "htemp_pseudoCaloMET_MC",   new_bins);
+    delete[] new_bins;
+
+    htemp_orMETtrigger_data->Divide(htemp_pseudoCaloMET_data);
+    htemp_orMETtrigger_MC->Divide(htemp_pseudoCaloMET_MC);
+
+    htemp_orMETtrigger_data->Divide(htemp_orMETtrigger_MC);
+    cout << "Extracted SF for " << ofiletxt << ":\n";
+    for (int i = 1; i <= htemp_orMETtrigger_data->GetNbinsX(); i++) {
+        double sf, sf_down, sf_up;
+
+        sf      = htemp_orMETtrigger_data->GetBinContent(i);
+        sf_down = sf - htemp_orMETtrigger_data->GetBinError(i);
+        sf_up   = sf + htemp_orMETtrigger_data->GetBinError(i);
+
+        cout << htemp_orMETtrigger_data->GetBinLowEdge(i) << " " << sf_down << " " << sf << " " << sf_up << "\n";
+
+        outfile << htemp_orMETtrigger_data->GetBinLowEdge(i) << " " << sf_down << " " << sf << " " << sf_up << "\n";
+    }
+    cout << "\n";
+    outfile.close();
+
+
+    return;
 }
 
 
@@ -769,241 +898,249 @@ void TrigEff_AODvsMiniAOD() {
 }
 
 
-void Cutflows(std::string ifileAOD, std::string ifileminiAOD, bool HLTMu = true, bool normToOne = false, std::string PseudoMETon="") {
-    
-    std::string ofile = std::string("PlayWithHistos/EventCutflow");
+void Cutflows(std::string QCD, std::string TTbar, std::string Wjets, std::string JetMETdata, std::string Gluino2000) {
 
-    TFile *ifile_AOD_ = new TFile(ifileAOD.c_str(), "READ");
-    TFile *ifile_miniAOD_ = new TFile(ifileminiAOD.c_str(), "READ");
+    TFile *ofile = new TFile("PlayWithHistos/EventCutflow.root", "RECREATE");
 
-    TH1F *hAOD_NotrackCut = (TH1F*)ifile_AOD_->Get("EventCutflow_NotrackCut");
-    TH1F *hminiAOD_NotrackCut = (TH1F*)ifile_miniAOD_->Get("EventCutflow_NotrackCut");
-    TH1F *hAOD = (TH1F*)ifile_AOD_->Get("EventCutflow");
-    TH1F *hminiAOD = (TH1F*)ifile_miniAOD_->Get("EventCutflow");
+    TFile *ifile_QCD = new TFile(QCD.c_str(), "READ");
+    TFile *ifile_TTbar = new TFile(TTbar.c_str(), "READ");
+    TFile *ifile_Wjets = new TFile(Wjets.c_str(), "READ");
+    TFile *ifile_JetMETdata = new TFile(JetMETdata.c_str(), "READ");
+    TFile *ifile_Gluino2000 = new TFile(Gluino2000.c_str(), "READ");
 
+    TH1D *Cutflow_QCD = (TH1D*)ifile_QCD->Get("EventCutflow");
+    TH1D *Cutflow_TTbar = (TH1D*)ifile_TTbar->Get("EventCutflow");
+    TH1D *Cutflow_Wjets = (TH1D*)ifile_Wjets->Get("EventCutflow");
+    TH1D *Cutflow_JetMETdata = (TH1D*)ifile_JetMETdata->Get("EventCutflow");
+    TH1D *Cutflow_Gluino2000 = (TH1D*)ifile_Gluino2000->Get("EventCutflow");
 
-    //     
-    int color1 = kBlue-7;
-    int color2 = kRed+1;
-    int color3 = kGreen+3;
-    int color4 = kSpring;
-    TString labelCMS = "CMS Internal";
+    THStack *hs = new THStack("hs", "");
+    hs->Add(Cutflow_QCD);
+    hs->Add(Cutflow_TTbar);
+    hs->Add(Cutflow_Wjets);
 
-    // --- Clones
-    TH1* hAOD_NotrackCut_draw = (TH1*)hAOD_NotrackCut->Clone(hAOD_NotrackCut->GetName() + TString("_draw"));
-    TH1* hminiAOD_NotrackCut_draw = (TH1*)hminiAOD_NotrackCut->Clone(hminiAOD_NotrackCut->GetName() + TString("_draw"));
-    TH1* hAOD_NotrackCut_r = (TH1*)hAOD_NotrackCut->Clone(hAOD_NotrackCut->GetName() + TString("_r"));
-    TH1* hminiAOD_NotrackCut_r = (TH1*)hminiAOD_NotrackCut->Clone(hminiAOD_NotrackCut->GetName() + TString("_r"));
-    TH1* hAOD_draw = (TH1*)hAOD->Clone(hAOD->GetName() + TString("_draw"));
-    TH1* hminiAOD_draw = (TH1*)hminiAOD->Clone(hminiAOD->GetName() + TString("_draw"));
-    TH1* hAOD_r = (TH1*)hAOD->Clone(hAOD->GetName() + TString("_r"));
-    TH1* hminiAOD_r = (TH1*)hminiAOD->Clone(hminiAOD->GetName() + TString("_r"));
+    auto PrintCutflowPercent = [](TH1D* h, const std::string& name)
+    {
+        double N0 = h->GetBinContent(2);
 
+        std::cout << "\n=== " << name << " ===\n";
+        std::cout << "Cut\t\tEvents\t\tRemaining (%)\n";
+
+        for (int i = 2; i <= h->GetNbinsX(); ++i) { // remove 'All' bin
+            double Ni = h->GetBinContent(i);
+            double eff = (N0 > 0) ? 100. * Ni / N0 : 0.;
+            std::cout << i << "\t\t"
+                    << Ni << "\t\t"
+                    << std::fixed << std::setprecision(2)
+                    << eff << " %\n";
+        }
+    };
+
+    // --- Style   
+    int colorWjets = kBlue-7;
+    int colorTTbar = kRed;
+    int colorQCD = kGreen-4;
+    int colorSignal = kOrange+1;
+    int colorJetMET = kBlack;
     gStyle->SetOptStat(0);
 
-    
-    if (normToOne) {
-        hAOD_NotrackCut_draw->Scale(1. / hAOD_NotrackCut_draw->GetBinContent(1));
-        hminiAOD_NotrackCut_draw->Scale(1. / hminiAOD_NotrackCut_draw->GetBinContent(1));
-        hAOD_draw->Scale(1. / hAOD_draw->GetBinContent(1));
-        hminiAOD_draw->Scale(1. / hminiAOD_draw->GetBinContent(1));
-    }
+    Cutflow_Wjets->SetFillColorAlpha(colorWjets, 0.5);
+    Cutflow_Wjets->SetLineColor(colorWjets);
+    Cutflow_TTbar->SetFillColorAlpha(colorTTbar, 0.5);
+    Cutflow_TTbar->SetLineColor(colorTTbar);
+    Cutflow_QCD->SetFillColorAlpha(colorQCD, 0.5);
+    Cutflow_QCD->SetLineColor(colorQCD);
+    Cutflow_Gluino2000->SetLineColor(colorSignal);
+    Cutflow_Gluino2000->SetMarkerColor(colorSignal);
+    Cutflow_Gluino2000->SetMarkerStyle(22);
+    Cutflow_JetMETdata->SetLineColor(colorJetMET);
+    Cutflow_JetMETdata->SetMarkerColor(colorJetMET);
+    Cutflow_JetMETdata->SetMarkerStyle(20);
 
-    // --- Style
-    hAOD_NotrackCut_draw->SetLineWidth(2);
-    hminiAOD_NotrackCut_draw->SetLineWidth(2);
-    hAOD_NotrackCut_draw->SetMarkerStyle(0);
-    hminiAOD_NotrackCut_draw->SetMarkerStyle(0);
-    hAOD_draw->SetLineWidth(2);
-    hminiAOD_draw->SetLineWidth(2);
-    hAOD_draw->SetMarkerStyle(0);
-    hminiAOD_draw->SetMarkerStyle(0);
 
-    hAOD_NotrackCut_draw->SetLineColor(color3);
-    hminiAOD_NotrackCut_draw->SetLineColor(color4);
-    hAOD_NotrackCut_draw->SetFillStyle(1001);
-    hAOD_NotrackCut_draw->SetFillColorAlpha(color3, 0.5);
-    hAOD_draw->SetLineColor(color1);
-    hminiAOD_draw->SetLineColor(color2);
-    hAOD_draw->SetFillStyle(1001);
-    hAOD_draw->SetFillColorAlpha(color1, 0.5);
+
 
     // --- Canvas + pads
-    TCanvas* c = new TCanvas(hAOD_NotrackCut_draw->GetName() + TString("_canvas"), "", 700, 700);
-    c->Divide(1, 2);
+    TCanvas* c = new TCanvas("Cutflow_BKG_data_signal", "", 800, 800);
+    
+    c->SetBottomMargin(0.25);
+    c->SetLeftMargin(0.12);
+    c->SetRightMargin(0.05);
+    c->SetTopMargin(0.08);
 
-    // ----------------- PAD TOP -----------------
-    TPad* padTop = (TPad*)c->cd(1);
-    padTop->SetPad(0.0, 0.35, 1.0, 1.0);
-    padTop->SetTopMargin(0.08);
-    padTop->SetBottomMargin(0.02);
-    padTop->SetLeftMargin(0.16);
-    padTop->SetRightMargin(0.05);
-    padTop->SetLogy();
-
-    double ymax = std::max(hAOD_NotrackCut_draw->GetMaximum(), hminiAOD_NotrackCut_draw->GetMaximum());
-    double ymin = std::min(hAOD_NotrackCut_draw->GetMinimum(), hminiAOD_NotrackCut_draw->GetMinimum());
-    hAOD_NotrackCut_draw->SetMaximum(ymax * 3);
-    hAOD_NotrackCut_draw->SetMinimum(std::max(0.1, ymin / 2.));
-    hAOD_NotrackCut_draw->GetXaxis()->SetLabelSize(0);
-    hAOD_NotrackCut_draw->GetXaxis()->SetRangeUser(0, 18);
-    hAOD_NotrackCut_draw->GetYaxis()->SetTitle("Entries");
-    hAOD_NotrackCut_draw->GetYaxis()->SetTitleSize(0.10);
-    hAOD_NotrackCut_draw->GetYaxis()->SetTitleOffset(1.4);
-
-    hAOD_draw->SetMaximum(std::max(hAOD_draw->GetMaximum(), hAOD_draw->GetMaximum()) * 3);
-    hAOD_draw->SetMinimum(std::min(hAOD_draw->GetMinimum(), hAOD_draw->GetMinimum())/2);    
-    if (normToOne) hAOD_draw->SetMinimum(0.01);
-    hAOD_draw->GetXaxis()->SetLabelSize(0);
-    hAOD_draw->GetXaxis()->SetRangeUser(0, 18);
-    hAOD_draw->GetYaxis()->SetTitle("Events");
-    if (normToOne) hAOD_draw->GetYaxis()->SetTitle("Events (normalized to 1 in bin 1)");
-    hAOD_draw->GetYaxis()->SetTitleSize(0.05);
-    hAOD_draw->GetYaxis()->SetTitleOffset(0.8);
-    //hAOD_NotrackCut_draw->Draw("HIST");         // green
-    hAOD_draw->Draw("HIST");               // blue
-    hminiAOD_draw->Draw("HIST SAME");           // red
-    //hminiAOD_NotrackCut_draw->Draw("HIST SAME");// magenta
+    c->cd();
+    hs->SetMaximum(std::max(hs->GetMaximum()*3, Cutflow_JetMETdata->GetMaximum())*3);
+    hs->SetMinimum(std::min(hs->GetMinimum()/2, Cutflow_Gluino2000->GetMinimum())/2);
+    Cutflow_Wjets->GetXaxis()->SetLabelSize(0.04);
+    Cutflow_Wjets->GetXaxis()->SetRangeUser(1, 20);
+    Cutflow_Wjets->GetXaxis()->SetTitle("");
+    hs->Draw("HIST");
+    hs->GetHistogram()->GetYaxis()->SetTitle("Events");
+    Cutflow_Gluino2000->Draw("E1 same");
+    Cutflow_JetMETdata->Draw("E1 same");
+    c->SetLogy();
 
     // --- Légende
-    TLegend* leg = new TLegend(0.60, 0.73, 0.90, 0.88);
-    leg->SetNColumns(2);
+    TLegend* leg = new TLegend(0.60, 0.65, 0.92, 0.92);
     leg->SetBorderSize(0);
-    leg->AddEntry(hAOD_draw, "AOD", "f");
-    //leg->AddEntry(hAOD_NotrackCut_draw, "AOD no track cut", "f");
-    leg->AddEntry(hminiAOD_draw, "miniAOD", "l");
-    //leg->AddEntry(hminiAOD_NotrackCut_draw, "miniAOD no track cut", "l");
+    leg->SetFillStyle(0);
+    leg->AddEntry(Cutflow_JetMETdata, "2024 JetMET data", "ep");
+    leg->AddEntry(Cutflow_Wjets, "W+jets", "f");
+    leg->AddEntry(Cutflow_TTbar, "TTbar", "f");
+    leg->AddEntry(Cutflow_QCD, "QCD muEnriched", "f");
+    leg->AddEntry(Cutflow_Gluino2000, "#tilde{g}_{m=2000}", "ep");
     leg->Draw();
 
     // --- Label CMS
     TLatex latex;
     latex.SetNDC();
-    latex.SetTextSize(0.045);
+    latex.SetTextSize(0.035);
     latex.SetTextFont(42);
-    latex.DrawLatex(0.18, 0.88, labelCMS);
-
-    // ----------------- PAD BOTTOM -----------------
-    TPad* padBot = (TPad*)c->cd(2);
-    padBot->SetPad(0.0, 0.015, 1.0, 0.35);
-    padBot->SetTopMargin(0.02);
-    padBot->SetBottomMargin(0.55);
-    padBot->SetLeftMargin(0.16);
-    padBot->SetRightMargin(0.05);
-    padBot->SetGridy();
-
-    TH1* ratio = (TH1*)hminiAOD_r->Clone(hminiAOD->GetName() + TString("_ratio"));
-    ratio->Divide(hAOD_r);
-    ratio->SetTitle("");
-
-    ratio->GetYaxis()->SetTitle("miniAOD / AOD");
-    ratio->GetYaxis()->SetNdivisions(505);
-    ratio->GetYaxis()->SetTitleSize(0.08);
-    ratio->GetYaxis()->SetTitleOffset(0.6);
-    ratio->GetYaxis()->SetLabelSize(0.09);
-
-    ratio->GetXaxis()->SetTitle("");
-    ratio->GetXaxis()->SetTitleSize(0.11);
-    ratio->GetXaxis()->SetLabelSize(0.10);
-    ratio->GetXaxis()->SetLabelOffset(0.02);
-
-    ratio->SetLineColor(color2);
-    ratio->SetMarkerColor(color2);
-    ratio->SetMarkerStyle(20);
-    ratio->SetMarkerSize(0.7);
-    ratio->SetMinimum(0.0);
-    ratio->SetMaximum(2.0);
-
-
-    TH1* ratio_Cut = (TH1*)hminiAOD_NotrackCut_r->Clone(hminiAOD_NotrackCut->GetName() + TString("_ratio_Cut"));
-    ratio_Cut->Divide(hAOD_NotrackCut_r);
-    ratio_Cut->SetTitle("");
-
-    ratio_Cut->GetYaxis()->SetNdivisions(505);
-    ratio_Cut->GetYaxis()->SetTitleSize(0.10);
-    ratio_Cut->GetYaxis()->SetTitleOffset(0.6);
-    ratio_Cut->GetYaxis()->SetLabelSize(0.09);
-
-    ratio_Cut->GetXaxis()->SetTitleSize(0.11);
-    ratio_Cut->GetXaxis()->SetLabelSize(0.10);
-    ratio_Cut->GetXaxis()->SetLabelOffset(0.02);
-
-    ratio_Cut->SetLineColor(color4);
-    ratio_Cut->SetMarkerColor(color4);
-    ratio_Cut->SetMarkerStyle(22);
-    ratio_Cut->SetMarkerSize(0.7);
-    ratio_Cut->SetMinimum(0.0);
-    ratio_Cut->SetMaximum(2.0);
+    latex.DrawLatex(0.12, 0.93, "#it{Work in progress}");
 
     // --- Labels X
-    std::vector<TString> xlabel;
-    if (HLTMu) xlabel = {"All","HLT_Mu50","METfilters (true)", "CaloMET > 170 (true)", "p_{T}>55","|#eta|<2.4","N_{no-L1 pixel hits}#geq2","f_{valid hits}>0.8",
-                "N_{dEdx hits}#geq10","HighPurity","#chi^{2}/N_{dof}<5","|d_{z}|<0.1","|d_{xy}|<0.02","I^{rel}_{PF iso}<0.02","I^{trk}_{dr03}<15",
-                "E/p<0.3","#sigma_{p_{T}}/p_{T}^{2}<0.0008","F_{i}>0.3","#sigma_{p_{T}}/p_{T}<1","I_{h}>C"};
-    else xlabel = {"All","HLT MET","METfilters", "PseudoMET > 170", "p_{T}>55","|#eta|<2.4","N_{no-L1 pixel hits}#geq2","f_{valid hits}>0.8",
-                "N_{dEdx hits}#geq10","HighPurity","#chi^{2}/N_{dof}<5","|d_{z}|<0.1","|d_{xy}|<0.02","I^{rel}_{PF iso}<0.02","I^{trk}_{dr03}<15",
-                "E/p<0.3","#sigma_{p_{T}}/p_{T}^{2}<0.0008","F_{i}>0.3","#sigma_{p_{T}}/p_{T}<1","I_{h}>C"};
+    std::vector<TString> xlabel = {"All","HLT MET","METfilters", "PseudoMET > 170", "p_{T}>50","|#eta|<2.4","N_{no-L1 pixel hits}#geq2","f_{valid hits}>0.8",
+                "N_{dEdx hits}#geq10","HighPurity","#chi^{2}/N_{dof}<5","|d_{z}|<0.1","|d_{xy}|<0.02","I^{rel}_{PF}<0.02","I^{trk}_{dr03}<15",
+                "E/p<0.3","#sigma_{p_{T}}/p_{T}^{2}<0.0008","F_{pixel}>0.3","#sigma_{p_{T}}/p_{T}<1","I_{h}>C"};
 
-    for (int i = 1; i <= ratio->GetNbinsX(); i++) {
-        if (i-1 < xlabel.size())
-            ratio->GetXaxis()->SetBinLabel(i, xlabel[i-1]);
+    for (int i = 1; i <= Cutflow_Wjets->GetNbinsX(); i++) {
+        if (i-1 < xlabel.size()) {
+            Cutflow_Wjets->GetXaxis()->SetBinLabel(i, xlabel[i-1]);
+            Cutflow_TTbar->GetXaxis()->SetBinLabel(i, xlabel[i-1]);
+            Cutflow_QCD->GetXaxis()->SetBinLabel(i, xlabel[i-1]);
+            hs->GetXaxis()->SetBinLabel(i, xlabel[i-1]);
+        }
     }
 
     gPad->SetTickx(0);
-    ratio->LabelsOption("v", "X");
-    ratio->SetLabelSize(0.08, "X");
-    ratio->GetXaxis()->SetRangeUser(0, 18);
-    ratio->Draw("E1");
-    //ratio_Cut->Draw("E1 SAME");
+    hs->GetXaxis()->LabelsOption("v");
+    hs->GetXaxis()->SetRangeUser(1, 20);
+    hs->GetXaxis()->SetLabelSize(0.04);
+    c->Update();
 
-    // --- ratio values
-    for (int i = 1; i <= ratio->GetNbinsX(); i++) {
-        double x = ratio->GetBinCenter(i);
-        double y = ratio->GetBinContent(i);
-        double err = ratio->GetBinError(i);
-        if (y == 0) continue;
+    
 
-        TLatex txt;
-        txt.SetTextAlign(22);
-        txt.SetTextSize(0.06);
-        txt.SetTextFont(42);
-        //txt.SetTextColor(color2);
-        //if (i==18) txt.DrawLatex(x, y + err + 0.15, Form("%.2f", y));
-        txt.SetTextColor(kBlack);
-        txt.DrawLatex(x, y + err + 0.15, Form("%.2f", y));
-    }
+    // Cout values:
+    PrintCutflowPercent(Cutflow_JetMETdata, "JetMET data");
+    TH1D* Cutflow_MC = (TH1D*)Cutflow_Wjets->Clone("Cutflow_MC");
+    Cutflow_MC->Add(Cutflow_TTbar);
+    Cutflow_MC->Add(Cutflow_QCD);
+    PrintCutflowPercent(Cutflow_MC, "MC (Wjets + TTbar + QCD)");
+    PrintCutflowPercent(Cutflow_Gluino2000, "Signal m=2000");
 
-    for (int i = 1; i <= ratio->GetNbinsX(); i++) {
-        double x = ratio_Cut->GetBinCenter(i);
-        double y = ratio_Cut->GetBinContent(i);
-        double err = ratio_Cut->GetBinError(i);
-        if (y == 0) continue;
 
-        TLatex txt;
-        txt.SetTextAlign(22);
-        txt.SetTextSize(0.07);
-        txt.SetTextFont(42);
-        txt.SetTextColor(color4);
-        //if (i==18) txt.DrawLatex(x, y - err - 0.25, Form("%.2f", y));
-    }
 
     // --- Saving
-    ofile += HLTMu ? "_HLTMu" : "_HLTMET";
-    if (normToOne) ofile += "_normToOne";
-    std::string outname = ofile + PseudoMETon + ".pdf";
-
-    c->SaveAs(outname.c_str());
-
-    if (normToOne) {
-        cout << "AOD normalized to 1:" << endl;
-        for (int i = 1; i <= hAOD_draw->GetNbinsX(); i++) {
-            cout << "Bin " << i << " AOD : " << hAOD_draw->GetBinContent(i) << " +/- " << hAOD_draw->GetBinError(i) << endl;
-            cout << "  miniAOD : " << hminiAOD_draw->GetBinContent(i) << " +/- " << hminiAOD_draw->GetBinError(i) << endl;
-        }
-    }
+    ofile->cd();
+    c->Write();
+    c->SaveAs("PlayWithHistos/EventCutflow.pdf");
+    ofile->Close();
 }
 
 
-void MET_trg_eff(const char *label, const char *ofilename, const char *inputfileDATA, const char *inputfileMC) {
+void Cutflows_cutPseudoMET() {
+
+    TFile *ofile = new TFile("PlayWithHistos/EventCutflow_GluinoPseudoMETcut.root", "RECREATE");
+
+    TFile *ifile_Gluino2000_cut170 = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p1_weighted.root", "READ");
+    TFile *ifile_Gluino2000_cut300 = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p1_cut300PseudoMET_weighted.root", "READ");
+
+    TH1D *Cutflow_Gluino2000_cut170 = (TH1D*)ifile_Gluino2000_cut170->Get("EventCutflow");
+    TH1D *Cutflow_Gluino2000_cut300 = (TH1D*)ifile_Gluino2000_cut300->Get("EventCutflow");
+
+    auto PrintCutflowPercent = [](TH1D* h, const std::string& name)
+    {
+        double N0 = h->GetBinContent(1);
+
+        std::cout << "\n=== " << name << " ===\n";
+        std::cout << "Cut\t\tEvents\t\tRemaining (%)\n";
+
+        for (int i = 1; i <= h->GetNbinsX(); ++i) {
+            double Ni = h->GetBinContent(i);
+            double eff = (N0 > 0) ? 100. * Ni / N0 : 0.;
+            std::cout << i << "\t\t"
+                    << Ni << "\t\t"
+                    << std::fixed << std::setprecision(2)
+                    << eff << " %\n";
+        }
+    };
+
+    // --- Style    
+    int colorSignal = kBlue-7;
+    int colorSignal_bis = kRed+1;
+    gStyle->SetOptStat(0);
+    Cutflow_Gluino2000_cut170->SetLineColor(colorSignal);
+    Cutflow_Gluino2000_cut170->SetMarkerColor(colorSignal);
+    Cutflow_Gluino2000_cut170->SetMarkerStyle(22);
+    Cutflow_Gluino2000_cut300->SetLineColor(colorSignal_bis);
+    Cutflow_Gluino2000_cut300->SetMarkerColor(colorSignal_bis);
+    Cutflow_Gluino2000_cut300->SetMarkerStyle(20);
+
+
+    // --- Canvas + pads
+    TCanvas* c = new TCanvas("Cutflow_BKG_data_signal", "", 800, 800);
+    
+    c->SetBottomMargin(0.25);
+    c->SetLeftMargin(0.12);
+    c->SetRightMargin(0.05);
+    c->SetTopMargin(0.08);
+
+    c->cd();
+    Cutflow_Gluino2000_cut170->SetMaximum(std::max(Cutflow_Gluino2000_cut170->GetMaximum()*3, Cutflow_Gluino2000_cut300->GetMaximum())*3);
+    Cutflow_Gluino2000_cut170->SetMinimum(std::min(Cutflow_Gluino2000_cut170->GetMinimum()/2, Cutflow_Gluino2000_cut300->GetMinimum())/2);
+    Cutflow_Gluino2000_cut170->GetXaxis()->SetLabelSize(0.04);
+    Cutflow_Gluino2000_cut170->GetXaxis()->SetRangeUser(0, 18);
+    Cutflow_Gluino2000_cut170->GetYaxis()->SetTitle("Events");
+    Cutflow_Gluino2000_cut170->GetYaxis()->SetTitleOffset(1.4);
+    Cutflow_Gluino2000_cut170->GetXaxis()->SetTitle("");
+    Cutflow_Gluino2000_cut170->Draw("E1");
+    Cutflow_Gluino2000_cut300->Draw("E1 same");
+    c->SetLogy();
+
+    // --- Légende
+    TLegend* leg = new TLegend(0.60, 0.73, 0.90, 0.88);
+    leg->SetBorderSize(0);
+    leg->SetFillStyle(0);
+    leg->AddEntry(Cutflow_Gluino2000_cut170, "PseudoMET > 170 GeV", "ep");
+    leg->AddEntry(Cutflow_Gluino2000_cut300, "PseudoMET > 300 GeV", "ep");
+    leg->Draw();
+
+    // --- Label CMS
+    TLatex latex;
+    latex.SetNDC();
+    latex.SetTextSize(0.035);
+    latex.SetTextFont(42);
+    latex.DrawLatex(0.12, 0.93, "CMS Internal");
+
+    // --- Labels X
+    std::vector<TString> xlabel = {"All","HLT MET","METfilters", "PseudoMET cut", "p_{T}>50","|#eta|<2.4","N_{no-L1 pixel hits}#geq2","f_{valid hits}>0.8",
+                "N_{dEdx hits}#geq10","HighPurity","#chi^{2}/N_{dof}<5","|d_{z}|<0.1","|d_{xy}|<0.02","I^{rel}_{PF iso}<0.02","I^{trk}_{dr03}<15",
+                "E/p<0.3","#sigma_{p_{T}}/p_{T}^{2}<0.0008","F_{pixel}>0.3","#sigma_{p_{T}}/p_{T}<1","I_{h}>C"};
+
+    for (int i = 1; i <= Cutflow_Gluino2000_cut170->GetNbinsX(); i++) {
+        if (i-1 < xlabel.size())
+            Cutflow_Gluino2000_cut170->GetXaxis()->SetBinLabel(i, xlabel[i-1]);
+    }
+
+    gPad->SetTickx(0);
+    Cutflow_Gluino2000_cut170->LabelsOption("v", "X");
+    c->Update();
+
+    
+    // Cout values:
+    PrintCutflowPercent(Cutflow_Gluino2000_cut170, "PseudoMET > 170");
+    PrintCutflowPercent(Cutflow_Gluino2000_cut300, "PseudoMET > 300");
+
+    // --- Saving
+    ofile->cd();
+    c->Write();
+    ofile->Close();
+}
+
+
+void MET_trg_eff(const char* labelData, const char* labelMC, const char *ofilename, const char *inputfileDATA, const char *inputfileMC) {
+
+    gErrorIgnoreLevel = kError;
 
     TFile *ofile = new TFile(Form("PlayWithHistos/%s.root", ofilename), "RECREATE");
 
@@ -1012,63 +1149,63 @@ void MET_trg_eff(const char *label, const char *ofilename, const char *inputfile
 
 
     // MC 
-    TH1F *PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_PseudoCaloMET", label));
-    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", label));
-    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", label));
-    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", label));
-    TH1F *if___HLT_MET105_IsoTrk50___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_MET105_IsoTrk50___PseudoCaloMET", label));
-    TH1F *if___orMETtrg___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___PseudoCaloMET", label));
+    TH1F *PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_PseudoCaloMET", labelMC));
+    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", labelMC));
+    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", labelMC));
+    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", labelMC));
+    TH1F *if___HLT_MET105_IsoTrk50___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_MET105_IsoTrk50___PseudoCaloMET", labelMC));
+    TH1F *if___orMETtrg___PseudoCaloMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___PseudoCaloMET", labelMC));
 
-    TH1F *RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_RecoPFMET", label));
-    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", label));            
-    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", label));
-    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", label));
-    TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_MET105_IsoTrk50___RecoPFMET", label));
-    TH1F *if___orMETtrg___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___RecoPFMET", label));
+    TH1F *RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_RecoPFMET", labelMC));
+    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", labelMC));            
+    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", labelMC));
+    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", labelMC));
+    TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_MET105_IsoTrk50___RecoPFMET", labelMC));
+    TH1F *if___orMETtrg___RecoPFMET_MC = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___RecoPFMET", labelMC));
     
-    TH1F *PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_PseudoCaloMET__RecoPFMETCut", label));
-    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", label));       
-    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", label));
-    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", label));
-    TH1F *if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", label));
-    TH1F *if___orMETtrg___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", label));
+    TH1F *PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_PseudoCaloMET__RecoPFMETCut", labelMC));
+    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", labelMC));       
+    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", labelMC));
+    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", labelMC));
+    TH1F *if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", labelMC));
+    TH1F *if___orMETtrg___PseudoCaloMET__RecoPFMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", labelMC));
     
-    TH1F *RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_RecoPFMET__PseudoCaloMETCut", label));
-    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", label));      
-    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", label));
-    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", label));
-    TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", label));
-    TH1F *if___orMETtrg___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", label));
+    TH1F *RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_RecoPFMET__PseudoCaloMETCut", labelMC));
+    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", labelMC));      
+    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", labelMC));
+    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", labelMC));
+    TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", labelMC));
+    TH1F *if___orMETtrg___RecoPFMET__PseudoCaloMETCut_MC = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", labelMC));
 
 
     // DATA
-    TH1F *PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_PseudoCaloMET", label));
-    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", label));
-    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", label));
-    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", label));
-    TH1F *if___HLT_MET105_IsoTrk50___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_MET105_IsoTrk50___PseudoCaloMET", label));
-    TH1F *if___orMETtrg___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___PseudoCaloMET", label));
+    TH1F *PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_PseudoCaloMET", labelData));
+    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", labelData));
+    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", labelData));
+    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", labelData));
+    TH1F *if___HLT_MET105_IsoTrk50___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_MET105_IsoTrk50___PseudoCaloMET", labelData));
+    TH1F *if___orMETtrg___PseudoCaloMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___PseudoCaloMET", labelData));
 
-    TH1F *RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_RecoPFMET", label));
-    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", label));            
-    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", label));
-    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", label));
-    TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_MET105_IsoTrk50___RecoPFMET", label));
-    TH1F *if___orMETtrg___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___RecoPFMET", label));
+    TH1F *RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_RecoPFMET", labelData));
+    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET", labelData));            
+    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET", labelData));
+    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET", labelData));
+    TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_MET105_IsoTrk50___RecoPFMET", labelData));
+    TH1F *if___orMETtrg___RecoPFMET_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___RecoPFMET", labelData));
     
-    TH1F *PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_PseudoCaloMET__RecoPFMETCut", label));
-    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", label));       
-    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", label));
-    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", label));
-    TH1F *if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", label));
-    TH1F *if___orMETtrg___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", label));
+    TH1F *PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_PseudoCaloMET__RecoPFMETCut", labelData));
+    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET__RecoPFMETCut", labelData));       
+    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET__RecoPFMETCut", labelData));
+    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET__RecoPFMETCut", labelData));
+    TH1F *if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_MET105_IsoTrk50___PseudoCaloMET__RecoPFMETCut", labelData));
+    TH1F *if___orMETtrg___PseudoCaloMET__RecoPFMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___PseudoCaloMET__RecoPFMETCut", labelData));
     
-    TH1F *RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_RecoPFMET__PseudoCaloMETCut", label));
-    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", label));      
-    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", label));
-    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", label));
-    TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", label));
-    TH1F *if___orMETtrg___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", label));
+    TH1F *RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_RecoPFMET__PseudoCaloMETCut", labelData));
+    TH1F *if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMET120_PFMHT120_IDTight___RecoPFMET__PseudoCaloMETCut", labelData));      
+    TH1F *if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoPFMET__PseudoCaloMETCut", labelData));
+    TH1F *if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", labelData));
+    TH1F *if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", labelData));
+    TH1F *if___orMETtrg___RecoPFMET__PseudoCaloMETCut_DATA = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", labelData));
 
 
     // setup 
@@ -1515,20 +1652,20 @@ void BKGdependency(const char *inputname, const char *ofilename) {
     ih_vs_eta->Add(ih_vs_eta_A9fp10);
     ih_vs_eta->Add(ih_vs_eta_D3fp8);
     ih_vs_eta->Add(ih_vs_eta_D8fp9);
-    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || || strstr(inputname, "QCD") != nullptr) ih_vs_eta->Add(ih_vs_eta_D9fp10);
+    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || strstr(inputname, "QCD") != nullptr) ih_vs_eta->Add(ih_vs_eta_D9fp10);
     ih_vs_eta->RebinX(4);
 
     TH2F *fpix_vs_ih = (TH2F*)fpix_vs_ih_A3fp9->Clone("fpix_vs_ih");
     fpix_vs_ih->Add(fpix_vs_ih_A9fp10);
     fpix_vs_ih->Add(fpix_vs_ih_D3fp8);
     fpix_vs_ih->Add(fpix_vs_ih_D8fp9);
-    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || || strstr(inputname, "QCD") != nullptr) fpix_vs_ih->Add(fpix_vs_ih_D9fp10);
+    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || strstr(inputname, "QCD") != nullptr) fpix_vs_ih->Add(fpix_vs_ih_D9fp10);
 
     TH2F *oP_vs_fpix = (TH2F*)oP_vs_fpix_A3fp9->Clone("oP_vs_fpix");
     oP_vs_fpix->Add(oP_vs_fpix_A9fp10);
     oP_vs_fpix->Add(oP_vs_fpix_D3fp8);
     oP_vs_fpix->Add(oP_vs_fpix_D8fp9);
-    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || || strstr(inputname, "QCD") != nullptr) oP_vs_fpix->Add(oP_vs_fpix_D9fp10);
+    if (strstr(inputname, "TTbar") != nullptr || strstr(inputname, "Wjets") != nullptr || strstr(inputname, "QCD") != nullptr) oP_vs_fpix->Add(oP_vs_fpix_D9fp10);
     TH2F *fpix_vs_oP = TransposeTH2(oP_vs_fpix);
 
     // plot the profile
@@ -1586,9 +1723,9 @@ void BKGdependency(const char *inputname, const char *ofilename) {
     return;
 }
 
-void GluinoP_mass(bool isPythia) {
+void GluinoP_mass(bool isPythia, bool isWeighted) {
 
-    TFile *ofile = new TFile(Form("PlayWithHistos/GluinoP_mass_%s.root", isPythia ? "pythia" : "madgraph"), "RECREATE");
+    TFile *ofile = new TFile(Form("PlayWithHistos/GluinoP_mass_%s_%s.root", isPythia ? "pythia" : "madgraph", isWeighted ? "weighted" : ""), "RECREATE");
 
     // create a std::vector of ifile where to retrieve the pT vs Fpixel histograms in each:
     std::vector<TFile*> ifiles;
@@ -1596,7 +1733,7 @@ void GluinoP_mass(bool isPythia) {
     if (isPythia) labels = {"1000", "1200", "1400", "1600", "1800", "2000", "2200", "2400", "2600"};
     else labels = {"1100", "1200", "1300", "1400", "1600", "1800", "2000", "2200", "2400", "2600"};
 
-    for (unsigned int i=0; i<labels.size(); i++) ifiles.push_back(new TFile(Form("../output/Gluino_V19/Gluino_Run3_MET_%s%s_V19p%s.root", isPythia ? "" : "madgraph_", labels[i].Data(), isPythia ? "0" : "1"), "READ"));
+    for (unsigned int i=0; i<labels.size(); i++) ifiles.push_back(new TFile(Form("../output/Gluino_V19/Gluino_Run3_MET_%s%s_V19p%s_%s.root", isPythia ? "" : "madgraph_", labels[i].Data(), isPythia ? "0" : "1", isWeighted ? "weighted" : ""), "READ"));
 
     // retrieve the p histogram and plot on the same canvas with different color (+legend)
     TCanvas *c_p = new TCanvas("c_p", "c_p", 800, 600);
@@ -1623,7 +1760,7 @@ void GluinoP_mass(bool isPythia) {
     for (size_t i = 0; i < ifiles.size(); i++) {
         TH2F *pT_vs_Fpixel = (TH2F*)ifiles[i]->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
 
-        int nEntries_CR = 0;
+        float nEntries_CR = 0;
         for (int xbin = 1; xbin <= pT_vs_Fpixel->GetNbinsX(); xbin++) {
             for (int ybin = 1; ybin <= pT_vs_Fpixel->GetNbinsY(); ybin++) {
                 if (pT_vs_Fpixel->GetXaxis()->GetBinCenter(xbin) <= fpix_cut || pT_vs_Fpixel->GetYaxis()->GetBinCenter(ybin) <= 70) {
@@ -1631,7 +1768,7 @@ void GluinoP_mass(bool isPythia) {
                 }
             }
         }
-        cout << "Number of entries in the CR (pT<=70 and Fpix<=" << fpix_cut << ") for m=" << labels[i].Data() << ": " << nEntries_CR << " / " << pT_vs_Fpixel->GetEntries() << " (" << 100.0*nEntries_CR/pT_vs_Fpixel->GetEntries() << "%)" << endl;
+        cout << "Number of entries in the CR (pT<=70 and Fpix<=" << fpix_cut << ") for m=" << labels[i].Data() << ": " << nEntries_CR << " / " << pT_vs_Fpixel->Integral() << " (" << 100.0*nEntries_CR/pT_vs_Fpixel->Integral() << "%)" << endl;
 
         TH1D *proj_pT = pT_vs_Fpixel->ProjectionY(Form("pT_%s", labels[i].Data()));
         TH1D *proj_Fpixel = pT_vs_Fpixel->ProjectionX(Form("Fpixel_%s", labels[i].Data()));
@@ -1659,7 +1796,7 @@ void GluinoP_mass(bool isPythia) {
     pT_vs_Fpixel_sum->Draw("COLZ");
     c_pT_vs_Fpixel->SetLogz();
 
-    int nEntries_CR = 0;
+    float nEntries_CR = 0;
     for (int xbin = 1; xbin <= pT_vs_Fpixel_sum->GetNbinsX(); xbin++) {
         for (int ybin = 1; ybin <= pT_vs_Fpixel_sum->GetNbinsY(); ybin++) {
             if (pT_vs_Fpixel_sum->GetXaxis()->GetBinCenter(xbin) <= fpix_cut || pT_vs_Fpixel_sum->GetYaxis()->GetBinCenter(ybin) <= 70) {
@@ -1667,7 +1804,7 @@ void GluinoP_mass(bool isPythia) {
             }
         }
     }
-    cout << "Number of entries in the CR (pT<=70 and Fpix<=" << fpix_cut << ") (TOTAL): " << nEntries_CR << " / " << pT_vs_Fpixel_sum->GetEntries() << " (" << 100.0*nEntries_CR/pT_vs_Fpixel_sum->GetEntries() << "%)" << endl;
+    cout << "Number of entries in the CR (pT<=70 and Fpix<=" << fpix_cut << ") (TOTAL): " << nEntries_CR << " / " << pT_vs_Fpixel_sum->Integral() << " (" << 100.0*nEntries_CR/pT_vs_Fpixel_sum->Integral() << "%)" << endl;
 
     // plot pT_distributions on the same canvas with different color (+legend)
     TCanvas *c_pT = new TCanvas("c_pT", "c_pT", 800, 600);
@@ -1726,7 +1863,7 @@ void CompareMaping() {
     TFile *ifileTTbar2024 = new TFile("../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "READ");
     TFile *ifileWjets2024 = new TFile("../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root", "READ");
     TFile *ifileQCD2024 = new TFile("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "READ");
-    TFile *GluinoRun3madgraph = new TFile("PlayWithHistos/GluinoP_mass_madgraph.root", "READ");
+    TFile *GluinoRun3madgraph = new TFile("PlayWithHistos/GluinoP_mass_madgraph_weighted.root", "READ");
 
 
     // load histograms
@@ -1743,19 +1880,41 @@ void CompareMaping() {
     // divide the gluino histogram by the bkg histogram to see where the signal is enhanced
     TH2F *pT_vs_fpix_ratio = (TH2F*)pT_vs_fpix_gluino->Clone("pT_vs_fpix_ratio");
     pT_vs_fpix_ratio->Divide(pT_vs_fpix_bkg);
+    pT_vs_fpix_ratio->Rebin2D(5,5);
 
     // canvas of the ratio
     TCanvas *c_ratio = new TCanvas("c_ratio", "c_ratio", 800, 600);
     pT_vs_fpix_ratio->GetXaxis()->SetTitle("F_{pixel}");
     pT_vs_fpix_ratio->GetYaxis()->SetTitle("p_{T} [GeV]");
-    pT_vs_fpix_ratio->Draw("COLZ");
+    pT_vs_fpix_ratio->Draw("TEXT");
 
-    Tcanvas *c_bkg_gluino = new TCanvas("c_bkg_gluino", "c_bkg_gluino", 800, 600);
+    TCanvas *c_bkg_gluino = new TCanvas("c_bkg_gluino", "c_bkg_gluino", 800, 600);
     pT_vs_fpix_bkg->GetXaxis()->SetTitle("F_{pixel}");
     pT_vs_fpix_bkg->GetYaxis()->SetTitle("p_{T} [GeV]");
     pT_vs_fpix_bkg->Draw("COLZ");
     pT_vs_fpix_gluino->SetLineColor(kRed);
-    pT_vs_fpix_gluino->Draw("COLZ same");
+    pT_vs_fpix_gluino->SetMarkerColor(kRed);
+    pT_vs_fpix_gluino->SetFillColor(kRed);
+    pT_vs_fpix_gluino->Draw("BOX same");
+
+
+    // cout number of event bellow each .1 in Fpixel, for both hists.
+    
+    for (int i=1; i<=10; i++) {
+        float fpix_cut = 0.1*i;
+        int nEntries_bkg = 0;
+        float nEntries_gluino = 0;
+        for (int xbin = 1; xbin <= pT_vs_fpix_bkg->GetNbinsX(); xbin++) {
+            for (int ybin = 1; ybin <= pT_vs_fpix_bkg->GetNbinsY(); ybin++) {
+                if (pT_vs_fpix_bkg->GetXaxis()->GetBinCenter(xbin) <= fpix_cut) {
+                    nEntries_bkg += pT_vs_fpix_bkg->GetBinContent(xbin, ybin);
+                    nEntries_gluino += pT_vs_fpix_gluino->GetBinContent(xbin, ybin);
+                }
+            }
+        }
+        cout << "Number of entries with Fpixel <= " << fpix_cut << ": " << nEntries_bkg << " (bkg), " << nEntries_gluino << " (gluino)" << "    (" << 100.0*nEntries_gluino/nEntries_bkg << " %)" << endl;
+    }
+
 
     ofile->cd();
     c_ratio->Write();
@@ -1766,36 +1925,678 @@ void CompareMaping() {
 }
 
 
+void FpixelPlot() {
+
+    TFile *ofile = new TFile("PlayWithHistos/Nm1_plots.root", "RECREATE");
+
+    TFile *ifile_JetMETdata = new TFile("../output/JetMET2024_V12/JetMET2024_V12p24.root", "READ");
+    TFile *ifile_Gluino = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p1.root", "READ");
+
+    TH1F *fpix_JetMETdata = (TH1F*)ifile_JetMETdata->Get("Nosel_Fpix");
+    TH1F *fpix_Gluino = (TH1F*)ifile_Gluino->Get("Nosel_Fpix");
+    fpix_JetMETdata->Scale(1./fpix_JetMETdata->Integral());
+    fpix_Gluino->Scale(1./fpix_Gluino->Integral());
+
+    TCanvas *c_fpix = new TCanvas("c_fpix", "c_fpix", 800, 800);
+    fpix_JetMETdata->SetLineColor(kBlack);
+    fpix_JetMETdata->SetMarkerColor(kBlack);
+    fpix_JetMETdata->SetMarkerStyle(20);
+    fpix_Gluino->GetXaxis()->SetTitle("F_{pixel}");
+    fpix_Gluino->GetYaxis()->SetTitle("A.U.");
+    fpix_Gluino->SetFillColorAlpha(kRed, 0.5);
+    fpix_Gluino->SetLineColor(kRed);
+    fpix_Gluino->Draw("HIST");
+    fpix_JetMETdata->Draw("E1 same");
+    TLegend *legend_fpix = new TLegend(0.2, 0.5, 0.5, 0.7);
+    legend_fpix->AddEntry(fpix_JetMETdata, "JetMET 2024 data", "lep");
+    legend_fpix->AddEntry(fpix_Gluino, "#tilde{g}_{m=2000 GeV}", "f");
+    legend_fpix->SetBorderSize(0);
+    legend_fpix->SetFillStyle(0);
+    legend_fpix->Draw();
+
+    // remove stat using SetOptStat(0);
+    gStyle->SetOptStat(0);
+    
+    TLatex *latex = new TLatex();
+    latex->SetNDC();
+    latex->SetTextSize(0.03);
+    latex->DrawLatex(0.1, 0.91, "#it{Private Work}");
+
+    c_fpix->SaveAs("PlayWithHistos/Fpixel_plot.pdf");
+}
+
+
+void Nm1Eff (bool isRescaled, bool isOnlyWjets, std::string QCD, std::string TTbar, std::string Wjets, std::string JetMETdata) {
+
+    gErrorIgnoreLevel = kWarning;
+
+    TFile *ifile_QCD = new TFile(QCD.c_str(), "READ");
+    TFile *ifile_TTbar = new TFile(TTbar.c_str(), "READ");
+    TFile *ifile_Wjets = new TFile(Wjets.c_str(), "READ");
+    TFile *ifile_JetMETdata = new TFile(JetMETdata.c_str(), "READ");
+
+    std::vector<TH1F*> hNM1_QCD, hNM1_TTbar, hNM1_Wjets, hNM1_MC, hNM1_JetMETdata;
+    
+    std::vector<string> cutNames = {"trigger", "METfilters", "CaloMET", "CaloMET_weighted", "Ptpseudo", "eta", "NOPH", "FOVH", "NOM", "HighPurity", 
+    "Chi2", "dZ", "dXY", "PFMiniIso", "TrkIso", "EoverP", "PtErr_over_PtPt", "Fpix", "PtErr_over_Pt", "Ih_StripOnly"};
+
+    std::vector<string> Xlabel = {"orMETtrigger", "METfilters", "PseudoMET", "PseudoMET rescaled", "p_{T} [GeV]", "eta", "Nb pixel hits", "frac. valid hits", "Nb dE/dx", "HighPurity", 
+    "#chi^{2}/NDOF", "dz [cm]", "dxy [cm]", "I_{PF}^{rel}", "I_{dr03}^{trk}", "E/p", "#sigma_{p_{T}}/p_{T}^{2}", "F_{pixel}", "#sigma_{p_{T}}/p_{T}", "I_{h} strip only [MeV/cm]"};
+
+    // Step 1: retrieve the Nm1 hists
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        hNM1_QCD.push_back((TH1F*)ifile_QCD->Get(Form("Nm1_%s", cutNames[i].c_str())));
+        hNM1_TTbar.push_back((TH1F*)ifile_TTbar->Get(Form("Nm1_%s", cutNames[i].c_str())));
+        hNM1_Wjets.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+
+        if (cutNames[i] == "CaloMET_weighted") hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i-1].c_str())));
+        else hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+
+        hNM1_MC.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+    }
+
+    // Step 2: change the style of the hists
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        hNM1_MC[i]->Add(hNM1_TTbar[i]);
+        hNM1_MC[i]->Add(hNM1_QCD[i]);
+
+        hNM1_QCD[i]->SetLineColor(kGreen-4);
+        hNM1_QCD[i]->SetFillColorAlpha(kGreen-4, 0.5);
+        hNM1_TTbar[i]->SetLineColor(kRed);
+        hNM1_TTbar[i]->SetFillColorAlpha(kRed, 0.5);
+        hNM1_Wjets[i]->SetLineColor(kBlue-7);
+        hNM1_Wjets[i]->SetFillColorAlpha(kBlue-7, 0.5);
+        hNM1_JetMETdata[i]->SetLineColor(kBlack);
+        hNM1_JetMETdata[i]->SetMarkerColor(kBlack);
+        hNM1_JetMETdata[i]->SetMarkerStyle(20);
+    }
+
+    // Step 2 bis: if rescaled, scale all the hists to 1
+    if (isRescaled && !isOnlyWjets) {
+        for (size_t i = 0; i < cutNames.size(); i++) {
+            float intTot = hNM1_QCD[i]->Integral() + hNM1_TTbar[i]->Integral() + hNM1_Wjets[i]->Integral();
+            hNM1_QCD[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+            hNM1_TTbar[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+            hNM1_Wjets[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+        }
+    }
+    else if (isRescaled && isOnlyWjets) {
+        for (size_t i = 0; i < cutNames.size(); i++) {
+            hNM1_Wjets[i]->Scale(hNM1_JetMETdata[i]->Integral()/hNM1_Wjets[i]->Integral());
+        }
+    }
+
+    // Step 3: Canvas for each hists
+    std::vector<TCanvas*> canvases;
+    for (size_t i = 0; i < cutNames.size(); i++) {
+
+        TCanvas *c = new TCanvas(Form("c_Nm1_%s", cutNames[i].c_str()), Form("c_Nm1_%s", cutNames[i].c_str()), 800, 600);
+
+        THStack *hs = new THStack(Form("hs_%s", cutNames[i].c_str()), "");
+        if (!isOnlyWjets) {
+            hs->Add(hNM1_QCD[i]);
+            hs->Add(hNM1_TTbar[i]);
+            hs->Add(hNM1_Wjets[i]);
+        }
+        else hs->Add(hNM1_Wjets[i]);
+        hs->Draw("HIST");
+        hs->SetMaximum(std::max(hs->GetMaximum()*1.5, hNM1_JetMETdata[i]->GetMaximum()*1.5));
+        hs->SetMinimum(std::min(hs->GetMinimum() == 0 ? 1 : hs->GetMinimum()/2, hNM1_JetMETdata[i]->GetMinimum() == 0 ? 1 : hNM1_JetMETdata[i]->GetMinimum()/2));
+        hs->GetXaxis()->SetTitle(Xlabel[i].c_str());
+        hs->GetYaxis()->SetTitle("Number of events");
+
+        hNM1_JetMETdata[i]->SetMarkerStyle(20);
+        hNM1_JetMETdata[i]->SetMarkerColor(kBlack);
+        hNM1_JetMETdata[i]->SetLineColor(kBlack);
+        hNM1_JetMETdata[i]->Draw("E1 same");
+
+        TLegend *legend = new TLegend(0.7, 0.5, 0.85, 0.9);
+        if (!isOnlyWjets) {
+            legend->AddEntry(hNM1_QCD[i],       "QCD muEnriched",       "f");
+            legend->AddEntry(hNM1_TTbar[i],     "TTbar",     "f");
+        }
+        legend->AddEntry(hNM1_Wjets[i],     "W+jets",    "f");
+        legend->AddEntry(hNM1_JetMETdata[i],"JetMET data","lep");
+        legend->SetBorderSize(0);
+        legend->SetFillStyle(0);
+        legend->Draw();
+
+        c->SetLogy();
+
+        TH1F *htemp = (TH1F*)hNM1_Wjets[i]->Clone("htemp");
+        if (!isOnlyWjets) {
+            htemp->Add(hNM1_TTbar[i]);
+            htemp->Add(hNM1_QCD[i]);
+        }
+
+        TCanvas *cRatio = DrawWithRatio(hNM1_JetMETdata[i], htemp, c, Form("N-1 plot -- %s",Xlabel[i].c_str()), "data/MC",  Xlabel[i], htemp->GetBinLowEdge(1), htemp->GetBinLowEdge(htemp->GetNbinsX()+1));
+
+        canvases.push_back(cRatio);
+        delete htemp;
+    }
+
+    // Step 4: compute the efficiency for each cut
+    // For each cut: efficiency = integral on the signal side / total integral
+    // "right" = cut is var > threshold (keep high values)
+    // "left"  = cut is var < threshold (keep low values)
+
+    struct CutInfo {
+        double threshold;
+        bool keepRight;
+        bool isSymmetric; // pour les coupures sur |var|
+    };
+
+    std::vector<CutInfo> cutInfos = {
+        {0,      true,  false},  // trigger
+        {0,      true,  false},  // METfilters
+        {170,    true,  false},  // CaloMET       > 170
+        {170,    true,  false},  // CaloMET rescaled       > 170
+        {50,     true,  false},  // Pt_pseudo     > 50
+        {2.4,    false, true },  // |eta|         < 2.4  ← symétrique
+        {2,      true,  false},  // NOPH          >= 2
+        {0.8,    true,  false},  // FOVH          > 0.8
+        {10,     true,  false},  // NOM           >= 10
+        {0,      true,  false},  // HighPurity
+        {5.0,    false, false},  // Chi2          < 5
+        {0.1,    false, true },  // |dZ|          < 0.1  ← symétrique
+        {0.02,   false, true },  // |dXY|         < 0.02 ← symétrique
+        {0.02,   false, false},  // PFMiniIso     < 0.02
+        {15,     false, false},  // TrkIso        < 15
+        {0.3,    false, false},  // EoverP        < 0.3
+        {0.0008, false, false},  // PtErr/PtPt    < 0.0008
+        {0.3,    true,  false},  // Fpix          > 0.3
+        {1,      false, false},  // PtErr/Pt      < 1
+        {3.14,   true,  false},  // Ih_StripOnly  > 3.14
+    };
+
+    // Helper lambda étendu: avec option symétrique pour |var| < threshold
+    auto computeEff = [](TH1F* h, double threshold, bool keepRight, bool isSymmetric = false) -> double {
+        if (!h) return -1.0;
+        int totalBins = h->GetNbinsX();
+        double total  = h->Integral(1, totalBins);
+        if (total == 0) return 0.0;
+
+        if (isSymmetric) {
+            // |var| < threshold  =>  intégrer entre -threshold et +threshold
+            int binLow  = h->FindBin(-threshold);
+            int binHigh = h->FindBin(threshold);
+            return h->Integral(binLow, binHigh) / total;
+        }
+
+        int cutBin = h->FindBin(threshold);
+        double signal = keepRight ? h->Integral(cutBin, totalBins)
+                                : h->Integral(1, cutBin - 1);
+        return signal / total;
+    };
+
+    // Print efficiencies
+    std::cout << std::left
+            << std::setw(25) << "Cut"
+            << std::setw(12) << "QCD"
+            << std::setw(12) << "TTbar"
+            << std::setw(12) << "W+jets"
+            << std::setw(12) << "ALL MC"
+            << std::setw(12) << "Data"
+            << std::endl;
+    std::cout << std::string(70, '-') << std::endl;
+
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        double eff_QCD   = computeEff(hNM1_QCD[i],        cutInfos[i].threshold, cutInfos[i].keepRight);
+        double eff_TTbar = computeEff(hNM1_TTbar[i],      cutInfos[i].threshold, cutInfos[i].keepRight);
+        double eff_Wjets = computeEff(hNM1_Wjets[i],      cutInfos[i].threshold, cutInfos[i].keepRight);
+        double eff_MC    = computeEff(hNM1_MC[i],         cutInfos[i].threshold, cutInfos[i].keepRight);
+
+        double eff_Data  = computeEff(hNM1_JetMETdata[i], cutInfos[i].threshold, cutInfos[i].keepRight);
+
+        std::cout << std::left  << std::setw(25) << cutNames[i]
+                << std::fixed << std::setprecision(4)
+                << std::setw(12) << eff_QCD
+                << std::setw(12) << eff_TTbar
+                << std::setw(12) << eff_Wjets
+                << std::setw(12) << eff_MC
+                << std::setw(12) << eff_Data
+                << std::endl;
+    }
+
+    // Step 5: save
+    TString pdfName = Form("PlayWithHistos/Nm1plots/Nm1Eff%s%s_ALL.pdf", isRescaled ? "_rescaled" : "", isOnlyWjets ? "_onlyWjets" : "");
+    for (size_t i = 0; i < canvases.size(); i++) {
+        if      (i == 0)                    canvases[i]->Print(pdfName + "("); // ouverture
+        else if (i == canvases.size() - 1)  canvases[i]->Print(pdfName + ")"); // fermeture
+        else                                canvases[i]->Print(pdfName);       // page normale
+    }
+    
+
+    return;
+}
+
+void PseudoMET_vs_PFMET () {
+    TFile *ifileData = new TFile("TestMET2024_V12p24.root", "READ");
+    TFile *ifileGluino = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p1.root", "READ");
+
+    TH2F *CaloMET_vs_PFMET_data = (TH2F*)ifileData->Get("Nosel_PseudoMET_vs_PFMET");
+    TH2F *CaloMET_vs_PFMET_gluino = (TH2F*)ifileGluino->Get("Nosel_PseudoMET_vs_PFMET");
+
+    // draw two different TCanvas with the same range, one for data and one for gluino, with the same color scale
+    TCanvas *c_data = new TCanvas("c_data", "c_data", 1200, 900);
+    CaloMET_vs_PFMET_data->GetXaxis()->SetTitle("PFMET [GeV]");
+    CaloMET_vs_PFMET_data->GetXaxis()->SetLabelSize(0.03);
+    CaloMET_vs_PFMET_data->GetYaxis()->SetTitle("PseudoMET [GeV]");
+    CaloMET_vs_PFMET_data->GetYaxis()->SetLabelSize(0.03);
+    CaloMET_vs_PFMET_data->Draw("COLZ");
+    c_data->SetLogz();
+    gStyle->SetOptStat(0);
+    TCanvas *c_gluino = new TCanvas("c_gluino", "c_gluino", 1200, 900);
+    CaloMET_vs_PFMET_gluino->GetXaxis()->SetTitle("PFMET [GeV]");
+    CaloMET_vs_PFMET_gluino->GetXaxis()->SetLabelSize(0.03);
+    CaloMET_vs_PFMET_gluino->GetYaxis()->SetTitle("PseudoMET [GeV]");
+    CaloMET_vs_PFMET_gluino->GetYaxis()->SetLabelSize(0.03);
+    CaloMET_vs_PFMET_gluino->Draw("COLZ");
+    c_gluino->SetLogz();
+    gStyle->SetOptStat(0);
+
+    c_data->SaveAs("PlayWithHistos/PseudoMET_vs_PFMET_data.pdf");
+    c_gluino->SaveAs("PlayWithHistos/PseudoMET_vs_PFMET_gluino.pdf");
+
+    return;
+}
+
+void DrawPseudoMET() {
+
+    gErrorIgnoreLevel = kError;
+
+    TFile *ifileWjetMuNu = new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root", "READ");
+    TFile *ifileMET = new TFile("../output/JetMET2024_V12/JetMET2024_V12p24.root", "READ");
+
+    TH1F *Nosel_PseudoCaloMET_WjetMuNu = (TH1F*)ifileWjetMuNu->Get("Nosel_PseudoCaloMET");
+    TH1F *Nosel_PseudoCaloMET_MET2024 = (TH1F*)ifileMET->Get("Nosel_PseudoCaloMET");
+
+    TH1F *Nm1_event_PseudoMET_WjetMuNu = (TH1F*)ifileWjetMuNu->Get("Nm1_event_CaloMET");
+    TH1F *Nm1_event_PseudoMET_MET2024 = (TH1F*)ifileMET->Get("Nm1_event_CaloMET");
+
+    TH1F *Nm1Rescaled_event_PseudoMET_WjetMuNu = (TH1F*)ifileWjetMuNu->Get("Nm1_event_CaloMET_weighted");
+    TH1F *Nm1Rescaled_event_PseudoMET_MET2024 = (TH1F*)ifileMET->Get("Nm1_event_CaloMET_weighted");
+
+
+    Nm1_event_PseudoMET_WjetMuNu->Scale(1./Nm1_event_PseudoMET_WjetMuNu->Integral());
+    Nm1_event_PseudoMET_MET2024->Scale(1./Nm1_event_PseudoMET_MET2024->Integral());
+    Nosel_PseudoCaloMET_WjetMuNu->Scale(1./Nosel_PseudoCaloMET_WjetMuNu->Integral());
+    Nosel_PseudoCaloMET_MET2024->Scale(1./Nosel_PseudoCaloMET_MET2024->Integral());
+    Nm1Rescaled_event_PseudoMET_WjetMuNu->Scale(1./Nm1Rescaled_event_PseudoMET_WjetMuNu->Integral());
+    Nm1Rescaled_event_PseudoMET_MET2024->Scale(1./Nm1Rescaled_event_PseudoMET_MET2024->Integral());
+
+    // fit both hist with a gaussian at the peak
+    TF1 *gaus_WjetMuNu = new TF1("gaus_WjetMuNu", "gaus", 20, 200);
+    TF1 *gaus_MET2024 = new TF1("gaus_MET2024", "gaus", 20, 200);
+    gaus_WjetMuNu->SetParameters(Nosel_PseudoCaloMET_WjetMuNu->GetMaximum(), Nosel_PseudoCaloMET_WjetMuNu->GetMean(), Nosel_PseudoCaloMET_WjetMuNu->GetRMS());
+    gaus_MET2024->SetParameters(Nosel_PseudoCaloMET_MET2024->GetMaximum(), Nosel_PseudoCaloMET_MET2024->GetMean(), Nosel_PseudoCaloMET_MET2024->GetRMS());
+    cout << "No sel" << endl;
+    Nosel_PseudoCaloMET_WjetMuNu->Fit(gaus_WjetMuNu, "RQ");
+    Nosel_PseudoCaloMET_MET2024->Fit(gaus_MET2024, "RQ");
+    gaus_WjetMuNu->SetLineColor(kRed);
+    gaus_MET2024->SetLineColor(kGreen);
+
+    TF1 *gaus_Nm1_WjetMuNu = new TF1("gaus_Nm1_WjetMuNu", "gaus", 80, 220);
+    TF1 *gaus_Nm1_MET2024 = new TF1("gaus_Nm1_MET2024", "gaus", 50, 230);
+    gaus_Nm1_WjetMuNu->SetParameters(Nm1_event_PseudoMET_WjetMuNu->GetMaximum(), Nm1_event_PseudoMET_WjetMuNu->GetMean(), Nm1_event_PseudoMET_WjetMuNu->GetRMS());
+    gaus_Nm1_MET2024->SetParameters(Nm1_event_PseudoMET_MET2024->GetMaximum(), Nm1_event_PseudoMET_MET2024->GetMean(), Nm1_event_PseudoMET_MET2024->GetRMS());
+    cout << "N-1 sel" << endl;
+    Nm1_event_PseudoMET_WjetMuNu->Fit(gaus_Nm1_WjetMuNu, "R");
+    Nm1_event_PseudoMET_MET2024->Fit(gaus_Nm1_MET2024, "R");
+    gaus_Nm1_WjetMuNu->SetLineColor(kRed);
+    gaus_Nm1_MET2024->SetLineColor(kGreen);
+    cout << "Mean data: " << gaus_Nm1_MET2024->GetParameter(1) << "   Mean WjetMuNu: " << gaus_Nm1_WjetMuNu->GetParameter(1) << endl;
+    cout << "weight = " << gaus_Nm1_MET2024->GetParameter(1)/gaus_Nm1_WjetMuNu->GetParameter(1) << endl;
+
+    TLegend *legend = new TLegend(0.7, 0.5, 0.85, 0.9);
+    legend->AddEntry(Nosel_PseudoCaloMET_WjetMuNu, "WjetMuNu", "f");
+    legend->AddEntry(Nosel_PseudoCaloMET_MET2024, "MET2024", "lep");
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+
+
+    TCanvas *c_PseudoCaloMET_nosel = new TCanvas("c_PseudoCaloMET_nosel", "c_PseudoCaloMET_nosel", 800, 600);
+    c_PseudoCaloMET_nosel->cd();
+    Nosel_PseudoCaloMET_WjetMuNu->SetLineColor(kBlue-7);
+    Nosel_PseudoCaloMET_WjetMuNu->SetFillColorAlpha(kBlue-7, 0.5);
+    Nosel_PseudoCaloMET_WjetMuNu->GetXaxis()->SetTitle("PseudoMET (~ CaloMET) [GeV]");
+    Nosel_PseudoCaloMET_WjetMuNu->GetYaxis()->SetTitle("Number of events");
+    Nosel_PseudoCaloMET_WjetMuNu->Draw("HIST");
+    Nosel_PseudoCaloMET_WjetMuNu->GetXaxis()->SetRangeUser(10, 1000);
+    Nosel_PseudoCaloMET_MET2024->SetLineColor(kBlack);
+    Nosel_PseudoCaloMET_MET2024->SetMarkerColor(kBlack);
+    Nosel_PseudoCaloMET_MET2024->SetMarkerStyle(20);
+    Nosel_PseudoCaloMET_MET2024->Draw("E1 same");
+    gaus_WjetMuNu->Draw("same");
+    gaus_MET2024->Draw("same");
+    legend->Draw();
+    gPad->SetLogy();
+    gStyle->SetOptStat(0);
+
+    TCanvas *c_PseudoCaloMET = new TCanvas("c_PseudoCaloMET", "c_PseudoCaloMET", 800, 600);
+    c_PseudoCaloMET->cd();
+    Nm1_event_PseudoMET_WjetMuNu->SetLineColor(kBlue-7);
+    Nm1_event_PseudoMET_WjetMuNu->SetFillColorAlpha(kBlue-7, 0.5);
+    Nm1_event_PseudoMET_WjetMuNu->GetXaxis()->SetTitle("PseudoMET (~ CaloMET) [GeV]");
+    Nm1_event_PseudoMET_WjetMuNu->GetYaxis()->SetTitle("Number of events");
+    Nm1_event_PseudoMET_WjetMuNu->Draw("HIST");
+    Nm1_event_PseudoMET_WjetMuNu->GetXaxis()->SetRangeUser(10, 1000);
+    Nm1_event_PseudoMET_MET2024->SetLineColor(kBlack);
+    Nm1_event_PseudoMET_MET2024->SetMarkerColor(kBlack);
+    Nm1_event_PseudoMET_MET2024->SetMarkerStyle(20);
+    Nm1_event_PseudoMET_MET2024->Draw("E1 same");
+    gaus_Nm1_WjetMuNu->Draw("same");
+    gaus_Nm1_MET2024->Draw("same");
+    legend->Draw();
+    gPad->SetLogy();
+    gStyle->SetOptStat(0);
+
+    TCanvas *cRescaled_PseudoCaloMET = new TCanvas("cRescaled_PseudoCaloMET", "cRescaled_PseudoCaloMET", 800, 600);
+    cRescaled_PseudoCaloMET->cd();
+    Nm1Rescaled_event_PseudoMET_WjetMuNu->SetLineColor(kBlue-7);
+    Nm1Rescaled_event_PseudoMET_WjetMuNu->SetFillColorAlpha(kBlue-7, 0.5);
+    Nm1Rescaled_event_PseudoMET_WjetMuNu->GetXaxis()->SetTitle("PseudoMET (~ CaloMET) [GeV]");
+    Nm1Rescaled_event_PseudoMET_WjetMuNu->GetYaxis()->SetTitle("Number of events");
+    Nm1Rescaled_event_PseudoMET_WjetMuNu->Draw("HIST");
+    Nm1Rescaled_event_PseudoMET_WjetMuNu->GetXaxis()->SetRangeUser(10, 1000);
+    Nm1Rescaled_event_PseudoMET_MET2024->SetLineColor(kBlack);
+    Nm1Rescaled_event_PseudoMET_MET2024->SetMarkerColor(kBlack);
+    Nm1Rescaled_event_PseudoMET_MET2024->SetMarkerStyle(20);
+    Nm1Rescaled_event_PseudoMET_MET2024->Draw("E1 same");
+    legend->Draw();
+    gPad->SetLogy();
+    gStyle->SetOptStat(0);
+
+    TCanvas *cRatio_nosel = DrawWithRatio(Nosel_PseudoCaloMET_MET2024, Nosel_PseudoCaloMET_WjetMuNu,
+                       c_PseudoCaloMET_nosel, "PseudoMET wo selections", "data/MC",  "PseudoMET (~ CaloMET) [GeV]", 10, 1000);
+
+    TCanvas *cRatio_Nm1 = DrawWithRatio(Nm1_event_PseudoMET_MET2024, Nm1_event_PseudoMET_WjetMuNu,
+                       c_PseudoCaloMET, "PseudoMET N-1 selections", "data/MC",  "PseudoMET (~ CaloMET) [GeV]", 10, 1000);
+
+    TCanvas *cRatio_Rescaled = DrawWithRatio(Nm1Rescaled_event_PseudoMET_MET2024, Nm1Rescaled_event_PseudoMET_WjetMuNu,
+                       cRescaled_PseudoCaloMET, "PseudoMET N-1 selections rescaled", "data/MC",  "PseudoMET (~ CaloMET) [GeV]", 10, 1000);
+
+    cRatio_nosel->SaveAs("PlayWithHistos/PseudoCaloMET_nosel_FIT.pdf");
+    cRatio_Nm1->SaveAs("PlayWithHistos/PseudoCaloMET_Nm1_FIT.pdf");
+    cRatio_Rescaled->SaveAs("PlayWithHistos/PseudoCaloMET_Nm1_rescaled.pdf");
+
+    return;
+}
+
+void nHSCP() {
+
+    gErrorIgnoreLevel = kError;
+
+    TFile *ifileQCD = new TFile("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "READ");
+    TFile *ifileTTbar = new TFile("../output/TTbar2024_V15/TTbar2024_V15p6_weighted.root", "READ");
+    TFile *ifileWjetMuNu = new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root", "READ");
+    TFile *ifileMET = new TFile("../output/JetMET2024_V12/JetMET2024_V12p24.root", "READ");
+
+    TH1F *nHSCP_QCD = (TH1F*)ifileQCD->Get("nHSCP");
+    TH1F *nHSCP_TTbar = (TH1F*)ifileTTbar->Get("nHSCP");
+    TH1F *nHSCP_WjetMuNu = (TH1F*)ifileWjetMuNu->Get("nHSCP");
+    TH1F *nHSCP_MET = (TH1F*)ifileMET->Get("nHSCP");
+
+    TH1F *Sel_nHSCP_QCD = (TH1F*)ifileQCD->Get("METanalysis_Eta2p4_nHSCP");
+    TH1F *Sel_nHSCP_TTbar = (TH1F*)ifileTTbar->Get("METanalysis_Eta2p4_nHSCP");
+    TH1F *Sel_nHSCP_WjetMuNu = (TH1F*)ifileWjetMuNu->Get("METanalysis_Eta2p4_nHSCP");
+    TH1F *Sel_nHSCP_MET = (TH1F*)ifileMET->Get("METanalysis_Eta2p4_nHSCP");
+
+    // draw on the same canvas with a tstack for bkg
+    TCanvas *c_nHSCP = new TCanvas("c_nHSCP", "c_nHSCP", 800, 600);
+    THStack *hs_nHSCP = new THStack("hs_nHSCP", "");
+    nHSCP_QCD->SetLineColor(kGreen-4);
+    nHSCP_QCD->SetFillColorAlpha(kGreen-4, 0.5);
+    nHSCP_TTbar->SetLineColor(kRed);
+    nHSCP_TTbar->SetFillColorAlpha(kRed, 0.5);
+    nHSCP_WjetMuNu->SetLineColor(kBlue-7);
+    nHSCP_WjetMuNu->SetFillColorAlpha(kBlue-7, 0.5);
+    nHSCP_MET->SetLineColor(kBlack);
+    nHSCP_MET->SetMarkerColor(kBlack);
+    nHSCP_MET->SetMarkerStyle(20);
+
+    hs_nHSCP->Add(nHSCP_QCD);
+    hs_nHSCP->Add(nHSCP_TTbar);
+    hs_nHSCP->Add(nHSCP_WjetMuNu);
+    hs_nHSCP->Draw("HIST");
+    hs_nHSCP->SetMinimum(0.8);
+    hs_nHSCP->GetXaxis()->SetTitle("N_{HSCP}");
+    hs_nHSCP->GetYaxis()->SetTitle("Number of events");
+    nHSCP_MET->Draw("E1 same");
+
+    TLegend *legend = new TLegend(0.7, 0.5, 0.85, 0.9);
+    legend->AddEntry(nHSCP_QCD, "QCD muEnriched", "f");
+    legend->AddEntry(nHSCP_TTbar, "TTbar", "f");
+    legend->AddEntry(nHSCP_WjetMuNu, "W+jets", "f");
+    legend->AddEntry(nHSCP_MET, "JetMET data", "lep");
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+    legend->Draw();
+
+    c_nHSCP->SetLogy();
+
+    c_nHSCP->SaveAs("PlayWithHistos/nHSCP_nosel.pdf");
+
+    // same for the selected events
+    TCanvas *c_Sel_nHSCP = new TCanvas("c_Sel_nHSCP", "c_Sel_nHSCP", 800, 600);
+    THStack *hs_Sel_nHSCP = new THStack("hs_Sel_nHSCP", "");
+    Sel_nHSCP_QCD->SetLineColor(kGreen-4);
+    Sel_nHSCP_QCD->SetFillColorAlpha(kGreen-4, 0.5);
+    Sel_nHSCP_TTbar->SetLineColor(kRed);
+    Sel_nHSCP_TTbar->SetFillColorAlpha(kRed, 0.5);
+    Sel_nHSCP_WjetMuNu->SetLineColor(kBlue-7);
+    Sel_nHSCP_WjetMuNu->SetFillColorAlpha(kBlue-7, 0.5);
+    Sel_nHSCP_MET->SetLineColor(kBlack);
+    Sel_nHSCP_MET->SetMarkerColor(kBlack);
+    Sel_nHSCP_MET->SetMarkerStyle(20);
+
+    hs_Sel_nHSCP->Add(Sel_nHSCP_QCD);
+    hs_Sel_nHSCP->Add(Sel_nHSCP_TTbar);
+    hs_Sel_nHSCP->Add(Sel_nHSCP_WjetMuNu);
+    hs_Sel_nHSCP->Draw("HIST");
+    hs_Sel_nHSCP->SetMinimum(0.8);
+    hs_Sel_nHSCP->GetXaxis()->SetTitle("N_{HSCP}");
+    hs_Sel_nHSCP->GetYaxis()->SetTitle("Number of events");
+    Sel_nHSCP_MET->Draw("E1 same");
+
+    legend->Draw();
+    c_Sel_nHSCP->SetLogy();
+    c_Sel_nHSCP->SaveAs("PlayWithHistos/nHSCP_sel.pdf");
+
+
+    return;
+}
+
+void nPV() {
+
+    gErrorIgnoreLevel = kError;
+
+    TFile *ifileQCD = new TFile("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "READ");
+    TFile *ifileTTbar = new TFile("../output/TTbar2024_V15/TTbar2024_V15p6_weighted.root", "READ");
+    TFile *ifileWjetMuNu = new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root", "READ");
+    TFile *ifileMET = new TFile("../output/JetMET2024_V12/JetMET2024_V12p24.root", "READ");
+
+    TH1F *nPV_QCD = (TH1F*)ifileQCD->Get("nPVgood");
+    TH1F *nPV_TTbar = (TH1F*)ifileTTbar->Get("nPVgood");
+    TH1F *nPV_WjetMuNu = (TH1F*)ifileWjetMuNu->Get("nPVgood");
+    TH1F *nPV_MET = (TH1F*)ifileMET->Get("nPVgood");
+
+    TH1F *Sel_nPV_QCD = (TH1F*)ifileQCD->Get("METanalysis_Eta2p4_nPVgood");
+    TH1F *Sel_nPV_TTbar = (TH1F*)ifileTTbar->Get("METanalysis_Eta2p4_nPVgood");
+    TH1F *Sel_nPV_WjetMuNu = (TH1F*)ifileWjetMuNu->Get("METanalysis_Eta2p4_nPVgood");
+    TH1F *Sel_nPV_MET = (TH1F*)ifileMET->Get("METanalysis_Eta2p4_nPVgood");
+
+    // draw on the same canvas with a tstack for bkg
+    TCanvas *c_nPV = new TCanvas("c_nPV", "c_nPV", 800, 600);
+    THStack *hs_nPV = new THStack("hs_nPV", "");
+    nPV_QCD->SetLineColor(kGreen-4);
+    nPV_QCD->SetFillColorAlpha(kGreen-4, 0.5);
+    nPV_TTbar->SetLineColor(kRed);
+    nPV_TTbar->SetFillColorAlpha(kRed, 0.5);
+    nPV_WjetMuNu->SetLineColor(kBlue-7);
+    nPV_WjetMuNu->SetFillColorAlpha(kBlue-7, 0.5);
+    nPV_MET->SetLineColor(kBlack);
+    nPV_MET->SetMarkerColor(kBlack);
+    nPV_MET->SetMarkerStyle(20);
+
+    hs_nPV->Add(nPV_QCD);
+    hs_nPV->Add(nPV_TTbar);
+    hs_nPV->Add(nPV_WjetMuNu);
+    hs_nPV->Draw("HIST");
+    hs_nPV->SetMinimum(0.8);
+    hs_nPV->GetXaxis()->SetTitle("N_{PV}");
+    hs_nPV->GetYaxis()->SetTitle("Number of events");
+    nPV_MET->Draw("E1 same");
+
+    TLegend *legend = new TLegend(0.7, 0.5, 0.85, 0.9);
+    legend->AddEntry(nPV_QCD, "QCD muEnriched", "f");
+    legend->AddEntry(nPV_TTbar, "TTbar", "f");
+    legend->AddEntry(nPV_WjetMuNu, "W+jets", "f");
+    legend->AddEntry(nPV_MET, "JetMET data", "lep");
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+    legend->Draw();
+
+    c_nPV->SetLogy();
+
+    c_nPV->SaveAs("PlayWithHistos/nPV_nosel.pdf");
+
+    // same for the selected events
+    TCanvas *c_Sel_nPV = new TCanvas("c_Sel_nPV", "c_Sel_nPV", 800, 600);
+    THStack *hs_Sel_nPV = new THStack("hs_Sel_nPV", "");
+    Sel_nPV_QCD->SetLineColor(kGreen-4);
+    Sel_nPV_QCD->SetFillColorAlpha(kGreen-4, 0.5);
+    Sel_nPV_TTbar->SetLineColor(kRed);
+    Sel_nPV_TTbar->SetFillColorAlpha(kRed, 0.5);
+    Sel_nPV_WjetMuNu->SetLineColor(kBlue-7);
+    Sel_nPV_WjetMuNu->SetFillColorAlpha(kBlue-7, 0.5);
+    Sel_nPV_MET->SetLineColor(kBlack);
+    Sel_nPV_MET->SetMarkerColor(kBlack);
+    Sel_nPV_MET->SetMarkerStyle(20);
+
+    hs_Sel_nPV->Add(Sel_nPV_QCD);
+    hs_Sel_nPV->Add(Sel_nPV_TTbar);
+    hs_Sel_nPV->Add(Sel_nPV_WjetMuNu);
+    hs_Sel_nPV->Draw("HIST");
+    hs_Sel_nPV->SetMinimum(0.8);
+    hs_Sel_nPV->GetXaxis()->SetTitle("N_{PV}");
+    hs_Sel_nPV->GetYaxis()->SetTitle("Number of events");
+    Sel_nPV_MET->Draw("E1 same");
+
+    legend->Draw();
+    c_Sel_nPV->SetLogy();
+    c_Sel_nPV->SaveAs("PlayWithHistos/nPV_sel.pdf");
+
+
+    return;
+}
+
+
+void PostTriggerPseudoMET() {
+
+    gErrorIgnoreLevel = kError;
+
+    TFile *ifileWjetMuNu = new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p9_weighted.root", "READ");
+    TFile *ifileMET = new TFile("../output/JetMET2024_V12/JetMET2024_V12p24.root", "READ");
+
+    TH1F *PostTrigger_PseudoCaloMET_SF_rescaled_Wmunu = (TH1F*)ifileWjetMuNu->Get("PostTrigger_PseudoCaloMET_SF_rescaled");
+    TH1F *PostTrigger_PseudoCaloMET_SF_NOTrescaled_Wmunu = (TH1F*)ifileWjetMuNu->Get("PostTrigger_PseudoCaloMET_SF_NOTrescaled");
+    TH1F *PostTrigger_PseudoCaloMET_MET = (TH1F*)ifileMET->Get("PostTrigger_PseudoCaloMET_SF_NOTrescaled");
+
+    PostTrigger_PseudoCaloMET_SF_rescaled_Wmunu->Scale(1./PostTrigger_PseudoCaloMET_SF_rescaled_Wmunu->Integral());
+    PostTrigger_PseudoCaloMET_SF_NOTrescaled_Wmunu->Scale(1./PostTrigger_PseudoCaloMET_SF_NOTrescaled_Wmunu->Integral());
+    PostTrigger_PseudoCaloMET_MET->Scale(1./PostTrigger_PseudoCaloMET_MET->Integral());
+
+    PostTrigger_PseudoCaloMET_SF_rescaled_Wmunu->SetLineColor(kBlue-7);
+    PostTrigger_PseudoCaloMET_SF_rescaled_Wmunu->SetFillColorAlpha(kBlue-7, 0.5);
+    PostTrigger_PseudoCaloMET_SF_NOTrescaled_Wmunu->SetLineColor(kCyan);
+    PostTrigger_PseudoCaloMET_SF_NOTrescaled_Wmunu->SetFillColorAlpha(kCyan, 0.5);
+    PostTrigger_PseudoCaloMET_MET->SetLineColor(kBlack);
+    PostTrigger_PseudoCaloMET_MET->SetMarkerColor(kBlack);
+    PostTrigger_PseudoCaloMET_MET->SetMarkerStyle(20);
+
+    THStack *hs_PostTrigger_PseudoCaloMET = new THStack("hs_PostTrigger_PseudoCaloMET", "");
+    hs_PostTrigger_PseudoCaloMET->Add(PostTrigger_PseudoCaloMET_SF_rescaled_Wmunu);
+    hs_PostTrigger_PseudoCaloMET->Add(PostTrigger_PseudoCaloMET_SF_NOTrescaled_Wmunu);
+
+
+    TLegend *legend = new TLegend(0.7, 0.5, 0.85, 0.9);
+    legend->AddEntry(PostTrigger_PseudoCaloMET_SF_rescaled_Wmunu, "WjetMuNu SFwRescaling", "f");
+    legend->AddEntry(PostTrigger_PseudoCaloMET_SF_NOTrescaled_Wmunu, "WjetMuNu SFwo/Rescaling", "f");
+    legend->AddEntry(PostTrigger_PseudoCaloMET_MET, "MET2024", "lep");
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+
+    TCanvas *c_PseudoCaloMET = new TCanvas("c_PseudoCaloMET", "c_PseudoCaloMET", 800, 600);
+    c_PseudoCaloMET->cd();
+    hs_PostTrigger_PseudoCaloMET->Draw("HIST");
+    hs_PostTrigger_PseudoCaloMET->SetMinimum(0.8);
+    hs_PostTrigger_PseudoCaloMET->GetXaxis()->SetTitle("PseudoMET (~ CaloMET) [GeV]");
+    hs_PostTrigger_PseudoCaloMET->GetYaxis()->SetTitle("Number of events");
+    PostTrigger_PseudoCaloMET_MET->Draw("E1 same");
+    legend->Draw();
+    gPad->SetLogy();
+    gStyle->SetOptStat(0);
+
+
+    TCanvas *cRatio_Nm1 = DrawWithRatio(PostTrigger_PseudoCaloMET_MET, 
+                                        PostTrigger_PseudoCaloMET_SF_rescaled_Wmunu,
+                                        PostTrigger_PseudoCaloMET_SF_NOTrescaled_Wmunu,
+                                        c_PseudoCaloMET,
+                                        "PseudoMET w and wo rescaling (SF applied)",
+                                        "data/MC",
+                                        "PseudoMET (~ CaloMET) [GeV]",
+                                        10,
+                                        1000);
+
+    cRatio_Nm1->SaveAs("PlayWithHistos/PostTrigger_PseudoCaloMET_SF_rescaled_vs_NOTrescaled.pdf");
+
+    return;
+}
+
 void CombineHistos()
 {
     //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", false);
     //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", true);
-    MET_trg_eff("../output/Gluino_V19/Gluino_Run3_MET_2000_V19p0.root", false);
+    //MET_trg_eff("METanalysis_Eta2p4_EffTrg", "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p1.root", false);
+    //MET_trg_eff("METanalysis_Eta2p4_EffTrg", "../output/Gluino_V19/Gluino_Run3_MET_pythia_2000_V19p0.root", false);
     //PFMET_Cut(false);
     //TrigEff_AODvsMiniAOD();
-
-    //Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true, false);
-    //Cutflows("../output/Gluino2000_AOD_FULL_Mu50_V11p11_Eta2p4.root", "../output/Gluino2000_miniAOD_FULL_Mu50_V11p11_Eta2p4.root", true, true);
-    
-    //Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, false, "_PseudoMETon");
-    //Cutflows("../output/Gluino2000_Run2_MET_AOD_V11p16_Eta2p4.root", "../output/Gluino2000_Run2_MET_V11p16_Eta2p4.root", false, true, "_PseudoMETon");
 
     //MET_trg_eff("CalibPseudoMET", "MET_trg_eff_MC_vs_data", "../output/MuonEG_V17/MuonEG2024_V17p3.root", "../output/TTbar2024_V15/TTbar2024_V15p5.root");
     //MET_trg_eff("METanalysis_Eta2p4_EffTrg", "../output/Gluino_V13/Gluino2000_Run2_MET_V13p1.root", false);
     //Comp_muonEG("../output/MuonEG_V17/MuonEG2024_V17p3.root", "../output/TTbar2024_V15/TTbar2024_V15p5.root");
-    //MET_trg_eff("CalibPseudoMET_MuWay", "MET_trg_eff_MCwjet_vs_data", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root");
-    //MET_trg_eff("CalibPseudoMET_MuWaynocutPt", "MET_trg_eff_MCwjetNoptcut_vs_data", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root");
+    //MET_trg_eff("CalibPseudoMET_MuWay", "TriggerEff_Mu2024_WMuNu", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root");
+    //MET_trg_eff("CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay_isRescaled", "TriggerEff_Mu2024_WMuNu_PseudoMETrescaled", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root");
+    MET_trg_eff("CalibPseudoMET", "CalibPseudoMET_isRescaled", "TriggerEff_MuonEG2024_TTbar_PseudoMETrescaled", "../output/MuonEG_V17/MuonEG2024_V17p4.root", "../output/TTbar2024_V15/TTbar2024_V15p8_weighted.root");
     
 
     //Old_vs_New_fits("../output/JetMET2024_V12/JetMET2024_V12p24.root");
-    BKGdependency("../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "TTbar");
-    BKGdependency("../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root", "Wjets");
-    BKGdependency("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "QCD");
+    //BKGdependency("../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "TTbar");
+    //BKGdependency("../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root", "Wjets");
+    //BKGdependency("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "QCD");
 
-    CompareMaping();
+    //GluinoP_mass(true, true);
+    //GluinoP_mass(false, true);
+    //CompareMaping();
 
-    //GluinoP_mass(true);
-    //GluinoP_mass(false);
+    //Cutflows("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "../output/TTbar2024_V15/TTbar2024_V15p6_weighted.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root", "../output/JetMET2024_V12/JetMET2024_V12p24.root", "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p1_weighted.root");
+    //Cutflows_cutPseudoMET();
+    //Nm1Eff(true, true, "../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root", "../output/JetMET2024_V12/JetMET2024_V12p24.root");
+    //Nm1Eff(false, true, "../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root", "../output/JetMET2024_V12/JetMET2024_V12p24.root");
+    //Nm1Eff(true, false, "../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "../output/TTbar2024_V15/TTbar2024_V15p6_weighted.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root", "../output/JetMET2024_V12/JetMET2024_V12p24.root");
+    
+
+    //FpixelPlot();
+    //PseudoMET_vs_PFMET();
+    //DrawPseudoMET();
+    //nPV();
+    //nHSCP();
+
+    //ExtractSF ("TriggerEff_Mu2024_WMuNu_PseudoMETrescaled", "CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay_isRescaled", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root");
+    //ExtractSF ("TriggerEff_Mu2024_WMuNu_PseudoMET", "CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root");
+    
+    //PostTriggerPseudoMET();
 
     return;
 }
