@@ -50,6 +50,12 @@ void CPlots::AddHisto1F(std::string name, int nbins, float xmin, float xmax, std
     mh1F_[name] = new TH1F(name.c_str(),title.c_str(),nbins,xmin,xmax);
     mh1F_[name]->SetDirectory(nullptr);
     mh1F_[name]->Sumw2();
+
+    if (name.find("_SignalMass") != std::string::npos) {
+        mh1F_[name]->SetBinErrorOption(TH1::EBinErrorOpt::kPoisson);
+        std::cout << "Setting Poisson errors for histogram: " << name << std::endl;
+    }
+
     double bin_size = (xmax - xmin) / nbins;
     std::stringstream label;
     if (bin_size < 0.01 || bin_size > 1000) {

@@ -54,8 +54,8 @@ public :
    bool isMiniAOD = false;
 
    // DATA-MC SF for the signal (derived from the trigg. eff.)
-   std::vector <float> SF_triggerEff;
-   std::vector <float> SF_PseudoMETvalue;
+   std::vector <float> SF_triggerEff, SF_triggerEff_Up, SF_triggerEff_Down;
+   std::vector <float> SF_PseudoMETvalue, SF_PseudoMETvalue_Up, SF_PseudoMETvalue_Down;
    bool SFisUp;
    bool SFisDown;
    std::vector <float> SF_triggerEff_NOTrescaled;
@@ -93,6 +93,8 @@ public :
    TTreeReaderValue<int> trueNPV = {fReader, "trueNPV"};
    TTreeReaderValue<uint32_t> HSCP_n = {fReader, "HSCP_n"};
    TTreeReaderValue<float> weightPU = {fReader, "weightPU"};
+   TTreeReaderValue<float> weightPU_Up = {fReader, "weightPU_Up"};
+   TTreeReaderValue<float> weightPU_Down = {fReader, "weightPU_Down"};
    
 
    // TRACK INFO

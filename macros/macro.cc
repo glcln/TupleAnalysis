@@ -122,16 +122,16 @@
     };
 
     std::vector<TString> GluinoInputnamesMadgraph = {
-        Form("Par-M-1100_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1200_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1300_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1400_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1600_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1800_Code%s_merged.root", version.c_str()),
-        Form("Par-M-2000_Code%s_merged.root", version.c_str()),
-        Form("Par-M-2200_Code%s_merged.root", version.c_str()),
-        Form("Par-M-2400_Code%s_merged.root", version.c_str()),
-        Form("Par-M-2600_Code%s_merged.root", version.c_str())
+        "HSCP-Gluino_Par-M-1100_merged.root",
+        "HSCP-Gluino_Par-M-1200_merged.root",
+        "HSCP-Gluino_Par-M-1300_merged.root",
+        "HSCP-Gluino_Par-M-1400_merged.root",
+        "HSCP-Gluino_Par-M-1600_merged.root",
+        "HSCP-Gluino_Par-M-1800_merged.root",
+        "HSCP-Gluino_Par-M-2000_merged.root",
+        "HSCP-Gluino_Par-M-2200_merged.root",
+        "HSCP-Gluino_Par-M-2400_merged.root",
+        "HSCP-Gluino_Par-M-2600_merged.root",
     };
 
 
@@ -203,15 +203,21 @@
                 }
             }
         }
-        else if (version=="V19p1") {
+        else if (version=="V19p3") {
             for (size_t i = 0; i < GluinonamesMadgraph.size(); ++i) {
                 if (dataset == GluinonamesMadgraph[i]) {
                     chain = new TChain("HSCPMiniAODAnalyzer/Events");
-                    chain->AddFile(Form("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/SIGNAL/Gluino_Run3_madgraph/%s", GluinoInputnamesMadgraph[i].Data()));
+                    chain->AddFile(Form("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/SIGNAL/%s/%s", version.c_str(), GluinoInputnamesMadgraph[i].Data()));
                 }
             }
         }
     }
+
+    else if (dataset.find("Gluino_Run2") != std::string::npos) {
+        chain = new TChain("HSCPMiniAODAnalyzer/Events");
+        chain->AddFile("/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/SIGNAL/Gluino_Run2_madgraph/Gluino_Run2_MET_madgraph_2000.root");
+    }
+
     
 
 
@@ -295,18 +301,18 @@
 
     else if (dataset == "TestMuonEG") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
-            std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/MuonEG2024/";
-            std::string fileName = pathData + "testMuonEG.txt";
+        std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/MuonEG2024/";
+        std::string fileName = pathData + "testMuonEG.txt";
 
-            std::ifstream file(fileName);
-            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
+        std::ifstream file(fileName);
+        if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
 
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty()) chain->AddFile(line.c_str());
-            }
+        std::string line;
+        while (std::getline(file, line)) {
+            if (!line.empty()) chain->AddFile(line.c_str());
+        }
 
-            file.close();
+        file.close();
     }
 
     else if (dataset == "TestMuon2024") {
@@ -494,7 +500,7 @@
     else if (dataset == "WjetMuNu2024") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
             std::string pathData = "/opt/sbg/cms/ui3_data1/gcoulon/HSCP_prod/BKG/Wjets2024/";
-            std::string fileName = pathData + "V14p8.txt";
+            std::string fileName = pathData + "V14p11.txt";
 
             std::ifstream file(fileName);
             if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
