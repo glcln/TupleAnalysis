@@ -1,7 +1,6 @@
 #ifndef MassTools_h
 #define MassTools_h
 
-
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
@@ -9,47 +8,44 @@
 #include <TMath.h>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <TMatrixDSym.h>
+#include <TMatrixDSymEigen.h>
+#include <TVectorD.h>
+#include <TF1.h>
 #include <TProfile.h>
 #include <TCanvas.h>
 #include <iostream>
-
 #include <fstream>
+#include <string>
+#include <sstream>
 
 
-
-/**
- To do:
-  - values of K & C are hard-coded --> should go in config file
- **/
-
-//extern float K,C,K_data2018,C_data2018,K_data2017,C_data2017;
-
-
-// Function
-TH2D* BetheBlochForMass(float mass);
-
-// Function returning the MassErr as function momentum, dEdx, and errors on momentum and dEdx
-// Not take into account any erros coming from K&C factors because this function is used to see the impact of binning in p and dedx on mass error
-double GetMassErr (double P, double PErr, double dEdx, double dEdxErr, double M, double dEdxK, double dEdxC);
-// Return the mass as a function of momentum, dEdx, K and C. 
-// It corresponds to the Bethe-Bloch parametrisation used in the Hscp analysis
+    // K & C method
 float GetMass(float p, float ih, float k, float c);
-float sigmaP(float pt, float eta,float sigma_pt);
-float errorMassDedx(float p,float ih,float k,float c,float sigma_dEdx);
-float errorMassWithP(float p,float ih,float k,float c,float sigma_dEdx,float sigma_p);
-double partial_df_dedx(double beta_gamma, double p1, double p2, double p3, double p4);
-double calculateErrorOnMass(double df_dedx, double df_dp, double sigma_dedx, double sigma_dp);
+
+    // other
 float deltaR(float eta1, float phi1, float eta2, float phi2);
-float GetCombMass(float mBeta, float mDeDx);
-float GetCombMassWeighted(float mBeta, float mDeDx,float stdBeta, float stdDeDx);
-void crossHistos(TH2D* res, TH1D* h1, TH1D* h2);
-void crossHistos(TH2F* res, TH1F* h1, TH1F* h2);
-// Function doing the crossing between 1D-histograms of dEdx and momentum and returning a 2D-histogram (p,ih),
-// and respecting the eta binning as in the mass distribution calculation 
-void crossHistosEtaBinning(TH2D* res, TH2D* eta_1oP, TH2D* ih_eta);
-void crossHistosEtaBinning(TH2F* res, TH2F* eta_1oP, TH2F* ih_eta);
-std::vector<double> readScaleFactors(const std::string& fileName);
-double findScaleFactor(double value, const std::vector<std::pair<double, double>>& binRanges, const std::vector<double>& scaleFactors);
-double SF_betaError(double beta);
-void loadSF(const std::string& filepath, bool SFisUp, bool SFisDown, std::vector<float>& SF_PseudoMETvalue, std::vector<float>& SF_triggerEff);
+
+void loadSF(const std::string& filepath,
+            bool SFisUp, bool SFisDown,
+            std::vector<float>& SF_PseudoMETvalue,
+            std::vector<float>& SF_triggerEff);
+
+void loadSF2D(const std::string& filepath,
+            std::vector<float>& SF_PseudoMETlo,
+            std::vector<float>& SF_PseudoMEThi,
+            std::vector<float>& SF_PUppiMETlo,
+            std::vector<float>& SF_PUppiMEThi,
+            std::vector<float>& SF_Down,
+            std::vector<float>& SF,
+            std::vector<float>& SF_Up);
+            
+void loadSF1D(const std::string& filepath,
+            std::vector<float>& SF_MET,
+            std::vector<float>& SF_Down,
+            std::vector<float>& SF,
+            std::vector<float>& SF_Up);
 #endif

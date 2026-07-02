@@ -244,10 +244,6 @@ void RegionMassPlot::OneOverPreweighting(TH2F* ih_p_1, TH1F* p2)
 // errors: the sqrt of the squared uncertainties are added
 // 
     
-void RegionMassPlot::cross1D()
-{
-    crossHistosEtaBinning(cross1Dtemplates,eta_1oP,ih_eta);
-}
 
 void RegionMassPlot::plotMass()
 {

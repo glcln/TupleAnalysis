@@ -18,14 +18,31 @@ using namespace std;
 // Define here all the parameters and covariance matrix extracted from the fit
 // -----------------------------------------------------------------------------
 
-double FitParam2024[5] = {0.00715155, -29.1616, 0.875561, 6.91718, -2.82801};
-//double FitParam2024[5] = {0.00669857, -26.6212, 0.989545, 6.88361, -2.84246};     // under old saturation correction
-double covMatrix2024[5][5] = {
+double ATLASfit_data2024[5] = {0.00713848, -29.2506, 0.873168, 6.93903, -2.82795};
+double covMatrixATLASfit_data2024[5][5] = {
     {1.50116e-10, 3.13094e-12, -2.90955e-09, -6.56178e-09, 2.7389e-09},
     {3.13094e-12, 5.91383e-09, 1.05878e-10, -1.40831e-09, 3.86214e-11},
     {-2.90955e-09, 1.05878e-10, 5.84564e-08, 1.81817e-07, -5.18447e-08},
     {-6.56178e-09, -1.40831e-09, 1.81817e-07, 1.83453e-06, -8.52439e-08},
     {2.7389e-09, 3.86214e-11, -5.18447e-08, -8.52439e-08, 5.11685e-08}
+};
+
+double ATLASfit_bckg2024[5] = {0.00897263, -28.8776, 0.84023, 6.59937, -2.83328};
+double covMatrixATLASfit_bckg2024[5][5] = {
+    {2.89207e-10, -2.84835e-10, -4.73491e-09, -1.17769e-08, 4.79617e-09},
+    {-2.84835e-10, 2.92697e-09, 3.64143e-09, -1.61219e-08, -5.80983e-09},
+    {-4.73491e-09, 3.64143e-09, 9.29662e-08, 4.66886e-07, -7.03278e-08},
+    {-1.17769e-08, -1.61219e-08, 4.66886e-07, 5.57153e-06, -4.43662e-08},
+    {4.79617e-09, -5.80983e-09, -7.03278e-08, -4.43662e-08, 8.4788e-08}
+};
+
+double ATLASfit_glupion2024[5] = {0.0294779,-15.7847,1.42379,5.06116,-2.6255};
+double covMatrixATLASfit_glupion2024[5][5] = {
+    {1.26429e-07, 9.58137e-09, -1.36143e-06, -8.15125e-07, 1.81316e-06},
+    {9.58137e-09, 1.38415e-08, -9.3524e-08, -4.43099e-08, 1.42188e-07},
+    {-1.36143e-06, -9.3524e-08, 1.50113e-05, 1.02915e-05, -1.93057e-05},
+    {-8.15125e-07, -4.43099e-08, 1.02915e-05, 1.27375e-05, -1.07083e-05},
+    {1.81316e-06, 1.42188e-07, -1.93057e-05, -1.07083e-05, 2.66812e-05}
 };
 
 
@@ -170,8 +187,7 @@ BetaGammaMinResult findBetaGammaWithCovariance(double Ih, const double *FitParam
 // -----------------------------------------------------------------------------
 // Find zero of the function using Bisection Method
 // -----------------------------------------------------------------------------
-double ZeroBisectionMethod(double a, double b, const double *params)
-{
+double ZeroBisectionMethod(double a, double b, const double *params) {
     TF1 f("f", AtlasFunction, a, b, 6);
     for (int i = 0; i < 6; i++)
         f.FixParameter(i, params[i]);
@@ -207,8 +223,7 @@ double ZeroBisectionMethod(double a, double b, const double *params)
 // Find zero of the function using Brent's Method
 // https://people.math.sc.edu/Burkardt/cpp_src/brent/brent.html#:~:text=BRENT%2C%20a%20C%2B%2B%20library%20which,that%20the%20function%20is%20differentiable
 // -----------------------------------------------------------------------------
-double ZeroBrentMethod (double a, double b, double t, const double *params)
-{
+double ZeroBrentMethod (double a, double b, double t, const double *params) {
     double c;
     double d;
     double e;
@@ -322,13 +337,29 @@ double ZeroBrentMethod (double a, double b, double t, const double *params)
 // -----------------------------------------------------------------------------
 // Main function to be called
 // -----------------------------------------------------------------------------
-double findMass(const double p, const double Ih, const std::string year, bool up, bool down, bool nomsup)
-{
+double findMass(const double p, 
+                const double Ih,
+                const std::string year,
+                bool up=false, 
+                bool down=false, 
+                bool nomsup=false) {
     TMatrixDSym CovMatrix = TMatrixDSym(5);
     double *params = nullptr;
-    if (year == "2024") {
-        params = FitParam2024;
-        CovMatrix = InitializeCovMatrix(covMatrix2024);
+    if (year == "2024data") {
+        params = ATLASfit_data2024;
+        CovMatrix = InitializeCovMatrix(covMatrixATLASfit_data2024);
+    }
+    else if (year == "2024bkg") {
+        params = ATLASfit_bckg2024;
+        CovMatrix = InitializeCovMatrix(covMatrixATLASfit_bckg2024);
+    }
+    else if (year == "2024glupion") {
+        params = ATLASfit_glupion2024;
+        CovMatrix = InitializeCovMatrix(covMatrixATLASfit_glupion2024);
+    }
+    else {
+        cerr << "Error: Year not recognized. Use '2024' or '2018'." << endl;
+        return -1;
     }
 
     BetaGammaMinResult R = findBetaGammaWithCovariance(Ih, params, CovMatrix);

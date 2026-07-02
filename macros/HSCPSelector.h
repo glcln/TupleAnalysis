@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <limits>
 #include <fstream>
 #include "ROOT/RConfig.hxx"
 #include "TObjString.h"
@@ -32,7 +33,15 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-bool PassHSCPpresel_METanalysis_PseudoMETrescaled_Eta1_2p4_newIhcut(int hscpIndex);
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta2p4(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p4(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2(int hscpIndex);
 
 
    int etabins_;
@@ -62,6 +71,11 @@ bool PassHSCPpresel_METanalysis_PseudoMETrescaled_Eta1_2p4_newIhcut(int hscpInde
    bool SFisDown;
    std::vector <float> SF_triggerEff_NOTrescaled;
    std::vector <float> SF_PseudoMETvalue_NOTrescaled;
+
+   std::vector <float> SF2D_PseudoMETlovalue, SF2D_PseudoMEThivalue, SF2D_PUppiMETlovalue, SF2D_PUppiMEThivalue, SF2D_Down, SF2D, SF2D_Up;
+   std::vector <float> SF1D_PseudoMETvalue, SF1Dpseudo_Down, SF1Dpseudo, SF1Dpseudo_Up;
+   std::vector <float> SF1D_PUppiMETvalue, SF1Dpuppi_Down, SF1Dpuppi, SF1Dpuppi_Up;
+
 
    TFile* fout;
 
@@ -94,9 +108,33 @@ bool PassHSCPpresel_METanalysis_PseudoMETrescaled_Eta1_2p4_newIhcut(int hscpInde
    TTreeReaderValue<uint32_t> PV_npvsGood = {fReader, "PV_npvsGood"};
    TTreeReaderValue<int> trueNPV = {fReader, "trueNPV"};
    TTreeReaderValue<uint32_t> HSCP_n = {fReader, "HSCP_n"};
-   TTreeReaderValue<float> weightPU = {fReader, "weightPU"};
-   //TTreeReaderValue<float> weightPU_Up = {fReader, "weightPU_Up"};
-   //TTreeReaderValue<float> weightPU_Down = {fReader, "weightPU_Down"};
+   TTreeReaderValue<double> weightPU = {fReader, "weightPU"};
+
+
+   TTreeReaderValue<double> weightPU_Up = {fReader, "weightPU_Up"};
+   TTreeReaderValue<double> weightPU_Down = {fReader, "weightPU_Down"};
+
+   // JETS
+   TTreeReaderArray<double> Jet_px = {fReader, "puppijet_px"};
+   TTreeReaderArray<double> Jet_py = {fReader, "puppijet_py"};
+   TTreeReaderArray<double> Jet_pz = {fReader, "puppijet_pz"};
+   TTreeReaderArray<double> Jet_pt = {fReader, "puppijet_pt"};
+   TTreeReaderArray<double> Jet_eta = {fReader, "puppijet_eta"};
+   TTreeReaderArray<double> Jet_phi = {fReader, "puppijet_phi"};
+   TTreeReaderArray<double> Jet_energy = {fReader, "puppijet_energy"};
+   TTreeReaderArray<double> Jet_energy_raw = {fReader, "puppijet_energy_raw"};
+   TTreeReaderArray<double> Jet_mass = {fReader, "puppijet_mass"};
+   TTreeReaderArray<float> Jet_chf = {fReader, "puppijet_chf"};
+   TTreeReaderArray<float> Jet_nhf = {fReader, "puppijet_nhf"};
+   TTreeReaderArray<float> Jet_nemf = {fReader, "puppijet_nemf"};
+   TTreeReaderArray<float> Jet_muf = {fReader, "puppijet_muf"};
+   TTreeReaderArray<float> Jet_cemf = {fReader, "puppijet_cemf"};
+   TTreeReaderArray<int> Jet_chm = {fReader, "puppijet_chm"};
+   TTreeReaderArray<int> Jet_neutralMultiplicity = {fReader, "puppijet_neutralMultiplicity"};
+   TTreeReaderArray<int> Jet_chargedMultiplicity = {fReader, "puppijet_chargedMultiplicity"};
+   TTreeReaderArray<bool> Jet_passJetID = {fReader, "puppijet_passJetID"};
+   TTreeReaderArray<bool> Jet_IsRejectedbyJVM = {fReader, "puppijet_IsRejectedbyJVM"}; // true=rejected
+   TTreeReaderArray<double> Jet_jesUncTotal = {fReader, "puppijet_jesUncTotal"};
    
 
    // TRACK INFO
@@ -137,7 +175,8 @@ bool PassHSCPpresel_METanalysis_PseudoMETrescaled_Eta1_2p4_newIhcut(int hscpInde
    TTreeReaderArray<double> RecoPFMET = {fReader, "RecoPFMET"};
    TTreeReaderArray<double> RecoPFMET_phi = {fReader, "RecoPFMET_phi"};
    TTreeReaderArray<double> PseudoCaloMET = {fReader, "PseudoMET_viaCaloJets"};
-   TTreeReaderArray<double> RecoPuppiMET = {fReader, "RecoPuppiMET"};
+   TTreeReaderArray<double> RecoPUppiMET = {fReader, "RecoPuppiMET"};
+   TTreeReaderArray<double> RecoPUppiMET_phi = {fReader, "RecoPuppiMET_phi"};
 
    // Pseudo variable (reco in miniAOD)
    TTreeReaderArray<double> Pt_pseudo = {fReader, "IsoTrack_PseudoTrack_pt"};
@@ -151,8 +190,9 @@ bool PassHSCPpresel_METanalysis_PseudoMETrescaled_Eta1_2p4_newIhcut(int hscpInde
    TTreeReaderArray<double> GenPart_phi = {fReader, "GenPart_phi"};
    TTreeReaderArray<double> GenPart_mass = {fReader, "GenPart_mass"};
    TTreeReaderArray<int> GenPart_pdgId = {fReader, "GenPart_pdgId"};
+   TTreeReaderArray<int> GenPart_charge = {fReader, "GenPart_charge"};
 
-   TTreeReaderArray<double> PthatQCD = {fReader, "weight_generatorBinningValues"};
+   TTreeReaderArray<double> PthatQCD = {fReader, "weightGeneratorBinningValues"};
 
 
    // muon info
@@ -162,8 +202,9 @@ bool PassHSCPpresel_METanalysis_PseudoMETrescaled_Eta1_2p4_newIhcut(int hscpInde
    TTreeReaderArray<bool> muon_isLoose = {fReader, "muon_isLoose"};
    TTreeReaderArray<bool> muon_isMedium = {fReader, "muon_isMedium"};
    TTreeReaderArray<bool> muon_isTight = {fReader, "muon_isTight"};
-   TTreeReaderArray<float> muon_trackIso_dr04 = {fReader, "muon_trackIso_dr04"};
+   TTreeReaderArray<float> muon_trackIso_dr03 = {fReader, "muon_trackIso_dr03"};
    TTreeReaderArray<float> muon_pfMiniRelIsoAll = {fReader, "muon_pfMiniRelIsoAll"};
+   TTreeReaderArray<bool> muon_isPFMuon = {fReader, "muon_isPFMuon"};   
 
 
    // electron info

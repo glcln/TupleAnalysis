@@ -1,0 +1,35 @@
+% Trigger scale factors (DATA/MC), custom non-grid binning
+% trigger: orMETtrg
+\begin{table}[htbp]
+  \centering
+  \caption{Trigger scale factors (data/MC) for \texttt{orMETtrg} on the custom binning.}
+  \begin{tabular}{ccc}
+    \hline
+    PseudoMET [GeV] & PUppiMET [GeV] & SF \\
+    \hline
+    $\left[0, 250\right]$ & $\left[0, 150\right]$ & 0.5922 $\pm$ 0.0009 \\
+    $\left[0, 150\right]$ & $\left[150, 300\right]$ & 0.7720 $\pm$ 0.0081 \\
+    $\left[0, 250\right]$ & $\left[300, 1200\right]$ & 0.8747 $\pm$ 0.0415 \\
+    $\left[150, 250\right]$ & $\left[150, 200\right]$ & 0.9497 $\pm$ 0.0018 \\
+     & $\left[200, 250\right]$ & 0.9670 $\pm$ 0.0027 \\
+     & $\left[250, 300\right]$ & 0.9570 $\pm$ 0.0064 \\
+    $\left[250, 300\right]$ & $\left[0, 50\right]$ & 0.8132 $\pm$ 0.0045 \\
+     & $\left[50, 100\right]$ & 0.8888 $\pm$ 0.0032 \\
+     & $\left[100, 150\right]$ & 0.9623 $\pm$ 0.0025 \\
+     & $\left[150, 300\right]$ & 0.9903 $\pm$ 0.0012 \\
+     & $\left[300, 1200\right]$ & 0.9949 $\pm$ 0.0037 \\
+    $\left[300, 400\right]$ & $\left[0, 150\right]$ & 0.9723 $\pm$ 0.0018 \\
+     & $\left[150, 300\right]$ & 0.9966 $\pm$ 0.0009 \\
+     & $\left[300, 400\right]$ & 0.9961 $\pm$ 0.0011 \\
+     & $\left[400, 1200\right]$ & 0.9969 $\pm$ 0.0053 \\
+    $\left[400, 500\right]$ & $\left[0, 150\right]$ & 0.9932 $\pm$ 0.0021 \\
+     & $\left[150, 300\right]$ & 0.9958 $\pm$ 0.0009 \\
+     & $\left[300, 450\right]$ & 0.9992 $\pm$ 0.0016 \\
+     & $\left[450, 1200\right]$ & 1.0019 $\pm$ 0.0047 \\
+    $\left[500, 700\right]$ & $\left[0, 150\right]$ & 0.9964 $\pm$ 0.0032 \\
+     & $\left[150, 300\right]$ & 1.0017 $\pm$ 0.0041 \\
+     & $\left[300, 1200\right]$ & 0.9983 $\pm$ 0.0008 \\
+    $\left[700, 1200\right]$ & $\left[0, 1200\right]$ & 0.9973 $\pm$ 0.0019 \\
+    \hline
+  \end{tabular}
+\end{table}

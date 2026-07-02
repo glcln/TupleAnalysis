@@ -9,6 +9,9 @@
 #include "TH2.h"
 #include "TGraph.h"
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cmath>
 
 TH2F* TransposeTH2(const TH2F* h_in) {
     int nx = h_in->GetNbinsX();
@@ -202,37 +205,97 @@ TCanvas *DrawCanvas(TH1* h,
                     std::string XaxisTitle,
                     std::string YaxisTitle,
                     std::string OptionDraw,
+                    float sizetitleY,
                     float Xmin,
-                    float Xmax, 
+                    float Xmax,
+                    int color,
                     float Ymin = 0, 
                     float Ymax = -1, 
                     bool isLOGy = false) {
 
     TCanvas* c_new = new TCanvas(CanvasTitle.c_str(), CanvasTitle.c_str(), 800, 600);
+    c_new->cd(); 
     c_new->SetLeftMargin(0.16);
     c_new->SetBottomMargin(0.16);
+
+    c_new->SetTitle("");
+
+    gStyle->SetOptStat(0);
     
     TH1* hc = (TH1*)h->Clone(TString(h->GetName()) + "_" + CanvasTitle.c_str());
     hc->GetYaxis()->SetTitleOffset(1.2);
     hc->SetTitle("");
-    hc->GetYaxis()->SetTitleSize(0.06);
+    hc->GetYaxis()->SetTitleSize(sizetitleY);
     hc->GetXaxis()->SetTitleSize(0.06);
     hc->GetXaxis()->SetTitleOffset(0.9);
     hc->GetYaxis()->SetTitleOffset(1);
     hc->GetXaxis()->SetLabelSize(0.05);
     hc->GetYaxis()->SetLabelSize(0.05);
 
-    hc->SetTitle(CanvasTitle.c_str());
     hc->GetXaxis()->SetTitle(XaxisTitle.c_str());
     hc->GetYaxis()->SetTitle(YaxisTitle.c_str());
-    hc->SetLineColor(kBlack);
-    hc->SetMarkerColor(kBlack);
+    hc->SetLineColor(color);
+    hc->SetMarkerColor(color);
+    hc->SetMarkerStyle(20);
     hc->Draw(OptionDraw.c_str());
     hc->GetXaxis()->SetRangeUser(Xmin, Xmax);
     if (Ymax == -1) Ymax = 1.2*hc->GetMaximum();
-    if (isLOGy) Ymin = hc->GetMinimum()*0.8;
+    //if (isLOGy) Ymin = hc->GetMinimum()*0.8;
     hc->GetYaxis()->SetRangeUser(Ymin, Ymax);
     if (isLOGy) c_new->SetLogy();
+
+    c_new->Update();
+    cout << "Canvas " << CanvasTitle << " drawn with h: " << h->GetName() << endl;
+    return c_new;
+}
+
+TCanvas *DrawCanvas(TH2* h,
+                    std::string CanvasTitle,
+                    std::string XaxisTitle,
+                    std::string YaxisTitle,
+                    std::string ZaxisTitle,
+                    std::string OptionDraw,
+                    float Xmin,
+                    float Xmax, 
+                    float Ymin, 
+                    float Ymax,
+                    float Zmin = 0,
+                    float Zmax = 0,
+                    bool isLOGz = false) {
+
+    TCanvas* c_new = new TCanvas(CanvasTitle.c_str(), CanvasTitle.c_str(), 800, 600);
+    c_new->cd(); 
+    c_new->SetLeftMargin(0.16);
+    c_new->SetBottomMargin(0.16);
+    c_new->SetRightMargin(0.16);
+    
+
+    c_new->SetTitle("");
+
+    gStyle->SetOptStat(0);
+    
+    TH2* hc = (TH2*)h->Clone(TString(h->GetName()) + "_" + CanvasTitle.c_str());
+    hc->GetYaxis()->SetTitleOffset(1.2);
+    hc->SetTitle("");
+    hc->GetYaxis()->SetTitleSize(0.06);
+    hc->GetXaxis()->SetTitleSize(0.06);
+    hc->GetZaxis()->SetTitleSize(0.06);
+    hc->GetXaxis()->SetTitleOffset(0.9);
+    hc->GetYaxis()->SetTitleOffset(1);
+    hc->GetXaxis()->SetLabelSize(0.05);
+    hc->GetYaxis()->SetLabelSize(0.05);
+    hc->GetZaxis()->SetLabelSize(0.05);
+    hc->GetZaxis()->SetTitleOffset(0.9);
+
+    hc->GetXaxis()->SetTitle(XaxisTitle.c_str());
+    hc->GetYaxis()->SetTitle(YaxisTitle.c_str());
+    hc->GetZaxis()->SetTitle(ZaxisTitle.c_str());
+    hc->Draw(OptionDraw.c_str());
+    gStyle->SetPaintTextFormat("4.2f");
+    hc->GetXaxis()->SetRangeUser(Xmin, Xmax);
+    hc->GetYaxis()->SetRangeUser(Ymin, Ymax);
+    if (Zmin!=0 || Zmax!=0) hc->GetZaxis()->SetRangeUser(Zmin, Zmax);
+    if (isLOGz) c_new->SetLogz();
 
     c_new->Update();
     cout << "Canvas " << CanvasTitle << " drawn with h: " << h->GetName() << endl;
@@ -410,17 +473,109 @@ TCanvas *DrawCanvas(TH1* h1,
     return c_new;
 }
 
-void ExtractSF (const char *ofiletxt, const char *labelData, const char *labelMC, const char *inputfileDATA, const char *inputfileMC) {
+TCanvas* DrawWithCDF(TH1* h1,
+                     TCanvas* c1,
+                     std::string CanvasTitle,
+                     std::string XaxisTitle,
+                     std::string leg_h1,
+                     float Xmin,
+                     float Xmax,
+                     int color) {
+
+    TCanvas* c_new = new TCanvas(CanvasTitle.c_str(), CanvasTitle.c_str(), 800, 600);
+
+    // Define pads
+    TPad* pad1 = new TPad("pad1", "pad1", 0.0, 0.3, 1.0, 1.0);
+    pad1->SetLeftMargin(0.16);
+    pad1->SetBottomMargin(0.02);
+    pad1->Draw();
+
+    TPad* pad2 = new TPad("pad2", "pad2", 0.0, 0.0, 1.0, 0.315);
+    pad2->SetLeftMargin(0.16);pad2->SetBottomMargin(0.33);
+    pad2->Draw();
+
+    // Draw upper plot
+    pad1->cd();
+    c1->DrawClonePad();
+
+    // Clone histogram
+    TH1F* h1c = (TH1F*)h1->Clone(TString(h1->GetName()) + "_" + CanvasTitle.c_str() + "_h1");
+
+    // Normalize clone before computing CDF (so CDF goes from 0 to 1)
+    if (h1c->Integral() > 0) h1c->Scale(1.0 / h1c->Integral());
+
+    // Build CDF by cumulative sum
+    TH1* hCDF1 = h1c->GetCumulative();
+    hCDF1->SetName(TString("hCDF1_") + CanvasTitle.c_str());
+
+    // Style CDF1
+    hCDF1->SetLineColor(color);
+    hCDF1->SetMarkerColor(color);
+    hCDF1->SetMarkerStyle(20);
+
+    // Draw CDF in lower pad
+    pad2->cd();
+    gStyle->SetOptStat(0);
+    gPad->SetTickx(0);
+
+    hCDF1->SetTitle("");
+    hCDF1->GetYaxis()->SetTitle("CDF");
+    hCDF1->GetXaxis()->SetTitle(XaxisTitle.c_str());
+    hCDF1->GetYaxis()->SetRangeUser(0, 1);
+    hCDF1->GetYaxis()->SetNdivisions(505);
+    hCDF1->GetYaxis()->SetTitleFont(43);
+    hCDF1->GetXaxis()->SetTitleFont(43);
+    hCDF1->GetYaxis()->SetLabelFont(43);
+    hCDF1->GetXaxis()->SetLabelFont(43);
+    hCDF1->GetYaxis()->SetTitleSize(24);
+    hCDF1->GetXaxis()->SetTitleSize(24);
+    hCDF1->GetYaxis()->SetLabelSize(20);
+    hCDF1->GetXaxis()->SetLabelSize(20);
+    hCDF1->GetYaxis()->SetTitleOffset(1.3);
+    hCDF1->GetXaxis()->SetTitleOffset(1.0);
+    hCDF1->LabelsOption("v", "X");
+    hCDF1->GetXaxis()->SetRangeUser(Xmin, Xmax);
+
+    // draw horizontal dashed line at y=0.5
+    TLine* line = new TLine(Xmin, 0.5, Xmax, 0.5);
+    line->SetLineColor(kBlack);
+    line->SetLineStyle(2);
+
+    hCDF1->Draw("P");
+    line->Draw("same");
+
+    // Legend
+    TLegend* leg = new TLegend(0.12, 0.65, 0.45, 0.92);
+    leg->AddEntry(hCDF1, leg_h1.c_str(), "pe");
+    leg->SetBorderSize(0);
+    leg->SetFillStyle(0);
+    //leg->Draw();
+
+    c_new->Update();
+    cout << "Canvas " << CanvasTitle << " drawn with CDF of: "
+         << h1->GetName() << endl;
+
+    return c_new;
+}
+
+void ExtractSF (const char *ofiletxt,
+                const char *ofiletex,
+                const char *htemp_pseudoCaloMET_dataname,
+                const char *htemp_orMETtrigger_dataname,
+                const char *htemp_pseudoCaloMET_MCname,
+                const char *htemp_orMETtrigger_MCname,
+                const char *inputfileDATA,
+                const char *inputfileMC) {
 
     TFile *ifileDATA = new TFile(Form("%s", inputfileDATA), "READ");
     TFile *ifileMC   = new TFile(Form("%s", inputfileMC), "READ");
 
-    TH1F *htemp_pseudoCaloMET_data = (TH1F*)ifileDATA->Get(Form("%s_PseudoCaloMET", labelData));
-    TH1F *htemp_orMETtrigger_data = (TH1F*)ifileDATA->Get(Form("%s_if___orMETtrg___PseudoCaloMET", labelData));
-    TH1F *htemp_pseudoCaloMET_MC   = (TH1F*)ifileMC->Get(Form("%s_PseudoCaloMET", labelMC));
-    TH1F *htemp_orMETtrigger_MC   = (TH1F*)ifileMC->Get(Form("%s_if___orMETtrg___PseudoCaloMET", labelMC));
+    TH1F *htemp_pseudoCaloMET_data = (TH1F*)ifileDATA->Get(Form("%s", htemp_pseudoCaloMET_dataname));
+    TH1F *htemp_orMETtrigger_data = (TH1F*)ifileDATA->Get(Form("%s", htemp_orMETtrigger_dataname));
+    TH1F *htemp_pseudoCaloMET_MC   = (TH1F*)ifileMC->Get(Form("%s", htemp_pseudoCaloMET_MCname));
+    TH1F *htemp_orMETtrigger_MC   = (TH1F*)ifileMC->Get(Form("%s", htemp_orMETtrigger_MCname));
 
-    ofstream outfile(Form("PlayWithHistos/SF_%s.txt", ofiletxt), ios::out);
+    ofstream outfile(Form("%s", ofiletxt), ios::out);
 
     // Construction des edges
     const TAxis* ax = htemp_orMETtrigger_data->GetXaxis();
@@ -467,12 +622,39 @@ void ExtractSF (const char *ofiletxt, const char *labelData, const char *labelMC
     cout << "\n";
     outfile.close();
 
+    outfile.close();
+
+    // ------------------------------------------------------------------
+    // table LaTeX
+    // ------------------------------------------------------------------
+    std::string textname = std::string(ofiletex);
+
+    std::ofstream tex(textname.c_str(), std::ios::out);
+
+    tex << "\\begin{table}[htbp]\n  \\centering\n"
+        << "  \\caption{Trigger scale factors (data/MC) for \\texttt{orMETtrg} "
+        << "on the custom binning.}\n"
+        << "  \\begin{tabular}{cc}\n    \\hline\n"
+        << "    MET bin [GeV] & SF \\\\\n    \\hline\n";
+
+    for (int i = 1; i <= htemp_orMETtrigger_data->GetNbinsX(); i++) {
+        double sf  = htemp_orMETtrigger_data->GetBinContent(i);
+        double err = htemp_orMETtrigger_data->GetBinError(i);
+        double lo  = htemp_orMETtrigger_data->GetBinLowEdge(i);
+        double hi  = lo + htemp_orMETtrigger_data->GetBinWidth(i);
+
+        tex << "    $\\left[" << lo << ", " << hi << "\\right]$ & "
+            << Form("%.4f $\\pm$ %.4f", sf, err) << " \\\\\n";
+    }
+
+    tex << "    \\hline\n  \\end{tabular}\n\\end{table}\n";
+    tex.close();
+
 
     return;
 }
 
-double langaufun(double *x, double *par)
-{
+double langaufun(double *x, double *par) {
  
    //Fit parameters:
    //par[0]=Width (scale) parameter of Landau density
@@ -524,6 +706,137 @@ double langaufun(double *x, double *par)
       }
  
       return (par[2] * step * sum * invsq2pi / par[3]);
+}
+
+void PlotNormalized(const char *labelH1, const char *labelH2,
+                    const char *inputfile1, const char *inputfile2,
+                    const char *histoname1, const char *histoname2,
+                    const char *ofilename,
+                    const char *xtitle = "x", const char *ytitle = "a.u.",
+                    double xmin = 0, double xmax = 1200) {
+
+    gErrorIgnoreLevel = kError;
+
+    TFile *ifile1 = new TFile(inputfile1, "READ");
+    TFile *ifile2 = new TFile(inputfile2, "READ");
+
+    if (!ifile1 || ifile1->IsZombie()) {
+        std::cerr << "Error: Could not open input file " << inputfile1 << std::endl;
+        return;
+    }
+    if (!ifile2 || ifile2->IsZombie()) {
+        std::cerr << "Error: Could not open input file " << inputfile2 << std::endl;
+        return;
+    }
+
+    TH1F *h1 = (TH1F*)ifile1->Get(Form("%s_%s", labelH1, histoname1));
+    TH1F *h2 = (TH1F*)ifile2->Get(Form("%s_%s", labelH2, histoname2));
+
+    if (!h1) {
+        std::cerr << "Error: Could not find histo " << Form("%s_%s", labelH1, histoname1) << std::endl;
+        return;
+    }
+    if (!h2) {
+        std::cerr << "Error: Could not find histo " << Form("%s_%s", labelH2, histoname2) << std::endl;
+        return;
+    }
+
+    // detach from files so they survive the TFile closing
+    h1->SetDirectory(0);
+    h2->SetDirectory(0);
+
+    // normalization to unit area (integral including under/overflow optional)
+    if (h1->Integral() > 0) h1->Scale(1.0 / h1->Integral());
+    if (h2->Integral() > 0) h2->Scale(1.0 / h2->Integral());
+
+    // styling
+    h1->SetLineColor(kRed+1);
+    h1->SetMarkerColor(kRed+1);
+    h1->SetLineWidth(2);
+    h2->SetLineColor(kBlue+1);
+    h2->SetMarkerColor(kBlue+1);
+    h2->SetLineWidth(2);
+
+    // y range: leave headroom above the tallest bin
+    double ymax = std::max(h1->GetMaximum(), h2->GetMaximum());
+
+    TCanvas *c = new TCanvas("c_PlotNormalized", "c_PlotNormalized", 800, 600);
+    c->cd();
+
+    h1->GetXaxis()->SetRangeUser(xmin, xmax);
+    h1->GetXaxis()->SetTitle(xtitle);
+    h1->GetYaxis()->SetTitle(ytitle);
+    h1->SetMaximum(1.3 * ymax);
+    h1->SetMinimum(1e-8);
+    h1->SetStats(0);
+
+    h1->Draw("HIST E");
+    h2->Draw("HIST E SAME");
+
+    TLegend *leg = new TLegend(0.65, 0.75, 0.88, 0.88);
+    leg->SetBorderSize(0);
+    leg->SetFillStyle(0);
+    leg->AddEntry(h1, labelH1, "lep");
+    leg->AddEntry(h2, labelH2, "lep");
+    leg->Draw();
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Private work (CMS simulation/data)}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+    latex1->Draw();
+
+    c->SetLogy();
+
+
+    c->SaveAs(Form("PlayWithHistos/c_PlotNormalized__%s.pdf", ofilename));
+
+    return;
+}
+
+TH2D* RebinTH2( const TH2* hIn,
+                const std::vector<double>& xBins,
+                const std::vector<double>& yBins,
+                const TString& newName = "") {
+ 
+    TString hname = newName.IsNull() ?
+                    TString(hIn->GetName()) + "_rebinned" :
+                    newName;
+ 
+    TH2D* hOut = new TH2D(
+        hname,
+        hIn->GetTitle(),
+        xBins.size() - 1, xBins.data(),
+        yBins.size() - 1, yBins.data()
+    );
+ 
+    hOut->Sumw2();
+ 
+    for (int ix = 1; ix <= hIn->GetNbinsX(); ++ix) {
+        for (int iy = 1; iy <= hIn->GetNbinsY(); ++iy) {
+ 
+            double content = hIn->GetBinContent(ix, iy);
+            double error   = hIn->GetBinError(ix, iy);
+ 
+            if (content == 0. && error == 0.) continue;
+ 
+            double x = hIn->GetXaxis()->GetBinCenter(ix);
+            double y = hIn->GetYaxis()->GetBinCenter(iy);
+ 
+            int binOut = hOut->FindBin(x, y);
+ 
+            double oldContent = hOut->GetBinContent(binOut);
+            double oldError   = hOut->GetBinError(binOut);
+ 
+            hOut->SetBinContent(binOut, oldContent + content);
+            hOut->SetBinError(
+                binOut,
+                std::sqrt(oldError * oldError + error * error)
+            );
+        }
+    }
+ 
+    return hOut;
 }
 
 
@@ -4170,6 +4483,2007 @@ void DefineIhCut() {
 }
 
 
+void SignalAcceptance_EtaSlice(bool isHSCPcharged = false) {
+
+    const std::string version = isHSCPcharged ? "19p4" : "19p3";
+
+    std::vector<TFile*> TFileGluino;
+    for (int mass : {1100, 1200, 1300, 1400, 1600, 1800, 2000, 2200, 2400, 2600}) {
+        std::string fname = "../output/Gluino_V19/Gluino_Run3_MET_madgraph_"
+                        + std::to_string(mass) + "_V" + version + "_weighted.root";
+        TFileGluino.push_back(new TFile(fname.c_str(), "READ"));
+    }
+
+    std::vector<int> masses = {1100, 1200, 1300, 1400, 1600, 1800, 2000, 2200, 2400, 2600};
+    std::vector<TH1D *> h_accs;
+
+    TFile *ofile = new TFile("PlayWithHistos/SignalAcceptance_EtaSlice.root", "RECREATE");
+
+    const int nSlices = 24;  // |eta| de 0.1 à 2.4 par pas de 0.1
+
+    for (int i = 0; i < (int)TFileGluino.size(); i++) {
+        TH1D *h_eta2p4_nosel = (TH1D*)TFileGluino[i]->Get((isHSCPcharged) ? "Nosel_GenHSCPcharged_Eta" : "Nosel_eta");
+        TH1D *h_eta2p4       = (TH1D*)TFileGluino[i]->Get((isHSCPcharged) ? "HSCPsel_GenHSCPcharged_Eta" : "METanalysis_PseudoMETnotRescaled_Eta2p4_eta");
+
+        ofile->cd();
+        TH1D *h_acc = new TH1D(Form("Acceptance_EtaSlice_M%d", masses[i]),
+                               Form("Signal acceptance vs |#eta| cut (M = %d GeV);|#eta| < x;Acceptance", masses[i]),
+                               nSlices, 0.05, 2.45);  // bins centrés sur 0.1, 0.2, ..., 2.4
+
+        for (int s = 1; s <= nSlices; s++) {
+            double etaMax = 0.1 * s;  // 0.1, 0.2, ..., 2.4
+
+            // bins correspondant à [-etaMax, +etaMax]
+            int binLow_sel  = h_eta2p4->FindBin(-etaMax + 1e-6);
+            int binHigh_sel = h_eta2p4->FindBin( etaMax - 1e-6);
+
+            double errSel = 0., errNosel = 0;
+            double nSel   = h_eta2p4->IntegralAndError(binLow_sel, binHigh_sel, errSel);
+            double nNosel = h_eta2p4_nosel->IntegralAndError(0, h_eta2p4_nosel->GetNbinsX()+1, errSel);
+
+            double acc = (nNosel > 0) ? nSel / nNosel : 0.;
+            double err = 0.;
+            if (nSel > 0 && nNosel > 0) err = acc * std::sqrt(std::pow(errSel / nSel, 2) + std::pow(errNosel / nNosel, 2));
+
+            h_acc->SetBinContent(s, acc);
+            h_acc->SetBinError(s, err);
+        }
+        cout << masses[i] << " " << h_eta2p4_nosel->Integral(0, h_eta2p4_nosel->GetNbinsX())<< endl;
+
+        h_acc->Write();
+        h_accs.push_back(h_acc);
+    }
+
+    // --- Canvas récapitulatif ---
+    TCanvas *c = new TCanvas("c_SignalAcceptance_EtaSlice", "Signal acceptance vs |#eta| cut", 800, 600);
+    c->SetGrid();
+    c->SetLeftMargin(0.16); c->SetBottomMargin(0.16);
+
+    TLegend *leg = new TLegend(0.55, 0.2, 0.88, 0.5);
+    leg->SetBorderSize(0);
+
+    int colors[10] = {kRed+1, kOrange+7, kYellow+1, kSpring-1, kGreen+2,
+                      kTeal+3, kAzure+1, kBlue+1, kViolet+1, kMagenta+2};
+
+    double ymax = 0.;
+    for (auto h : h_accs) ymax = std::max(ymax, h->GetMaximum());
+
+    for (size_t i = 0; i < h_accs.size(); i++) {
+        TH1D *h = h_accs[i];
+        h->SetLineColor(colors[i % 10]);
+        h->SetMarkerColor(colors[i % 10]);
+        h->SetMarkerStyle(20);
+        h->SetMarkerSize(0.7);
+        h->SetLineWidth(2);
+        h->SetStats(0);
+        h->GetYaxis()->SetRangeUser(0., ymax * 1.2);
+        h->SetTitle("");
+        h->GetYaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleOffset(0.9);
+        h->GetYaxis()->SetTitleOffset(1);
+        h->GetXaxis()->SetLabelSize(0.05);
+        h->GetYaxis()->SetLabelSize(0.05);
+
+        h->Draw(i == 0 ? "PE" : "PE SAME");
+        leg->AddEntry(h, Form("M = %d GeV", masses[i]), "lp");
+    }
+    leg->Draw();
+
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+    latex1->Draw();
+
+    c->SaveAs((isHSCPcharged)? "PlayWithHistos/SignalAcceptance_EtaSlice_HSCPcharged.pdf" : "PlayWithHistos/SignalAcceptance_EtaSlice.pdf");
+
+    ofile->cd();
+    c->Write();
+
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c->Modified();
+    c->Update();
+    c->SaveAs((isHSCPcharged)? "PlayWithHistos/SignalAcceptance_EtaSlice_HSCPcharged_bis.pdf" : "PlayWithHistos/SignalAcceptance_EtaSlice_bis.pdf");
+
+    ofile->Close();
+
+
+    return;
+}
+
+
+void Corr_Ih_1oP(std::string eta) {
+
+    TFile *ifile_data = new TFile("../output/JetMET2024_V12/JetMET2024_V12p27.root", "READ");
+
+    TH2F *h_10000oP_vs_Ih__nosel = (TH2F*)ifile_data->Get("Nosel_10000oP_vs_Ih");
+    TH2F *h_10000oP_vs_Ih__sel   = (TH2F*)ifile_data->Get(Form("METanalysis_PseudoMETrescaled_%s_10000oP_vs_Ih", eta.c_str()));
+
+    // make the profil of each and then draw
+    TProfile *p_nsel = h_10000oP_vs_Ih__nosel->ProfileX();
+    TProfile *p_sel = h_10000oP_vs_Ih__sel->ProfileX();
+
+    h_10000oP_vs_Ih__nosel->GetXaxis()->SetTitle("10^{4}/p [GeV^{-1}]");
+    h_10000oP_vs_Ih__nosel->GetYaxis()->SetTitle("I_{h} [MeV/cm]");
+    h_10000oP_vs_Ih__nosel->GetZaxis()->SetTitle("Events");
+    h_10000oP_vs_Ih__nosel->SetTitle("");
+    h_10000oP_vs_Ih__nosel->GetYaxis()->SetTitleSize(0.06);
+    h_10000oP_vs_Ih__nosel->GetXaxis()->SetTitleSize(0.06);
+    h_10000oP_vs_Ih__nosel->GetXaxis()->SetTitleOffset(0.9);
+    h_10000oP_vs_Ih__nosel->GetYaxis()->SetTitleOffset(0.9);
+    h_10000oP_vs_Ih__nosel->GetXaxis()->SetLabelSize(0.05);
+    h_10000oP_vs_Ih__nosel->GetYaxis()->SetLabelSize(0.05);
+    h_10000oP_vs_Ih__nosel->GetZaxis()->SetTitleSize(0.06);
+    h_10000oP_vs_Ih__nosel->GetZaxis()->SetTitleOffset(0.9);
+    h_10000oP_vs_Ih__nosel->GetZaxis()->SetLabelSize(0.05);
+
+    h_10000oP_vs_Ih__sel->GetXaxis()->SetTitle("10^{4}/p [GeV^{-1}]");
+    h_10000oP_vs_Ih__sel->GetYaxis()->SetTitle("I_{h} [MeV/cm]");
+    h_10000oP_vs_Ih__sel->GetZaxis()->SetTitle("Events");
+    h_10000oP_vs_Ih__sel->SetTitle("");
+    h_10000oP_vs_Ih__sel->GetYaxis()->SetTitleSize(0.06);
+    h_10000oP_vs_Ih__sel->GetXaxis()->SetTitleSize(0.06);
+    h_10000oP_vs_Ih__sel->GetXaxis()->SetTitleOffset(0.9);
+    h_10000oP_vs_Ih__sel->GetYaxis()->SetTitleOffset(0.9);
+    h_10000oP_vs_Ih__sel->GetXaxis()->SetLabelSize(0.05);
+    h_10000oP_vs_Ih__sel->GetYaxis()->SetLabelSize(0.05);
+    h_10000oP_vs_Ih__sel->GetZaxis()->SetTitleSize(0.06);
+    h_10000oP_vs_Ih__sel->GetZaxis()->SetTitleOffset(0.9);
+    h_10000oP_vs_Ih__sel->GetZaxis()->SetLabelSize(0.05);
+
+    p_nsel->SetLineColor(kRed);
+    p_nsel->SetLineWidth(2);
+    p_sel->SetLineColor(kRed);
+    p_sel->SetLineWidth(2);
+
+    // --- fit linéaire (non dessiné) sur les profils ---
+    TF1 *fit_nsel = new TF1("fit_nsel", "[0]+[1]*x", 0, 210);
+    TF1 *fit_sel  = new TF1("fit_sel",  "[0]+[1]*x", 0, 210);
+
+    p_nsel->Fit(fit_nsel, "RQ0");
+    p_sel->Fit(fit_sel,  "RQ0");
+
+    cout << "Nosel : I_h = " << fit_nsel->GetParameter(0) << " + " << fit_nsel->GetParameter(1) << " * (10^4/p)" << endl;
+    cout << "Sel   : I_h = " << fit_sel->GetParameter(0)  << " + " << fit_sel->GetParameter(1)  << " * (10^4/p)" << endl;
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    TLatex *tex = new TLatex(0.62, 0.91, "105.8 fb^{-1} (13.6 TeV)");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+
+    TCanvas *c_nosel = new TCanvas("c_nosel", "c_nosel", 800, 600);
+    c_nosel->SetGrid();
+    c_nosel->SetLeftMargin(0.16); c_nosel->SetBottomMargin(0.16); c_nosel->SetRightMargin(0.19);
+    h_10000oP_vs_Ih__nosel->Draw("COLZ");
+    h_10000oP_vs_Ih__nosel->GetYaxis()->SetRangeUser(2.5, 6);
+    h_10000oP_vs_Ih__nosel->GetXaxis()->SetRangeUser(0, 210);
+    gStyle->SetOptStat(0);
+    p_nsel->Draw("same");
+    latex1->Draw();
+    tex->Draw();
+    c_nosel->SaveAs(Form("PlayWithHistos/Corr_Ih_1oP__%s_nosel.pdf", eta.c_str()));
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c_nosel->Modified();
+    c_nosel->Update();
+    c_nosel->SaveAs(Form("PlayWithHistos/Corr_Ih_1oP__%s_nosel_bis.pdf", eta.c_str()));
+
+    TCanvas *c_sel = new TCanvas("c_sel", "c_sel", 800, 600);
+    c_sel->SetGrid();
+    c_sel->SetLeftMargin(0.16); c_sel->SetBottomMargin(0.16); c_sel->SetRightMargin(0.16);
+    h_10000oP_vs_Ih__sel->Draw("COLZ");
+    h_10000oP_vs_Ih__sel->GetYaxis()->SetRangeUser(2.5, 6);
+    h_10000oP_vs_Ih__sel->GetXaxis()->SetRangeUser(0, 210);
+    gStyle->SetOptStat(0);
+    p_sel->Draw("same");
+    latex1->Draw();
+    tex->Draw();
+    c_sel->SaveAs(Form("PlayWithHistos/Corr_Ih_1oP__%s_sel.pdf", eta.c_str()));
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c_sel->Modified();
+    c_sel->Update();
+    c_sel->SaveAs(Form("PlayWithHistos/Corr_Ih_1oP__%s_sel_bis.pdf", eta.c_str()));
+
+    return;
+}
+
+
+void Acceptance_EtaSlice_DataMC() {
+
+    TFile *fData = new TFile("../output/JetMET2024_V12/JetMET2024_V12p27.root", "READ");
+
+    std::vector<TFile*> TFileMC = {
+        new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root",  "READ"),
+        new TFile("../output/TTbar2024_V15/TTbar2024_V15p6_weighted.root",  "READ"),
+        new TFile("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root",    "READ")
+    };
+
+
+    std::vector<TString> labels = {"Data", "W+jets", "t#bar{t}", "QCD"};
+
+    // Tous les fichiers dans un seul vecteur : data en premier
+    std::vector<TFile*> files = {fData};
+    for (auto f : TFileMC) files.push_back(f);
+
+    std::vector<TH1D*> h_accs;
+
+    TFile *ofile = new TFile("PlayWithHistos/Acceptance_EtaSlice_DataMC.root", "RECREATE");
+
+    const int nSlices = 24;  // |eta| de 0.1 à 2.4 par pas de 0.1
+
+    for (int i = 0; i < (int)files.size(); i++) {
+        TH1D *h_eta_nosel = (TH1D*)files[i]->Get("Nosel_eta");
+        TH1D *h_eta_sel   = (TH1D*)files[i]->Get((labels[i]=="Data" ? "METanalysis_PseudoMETnotRescaled_Eta2p4_eta" : "METanalysis_Eta2p4_eta"));
+
+        if (!h_eta_nosel || !h_eta_sel) {
+            std::cout << "Histogrammes manquants dans " << files[i]->GetName() << std::endl;
+            continue;
+        }
+
+        ofile->cd();
+        TH1D *h_acc = new TH1D(Form("Acceptance_EtaSlice_%s", labels[i].Data()),
+                               Form("Acceptance vs |#eta| cut (%s);|#eta| < x;Acceptance", labels[i].Data()),
+                               nSlices, 0.05, 2.45);  // bins centrés sur 0.1, 0.2, ..., 2.4
+
+        // Dénominateur : intégrale totale (underflow + overflow inclus), calculé une fois
+        double errNosel = 0.;
+        double nNosel = h_eta_nosel->IntegralAndError(0, h_eta_nosel->GetNbinsX() + 1, errNosel);
+
+        for (int s = 1; s <= nSlices; s++) {
+            double etaMax = 0.1 * s;  // 0.1, 0.2, ..., 2.4
+
+            int binLow_sel  = h_eta_sel->FindBin(-etaMax + 1e-6);
+            int binHigh_sel = h_eta_sel->FindBin( etaMax - 1e-6);
+
+            double errSel = 0.;
+            double nSel = h_eta_sel->IntegralAndError(binLow_sel, binHigh_sel, errSel);
+
+            double acc = (nNosel > 0) ? nSel / nNosel : 0.;
+            double err = 0.;
+            if (nSel > 0 && nNosel > 0)
+                err = acc * std::sqrt(std::pow(errSel / nSel, 2) + std::pow(errNosel / nNosel, 2));
+
+            h_acc->SetBinContent(s, acc);
+            h_acc->SetBinError(s, err);
+        }
+
+        std::cout << labels[i] << " : Nosel integral = " << nNosel << std::endl;
+
+        h_acc->Write();
+        h_accs.push_back(h_acc);
+    }
+
+    // --- Canvas récapitulatif ---
+    TCanvas *c = new TCanvas("c_Acceptance_EtaSlice_DataMC", "Acceptance vs |#eta| cut", 800, 600);
+    c->SetGrid();
+    c->SetLeftMargin(0.16); c->SetBottomMargin(0.16);
+
+    TLegend *leg = new TLegend(0.2, 0.7, 0.4, 0.89);
+    leg->SetBorderSize(0);
+    leg->SetTextSize(0.05);
+
+    // Data en noir, MC en couleurs
+    int colors[4]  = {kBlack, kRed+1, kAzure+1, kGreen+2};
+    int markers[4] = {20, 21, 22, 23};
+
+    double ymax = 0.;
+    for (auto h : h_accs) ymax = std::max(ymax, h->GetMaximum());
+
+    for (size_t i = 0; i < h_accs.size(); i++) {
+        TH1D *h = h_accs[i];
+
+        h->SetLineColor(colors[i % 4]);
+        h->SetMarkerColor(colors[i % 4]);
+        h->SetMarkerStyle(markers[i % 4]);
+        h->SetMarkerSize(0.8);
+        h->SetLineWidth(2);
+        h->SetStats(0);
+        h->GetYaxis()->SetRangeUser(0., ymax * 1.2);
+        h->SetTitle("");
+        h->GetYaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleOffset(0.9);
+        h->GetYaxis()->SetTitleOffset(1.2);
+        h->GetXaxis()->SetLabelSize(0.05);
+        h->GetYaxis()->SetLabelSize(0.05);
+
+        h->Draw(i == 0 ? "PE" : "PE SAME");
+        leg->AddEntry(h, labels[i], "lp");
+    }
+    leg->Draw();
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{ Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+    latex1->Draw();
+
+    c->SaveAs("PlayWithHistos/Acceptance_EtaSlice_DataMC.pdf");
+
+    ofile->cd();
+    c->Write();
+
+    // Version "Private work"
+    latex1->SetText(0.16, 0.91, "#it{Private work (CMS data)}");
+    c->Modified();
+    c->Update();
+    c->SaveAs("PlayWithHistos/Acceptance_EtaSlice_DataMC_bis.pdf");
+
+    ofile->Close();
+
+    return;
+}
+
+
+//------------------------------------------------------------------
+// Trigger efficiencies
+//------------------------------------------------------------------s
+
+void TriggerEffCalib__Signal(const char *labelSIGNAL, const char *inputfileSIGNAL, const char *ofilename) {
+
+    gErrorIgnoreLevel = kError;
+
+    TFile *ifileSIGNAL = new TFile(inputfileSIGNAL, "READ");
+
+    if (!ifileSIGNAL || ifileSIGNAL->IsZombie()) {
+        std::cerr << "Error: Could not open input file " << inputfileSIGNAL << std::endl;
+        return;
+    }
+
+    TFile *ofile = new TFile(Form("TriggEff/TriggerEffCalib__Signal_%s.root", ofilename), "RECREATE");
+
+    // ------------------------------------------------------------------
+    // configuration
+    // ------------------------------------------------------------------
+    struct Observable {
+        std::string label;                 // which selection label to read (nominal or rescaled)
+        std::string branch;                // histo suffix in the file
+        std::string tag;                   // short tag used in canvas/PDF names
+        std::string xtitle;                // x axis title
+        double cut;                        // lower threshold [GeV] for the "after-cut" efficiency (<0 = none)
+        std::vector<std::string> triggers; // numerator trigger tags
+    };
+
+    std::vector<std::string> baseTriggers = {
+        "HLT_PFMET120_PFMHT120_IDTight",
+        "HLT_PFHT500_PFMET100_PFMHT100_IDTight",
+        "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60",
+        "HLT_MET105_IsoTrk50",
+        "orMETtrg"
+    };
+
+    std::vector<std::string> orMET3a4 = {
+        "orMET3a4trg1", "orMET3a4trg2", "orMET3a4trg3", "orMET3a4trg4"
+    };
+
+    // base triggers + the 4 orMET3a4trg
+    std::vector<std::string> fullTriggers = baseTriggers;
+    fullTriggers.insert(fullTriggers.end(), orMET3a4.begin(), orMET3a4.end());
+
+    // marker sizes used in the original macro, indexed by base trigger
+    std::map<std::string, double> markerSize = {
+        { "HLT_PFMET120_PFMHT120_IDTight",                 0.045 },
+        { "HLT_PFHT500_PFMET100_PFMHT100_IDTight",         0.04  },
+        { "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60",  0.032 },
+        { "HLT_MET105_IsoTrk50",                           0.05  },
+        { "orMETtrg",                                      0.06  }
+    };
+
+    std::string lbl     = labelSIGNAL;
+
+    std::vector<Observable> observables = {
+        // label,  branch,          tag,             xtitle,                   cut,   triggers
+        { lbl,   "PseudoCaloMET", "PseudoCaloMET", "Pseudo MET [GeV]",       250.,  fullTriggers },
+        { lbl,   "PUppiMET",      "PUppiMET",      "PUppi MET [GeV]",        150.,  fullTriggers },
+        { lbl,   "PUppiMETNoMu",  "PUppiMETNoMu",  "PUppi MET (NoMu) [GeV]", 150.,  fullTriggers },
+        { lbl,   "PFtrackPT",     "PFtrackPT",     "PF track p_{T} [GeV]",   -1.,   { "HLT_MET105_IsoTrk50" } }
+    };
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    // axis upper edge: PFtrackPT goes to 3000, MET observables to 2500
+    // (drawing range kept at original-style values; tweak if needed)
+
+    // ------------------------------------------------------------------
+    // integrated-efficiency table (LaTeX)
+    // ------------------------------------------------------------------
+    std::ostringstream texBody;  // accumulates the table rows
+
+    // binomial efficiency + error from integrated counts.
+    // counts are summed over bins with low edge >= xmin (xmin < 0 -> full range,
+    // under/overflow included).
+    auto integratedEff = [](TH1F *num, TH1F *den, double xmin,
+                            double &eff, double &err) {
+        int blo, bhi;
+        if (xmin < 0) {
+            blo = 0;                       // include underflow
+            bhi = den->GetNbinsX() + 1;    // include overflow
+        } else {
+            blo = den->GetXaxis()->FindBin(xmin);
+            bhi = den->GetNbinsX() + 1;    // up to overflow
+        }
+        double N = den->Integral(blo, bhi);
+        double k = num->Integral(blo, bhi);
+        if (N > 0) {
+            eff = k / N;
+            double var = eff * (1.0 - eff) / N;   // gaussian binomial approx
+            err = (var > 0) ? std::sqrt(var) : 0.0;
+        } else {
+            eff = 0.0;
+            err = 0.0;
+        }
+    };
+
+    // ------------------------------------------------------------------
+    // loop over observables / triggers
+    // ------------------------------------------------------------------
+    for (const auto &obs : observables) {
+
+        // inclusive denominator
+        TH1F *den = (TH1F*)ifileSIGNAL->Get(Form("%s_%s", obs.label.c_str(), obs.branch.c_str()));
+
+        if (!den) {
+            std::cerr << "Warning: missing denominator " << obs.label << "_" << obs.branch
+                      << ", skipping observable." << std::endl;
+            continue;
+        }
+
+        // drawing x-range upper edge depends on the observable
+        double xUp = (obs.branch == "PFtrackPT") ? 3000 : 1200;
+
+        for (const std::string &trg : obs.triggers) {
+
+            std::string numName = Form("%s_if___%s___%s",
+                                       obs.label.c_str(), trg.c_str(), obs.branch.c_str());
+
+            TH1F *num = (TH1F*)ifileSIGNAL->Get(numName.c_str());
+
+            if (!num) {
+                std::cerr << "Warning: missing numerator " << numName
+                          << ", skipping." << std::endl;
+                continue;
+            }
+
+            if (obs.branch == "PFtrackPT") { num->Rebin(3); den->Rebin(3); }
+
+            // ---- efficiency = numerator / denominator ----
+            std::string effName = Form("eff_%s_%s_SIGNAL", trg.c_str(), obs.tag.c_str());
+            TH1F *eff = (TH1F*)num->Clone(effName.c_str());
+            eff->SetDirectory(0);
+            eff->Divide(den);
+
+            // ---- integrated efficiency for the LaTeX table ----
+            // full range
+            double effInt = 0., effErr = 0.;
+            integratedEff(num, den, -1., effInt, effErr);
+
+            // after a lower cut on the observable (if defined for this obs)
+            double effCut = -1., effCutErr = 0.;
+            if (obs.cut >= 0)
+                integratedEff(num, den, obs.cut, effCut, effCutErr);
+
+            // escape underscores for LaTeX
+            std::string obsTex = obs.tag; std::string trgTex = trg;
+            for (auto *s : { &obsTex, &trgTex })
+                for (size_t p = 0; (p = s->find('_', p)) != std::string::npos; p += 2)
+                    s->replace(p, 1, "\\_");
+
+            // cut column: value if a cut is defined, dash otherwise
+            std::string cutCell;
+            if (obs.cut >= 0)
+                cutCell = Form("%.4f $\\pm$ %.4f", effCut, effCutErr);
+            else
+                cutCell = "--";
+
+            texBody << "\\texttt{" << trgTex << "} & \\texttt{" << obsTex << "} & " << cutCell << " \\\\\n";
+
+            // ---- drawing ----
+            double msize = markerSize.count(trg) ? markerSize[trg] : 0.045;
+            std::string cName  = Form("c_%s___%s", trg.c_str(), obs.tag.c_str());
+            std::string ytitle = (trg == "orMETtrg") ? "eff orMETtrg"
+                                                      : Form("eff. %s", trg.c_str());
+
+            TCanvas *c = DrawCanvas(eff, cName.c_str(), obs.xtitle.c_str(), ytitle.c_str(),
+                                    "E1", msize, 0, xUp, 0, 1, false);
+            c->cd();
+            latex1->Draw();
+
+            // ---- saving ----
+            c->SaveAs(Form("TriggEff/c_%s___%s__SIGNAL__%s.pdf",
+                           trg.c_str(), obs.tag.c_str(), ofilename));
+
+            ofile->cd();
+            c->Write();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // write LaTeX table
+    // ------------------------------------------------------------------
+    std::ofstream tex(Form("TriggEff/TriggerEff_table_%s.txt", ofilename));
+    tex << "\\begin{table}[htbp]\n  \\centering\n"
+        << "  \\caption{Integrated trigger efficiency (signal). "
+        << "The last column gives the efficiency after a lower cut on the observable "
+        << "(Pseudo MET $>$ 250 GeV, PUppi MET $>$ 150 GeV).}\n"
+        << "  \\begin{tabular}{llc}\n    \\hline\n"
+        << "    Trigger & Observable & $\\varepsilon$ (after cut) \\\\\n    \\hline\n"
+        << texBody.str()
+        << "    \\hline\n  \\end{tabular}\n\\end{table}\n";
+    tex.close();
+
+
+    ofile->Close();
+
+    return;
+}
+
+void TriggerEffCalib__Signal__2D(const char *labelSIGNAL, const char *inputfileSIGNAL, const char *SignalLabel) {
+
+    gErrorIgnoreLevel = kError;
+
+    TFile *ifileSIGNAL = new TFile(inputfileSIGNAL, "READ");
+
+    if (!ifileSIGNAL || ifileSIGNAL->IsZombie()) {
+        std::cerr << "Error: Could not open input file " << inputfileSIGNAL << std::endl;
+        return;
+    }
+
+    // ------------------------------------------------------------------
+    // configuration
+    // ------------------------------------------------------------------
+    // observables (the "VS_PseudoMET" 2D maps) and, for each, the list of
+    // trigger tags whose efficiency we want w.r.t. the inclusive denominator.
+    struct Observable {
+        std::string name;                  // denominator histo suffix
+        std::vector<std::string> triggers; // numerator trigger tags
+    };
+
+    std::vector<std::string> baseTriggers = {
+        "HLT_PFMET120_PFMHT120_IDTight",
+        "HLT_PFHT500_PFMET100_PFMHT100_IDTight",
+        "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60",
+        "HLT_MET105_IsoTrk50",
+        "orMETtrg"
+    };
+
+    std::vector<std::string> orMET3a4 = {
+        "orMET3a4trg1", "orMET3a4trg2", "orMET3a4trg3", "orMET3a4trg4"
+    };
+
+    // PuppiMET_VS_PseudoMET : original triggers + the 4 orMET3a4trg
+    std::vector<std::string> trg_PuppiMET = baseTriggers;
+    trg_PuppiMET.insert(trg_PuppiMET.end(), orMET3a4.begin(), orMET3a4.end());
+
+    // PUppiMETNoMu_VS_PseudoMET : same base triggers + the 4 orMET3a4trg
+    std::vector<std::string> trg_PUppiMETNoMu = baseTriggers;
+    trg_PUppiMETNoMu.insert(trg_PUppiMETNoMu.end(), orMET3a4.begin(), orMET3a4.end());
+
+    std::vector<Observable> observables = {
+        { "PUppiMET_VS_PseudoMET",     trg_PuppiMET     },
+        { "PUppiMETNoMu_VS_PseudoMET", trg_PUppiMETNoMu }
+    };
+
+    const char *xtitle = "PUppi MET [GeV]";
+    const char *ytitle = "Pseudo MET [GeV]";
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    // ------------------------------------------------------------------
+    // loop over observables / triggers
+    // ------------------------------------------------------------------
+    for (const auto &obs : observables) {
+
+        const std::string &obsName = obs.name;
+
+        // inclusive denominator
+        TH2F *den = (TH2F*)ifileSIGNAL->Get(Form("%s_%s", labelSIGNAL, obsName.c_str()));
+
+        if (!den) {
+            std::cerr << "Warning: missing denominator for " << obsName
+                      << ", skipping." << std::endl;
+            continue;
+        }
+
+        if (obsName == "PUppiMETNoMu_VS_PseudoMET") xtitle = "PUppi MET (NoMu) [GeV]";
+
+        for (const std::string &trg : obs.triggers) {
+
+            // numerator histo suffix: if___<trigger>___<observable>
+            std::string numSuffix = "if___" + trg + "___" + obsName;
+
+            TH2F *num = (TH2F*)ifileSIGNAL->Get(Form("%s_%s", labelSIGNAL, numSuffix.c_str()));
+
+            if (!num) {
+                std::cerr << "Warning: missing numerator " << numSuffix
+                          << ", skipping." << std::endl;
+                continue;
+            }
+
+            // ---- efficiency = numerator / denominator ----
+            TH2F *eff = (TH2F*)num->Clone(Form("eff_%s_%s_SIGNAL", trg.c_str(), obsName.c_str()));
+            eff->SetDirectory(0);
+            eff->Divide(den);
+
+            // ---- drawing ----
+            TCanvas *c = DrawCanvas(eff, Form("eff_%s_%s_SIGNAL", trg.c_str(), obsName.c_str()),
+                                    xtitle, ytitle, Form("Eff. %s", trg.c_str()),
+                                    "COLZ", 0, 1200, 0, 1200);
+            c->cd(); latex1->Draw();
+
+            // ---- saving ----
+            c->SaveAs(Form("TriggEff/c_%s_%s_SIGNAL__%s.pdf",
+                           trg.c_str(), obsName.c_str(), SignalLabel));
+        }
+    }
+
+    return;
+}
+
+
+void TriggerEffCalib (const char *labelData, const char *labelMC,
+                      const char *inputfileDATA, const char *inputfileMC,
+                      const char *ofilename) {
+
+    gErrorIgnoreLevel = kError;
+
+    cout << "dataset: " << inputfileDATA << " and " << inputfileMC << endl;
+
+    TFile *ifileDATA = new TFile(inputfileDATA, "READ");
+    TFile *ifileMC   = new TFile(inputfileMC,   "READ");
+
+    if (!ifileDATA || ifileDATA->IsZombie()) {
+        std::cerr << "Error: Could not open input file " << inputfileDATA << std::endl;
+        return;
+    }
+    if (!ifileMC || ifileMC->IsZombie()) {
+        std::cerr << "Error: Could not open input file " << inputfileMC << std::endl;
+        return;
+    }
+
+    // ------------------------------------------------------------------
+    // configuration
+    // ------------------------------------------------------------------
+    struct Observable {
+        std::string labelData;             // selection label to read in DATA
+        std::string labelMC;               // selection label to read in MC
+        std::string branch;                // histo suffix in the file
+        std::string tag;                   // short tag for canvas / PDF names
+        std::string xtitle;                // x axis title
+        double cut;                        // lower threshold [GeV] for the "after-cut" efficiency (<0 = none)
+        std::vector<std::string> triggers; // numerator trigger tags
+    };
+
+    std::vector<std::string> baseTriggers = {
+        "HLT_PFMET120_PFMHT120_IDTight",
+        "HLT_PFHT500_PFMET100_PFMHT100_IDTight",
+        "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60",
+        "HLT_MET105_IsoTrk50",
+        "orMETtrg"
+    };
+
+    std::vector<std::string> orMET3a4 = {
+        "orMET3a4trg1", "orMET3a4trg2", "orMET3a4trg3", "orMET3a4trg4"
+    };
+
+    // base triggers + the 4 orMET3a4trg
+    std::vector<std::string> fullTriggers = baseTriggers;
+    fullTriggers.insert(fullTriggers.end(), orMET3a4.begin(), orMET3a4.end());
+
+    // marker sizes used in the original macro, indexed by base trigger
+    std::map<std::string, double> markerSize = {
+        { "HLT_PFMET120_PFMHT120_IDTight",                 0.045 },
+        { "HLT_PFHT500_PFMET100_PFMHT100_IDTight",         0.04  },
+        { "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60",  0.032 },
+        { "HLT_MET105_IsoTrk50",                           0.05  },
+        { "orMETtrg",                                      0.06  }
+    };
+
+    std::string lD  = labelData;
+    std::string lMC = labelMC;
+
+    std::vector<Observable> observables = {
+        // labelData, labelMC, branch,          tag,             xtitle,                   cut,   triggers
+        { lD,  lMC,  "PseudoCaloMET", "PseudoMET",     "Pseudo MET [GeV]",       250.,  fullTriggers },
+        { lD,  lMC,  "PUppiMET",      "PUppiMET",      "PUppi MET [GeV]",        150.,  fullTriggers },
+        { lD,  lMC,  "PUppiMETNoMu",  "PUppiMETNoMu",  "PUppi MET (NoMu) [GeV]", 150.,  fullTriggers },
+        { lD,  lMC,  "PFtrackPT",     "PFtrackPT",     "PF track p_{T} [GeV]",   -1.,   { "HLT_MET105_IsoTrk50" } }
+    };
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    // fichiers SF par bin pour orMETtrg (PseudoCaloMET et PUppiMET)
+    std::ofstream sfPseudo(Form("TriggEff/SF_orMETtrg_PseudoCaloMET_%s.txt", ofilename));
+    std::ofstream sfPUppi (Form("TriggEff/SF_orMETtrg_PUppiMET_%s.txt",      ofilename));
+
+    std::ostringstream texBody;
+
+    // binomial efficiency + error from integrated counts.
+    // counts are summed over bins with low edge >= xmin (xmin < 0 -> full range,
+    // under/overflow included).
+    auto integratedEff = [](TH1F *num, TH1F *den, double xmin,
+                            double &eff, double &err) {
+        int blo, bhi;
+        if (xmin < 0) {
+            blo = 0;                       // include underflow
+            bhi = den->GetNbinsX() + 1;    // include overflow
+        } else {
+            blo = den->GetXaxis()->FindBin(xmin);
+            bhi = den->GetNbinsX() + 1;    // up to overflow
+        }
+        double N = den->Integral(blo, bhi);
+        double k = num->Integral(blo, bhi);
+        if (N > 0) {
+            eff = k / N;
+            double var = eff * (1.0 - eff) / N;   // gaussian binomial approx
+            err = (var > 0) ? std::sqrt(var) : 0.0;
+        } else { eff = 0.0; err = 0.0; }
+    };
+
+    // ------------------------------------------------------------------
+    // loop over observables / triggers
+    // ------------------------------------------------------------------
+    for (const auto &obs : observables) {
+
+        // inclusive denominators
+        TH1F *den_DATA = (TH1F*)ifileDATA->Get(Form("%s_%s", obs.labelData.c_str(), obs.branch.c_str()));
+        TH1F *den_MC   = (TH1F*)ifileMC->Get(Form("%s_%s",   obs.labelMC.c_str(),   obs.branch.c_str()));
+
+        if (!den_DATA || !den_MC) {
+            std::cerr << "Warning: missing denominator for " << obs.branch
+                      << " (DATA=" << den_DATA << ", MC=" << den_MC << "), skipping observable." << std::endl;
+            continue;
+        }
+
+        double xUp = (obs.branch == "PFtrackPT") ? 1500 : 1200;
+
+        for (const std::string &trg : obs.triggers) {
+
+            std::string numName_DATA = Form("%s_if___%s___%s",
+                                            obs.labelData.c_str(), trg.c_str(), obs.branch.c_str());
+            std::string numName_MC   = Form("%s_if___%s___%s",
+                                            obs.labelMC.c_str(),   trg.c_str(), obs.branch.c_str());
+
+            TH1F *num_DATA = (TH1F*)ifileDATA->Get(numName_DATA.c_str());
+            TH1F *num_MC   = (TH1F*)ifileMC->Get(numName_MC.c_str());
+
+            if (!num_DATA || !num_MC) {
+                std::cerr << "Warning: missing numerator " << trg << " / " << obs.branch
+                          << " (DATA=" << num_DATA << ", MC=" << num_MC << "), skipping." << std::endl;
+                continue;
+            }
+
+            if (obs.branch == "PFtrackPT") { num_MC->Rebin(3); num_DATA->Rebin(3); den_MC->Rebin(3); den_DATA->Rebin(3); }
+
+            // ---- efficiency = numerator / denominator ----
+            TH1F *eff_DATA = (TH1F*)num_DATA->Clone(Form("eff_%s_%s_DATA", trg.c_str(), obs.tag.c_str()));
+            TH1F *eff_MC   = (TH1F*)num_MC->Clone(Form("eff_%s_%s_MC",     trg.c_str(), obs.tag.c_str()));
+            eff_DATA->SetDirectory(0);
+            eff_MC->SetDirectory(0);
+            eff_DATA->Divide(den_DATA);
+            eff_MC->Divide(den_MC);
+
+            // ---- écriture du SF par bin pour orMETtrg ----
+            if (trg == "orMETtrg" &&
+                (obs.branch == "PseudoCaloMET" || obs.branch == "PUppiMET")) {
+
+                std::ofstream &out = (obs.branch == "PseudoCaloMET") ? sfPseudo : sfPUppi;
+
+                for (int b = 1; b <= eff_DATA->GetNbinsX(); ++b) {
+                    double eD  = eff_DATA->GetBinContent(b);
+                    double eM  = eff_MC->GetBinContent(b);
+                    double erD = eff_DATA->GetBinError(b);
+                    double erM = eff_MC->GetBinError(b);
+
+                    double sf = (eM > 0) ? eD / eM : 0.0;
+
+                    // propagation d'erreur du quotient : (dSF/SF)^2 = (dD/D)^2 + (dM/M)^2
+                    double sfErr = 0.0;
+                    if (eM > 0 && eD > 0) {
+                        double relD = erD / eD;
+                        double relM = erM / eM;
+                        sfErr = sf * std::sqrt(relD * relD + relM * relM);
+                    } else if (eM > 0) {
+                        sfErr = erD / eM;   // cas eD = 0
+                    }
+
+                    double sfDown = sf - sfErr;
+                    double sfUp   = sf + sfErr;
+                    double xup    = eff_DATA->GetXaxis()->GetBinUpEdge(b);
+
+                    out << xup << " " << sfDown << " " << sf << " " << sfUp << "\n";
+                }
+            }
+
+            // ---- integrated efficiencies for the LaTeX table ----
+            // full range
+            double effD = 0., errD = 0., effM = 0., errM = 0.;
+            integratedEff(num_DATA, den_DATA, -1., effD, errD);
+            integratedEff(num_MC,   den_MC,   -1., effM, errM);
+
+            // after a lower cut on the observable (if defined for this obs)
+            double effDc = -1., errDc = 0., effMc = -1., errMc = 0., sfc = 0., sfcErr = 0.;
+            if (obs.cut >= 0) {
+                integratedEff(num_DATA, den_DATA, obs.cut, effDc, errDc);
+                integratedEff(num_MC,   den_MC,   obs.cut, effMc, errMc);
+            }
+
+            std::string obsTex = obs.tag; std::string trgTex = trg;
+            for (auto *s : { &obsTex, &trgTex })
+                for (size_t p = 0; (p = s->find('_', p)) != std::string::npos; p += 2)
+                    s->replace(p, 1, "\\_");
+
+            // after-cut cells: values if a cut is defined, dashes otherwise
+            std::string cellDc, cellMc, cellSFc;
+            if (obs.cut >= 0) {
+                cellDc  = Form("%.4f $\\pm$ %.4f", effDc, errDc);
+                cellMc  = Form("%.4f $\\pm$ %.4f", effMc, errMc);
+            } else {
+                cellDc = cellMc = cellSFc = "--";
+            }
+
+            texBody << "\\texttt{" << trgTex << "} & \\texttt{" << obsTex << "} & "
+                    << cellDc << " & " << cellMc << " \\\\\n";
+
+            // ---- drawing : DATA + MC superimposed ----
+            double msize = markerSize.count(trg) ? markerSize[trg] : 0.045;
+            std::string cName  = Form("c_%s___%s", trg.c_str(), obs.tag.c_str());
+            std::string ytitle = (trg == "orMETtrg") ? "eff orMETtrg"
+                                                      : Form("eff. %s", trg.c_str());
+
+            latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+            TCanvas *c = DrawCanvas(eff_DATA, eff_MC, cName.c_str(),
+                                    obs.xtitle.c_str(), ytitle.c_str(),
+                                    "E1", "E1 same", true, "DATA", "MC", "lep", "lep",
+                                    msize, 0, xUp, 0, 1, false);
+            c->cd();
+            latex1->Draw();
+
+            // ---- ratio DATA/MC ----
+            std::string ratioTag = Form("%s_%s", trg.c_str(), obs.tag.c_str());
+
+            TCanvas *cRatio = DrawWithRatio(eff_DATA, eff_MC, c,
+                                            ratioTag.c_str(), "DATA/MC",
+                                            obs.xtitle.c_str(), 0, xUp);
+            cRatio->SaveAs(Form("TriggEff/cRatio_%s_%s.pdf",
+                                ratioTag.c_str(), ofilename));
+
+            // ---- "bis" pass: refresh canvas then redraw (fixes rendering) ----
+            latex1->SetTitle("#it{Private work (CMS simulation/data)}");
+            cRatio->Modified();
+            cRatio->Update();
+            TCanvas *cRatio_bis = DrawWithRatio(eff_DATA, eff_MC, c,
+                                                ratioTag.c_str(), "DATA/MC",
+                                                obs.xtitle.c_str(), 0, xUp);
+            cRatio_bis->SaveAs(Form("TriggEff/cRatio_%s_%s_bis.pdf",
+                                    ratioTag.c_str(), ofilename));
+        }
+    }
+
+    sfPseudo.close();
+    sfPUppi.close();
+
+    std::ofstream tex(Form("TriggEff/TriggerEff_table_%s.txt", ofilename));
+    tex << "\\begin{table}[htbp]\n  \\centering\n"
+        << "  \\caption{Integrated trigger efficiency, data vs.\\ MC. "
+        << "The last three columns give the efficiencies and scale factor after a lower cut "
+        << "on the observable (Pseudo MET $>$ 250 GeV, PUppi MET $>$ 150 GeV).}\n"
+        << "  \\begin{tabular}{llcccc}\n    \\hline\n"
+        << "     & \\multicolumn{2}{c}{after cut} \\\\\n"
+        << "    Trigger & Observable &"
+        << "$\\varepsilon_{\\mathrm{data}}$ & $\\varepsilon_{\\mathrm{MC}}$\\\\\n    \\hline\n"
+        << texBody.str()
+        << "    \\hline\n  \\end{tabular}\n\\end{table}\n";
+    tex.close();
+
+    return;
+}
+
+void TriggerEffCalib__2D(const char *labelData, const char *labelMC,
+                         const char *inputfileDATA, const char *inputfileMC,
+                         const char *ofilename) {
+ 
+    gErrorIgnoreLevel = kError;
+ 
+    cout << "dataset: " << inputfileDATA << " and " << inputfileMC << endl;
+ 
+    TFile *ifileDATA = new TFile(inputfileDATA, "READ");
+    TFile *ifileMC   = new TFile(inputfileMC,   "READ");
+ 
+    if (!ifileDATA || ifileDATA->IsZombie()) {
+        std::cerr << "Error: Could not open input file " << inputfileDATA << std::endl;
+        return;
+    }
+    if (!ifileMC || ifileMC->IsZombie()) {
+        std::cerr << "Error: Could not open input file " << inputfileMC << std::endl;
+        return;
+    }
+ 
+    // ------------------------------------------------------------------
+    // custom binning  (x = PUppi MET, y = Pseudo MET)
+    // ------------------------------------------------------------------
+    std::vector<double> xBins = {0, 150, 200, 300, 400, 500, 600, 700, 800, 1200};
+    std::vector<double> yBins = {0, 250, 300, 400, 500, 600, 700, 800, 1200};
+ 
+    // ------------------------------------------------------------------
+    // configuration : observables + their trigger lists
+    // ------------------------------------------------------------------
+    struct Observable {
+        std::string name;                  // denominator histo suffix
+        std::vector<std::string> triggers; // numerator trigger tags
+    };
+ 
+    std::vector<std::string> baseTriggers = {
+        "HLT_PFMET120_PFMHT120_IDTight",
+        "HLT_PFHT500_PFMET100_PFMHT100_IDTight",
+        "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60",
+        "HLT_MET105_IsoTrk50",
+        "orMETtrg"
+    };
+ 
+    std::vector<std::string> orMET3a4 = {
+        "orMET3a4trg1", "orMET3a4trg2", "orMET3a4trg3", "orMET3a4trg4"
+    };
+ 
+    // base triggers + the 4 orMET3a4trg (same list for both observables)
+    std::vector<std::string> triggers = baseTriggers;
+    triggers.insert(triggers.end(), orMET3a4.begin(), orMET3a4.end());
+ 
+    std::vector<Observable> observables = {
+        { "PUppiMET_VS_PseudoMET",     triggers },
+        { "PUppiMETNoMu_VS_PseudoMET", triggers }
+    };
+ 
+    const char *xtitle = "PUppi MET [GeV]";
+    const char *ytitle = "Pseudo MET [GeV]";
+ 
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Private work (CMS simulation/data)}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+ 
+    // ------------------------------------------------------------------
+    // loop over observables
+    // ------------------------------------------------------------------
+    for (const auto &obs : observables) {
+ 
+        const std::string &obsName = obs.name;
+ 
+        // adapt x-axis title for the NoMu map
+        const char *xtitle_obs = (obsName == "PUppiMETNoMu_VS_PseudoMET")
+                               ? "PUppi MET (NoMu) [GeV]" : xtitle;
+ 
+        // --------------------------------------------------------------
+        // inclusive denominators
+        // --------------------------------------------------------------
+        TH2F *den_MC_raw   = (TH2F*)ifileMC->Get(Form("%s_%s",   labelMC,   obsName.c_str()));
+        TH2F *den_DATA_raw = (TH2F*)ifileDATA->Get(Form("%s_%s", labelData, obsName.c_str()));
+ 
+        if (!den_MC_raw || !den_DATA_raw) {
+            std::cerr << "Error: missing denominator for " << obsName
+                      << " (MC=" << den_MC_raw << ", DATA=" << den_DATA_raw << "), skipping." << std::endl;
+            continue;
+        }
+ 
+        // rebinned denominators (once per observable)
+        TH2D *den_MC_rb   = RebinTH2(den_MC_raw,   xBins, yBins, Form("den_MC_%s_rebin",   obsName.c_str()));
+        TH2D *den_DATA_rb = RebinTH2(den_DATA_raw, xBins, yBins, Form("den_DATA_%s_rebin", obsName.c_str()));
+ 
+        // --------------------------------------------------------------
+        // loop over triggers
+        // --------------------------------------------------------------
+        for (const std::string &trg : obs.triggers) {
+ 
+            // numerator histo suffix: if___<trigger>___<observable>
+            std::string numSuffix = "if___" + trg + "___" + obsName;
+ 
+            TH2F *num_MC_raw   = (TH2F*)ifileMC->Get(Form("%s_%s",   labelMC,   numSuffix.c_str()));
+            TH2F *num_DATA_raw = (TH2F*)ifileDATA->Get(Form("%s_%s", labelData, numSuffix.c_str()));
+ 
+            if (!num_MC_raw || !num_DATA_raw) {
+                std::cerr << "Warning: missing numerator " << numSuffix
+                          << " (MC=" << num_MC_raw << ", DATA=" << num_DATA_raw << "), skipping." << std::endl;
+                continue;
+            }
+ 
+            // ==========================================================
+            // (A) FINE BINNING : efficiency / SF on the original binning
+            // ==========================================================
+            TH2F *eff_MC_fine   = (TH2F*)num_MC_raw->Clone(Form("eff_%s_%s_MC_fineBin",   trg.c_str(), obsName.c_str()));
+            TH2F *eff_DATA_fine = (TH2F*)num_DATA_raw->Clone(Form("eff_%s_%s_DATA_fineBin", trg.c_str(), obsName.c_str()));
+            eff_MC_fine->SetDirectory(0);
+            eff_DATA_fine->SetDirectory(0);
+            eff_MC_fine->Divide(den_MC_raw);
+            eff_DATA_fine->Divide(den_DATA_raw);
+ 
+            TH2F *sf_fine = (TH2F*)eff_DATA_fine->Clone(Form("sf_%s_%s_fineBin", trg.c_str(), obsName.c_str()));
+            sf_fine->SetDirectory(0);
+            sf_fine->Divide(eff_MC_fine);
+ 
+            // ==========================================================
+            // (B) REBINNED : efficiency / SF on the custom binning
+            // ==========================================================
+            TH2D *eff_MC_rb = RebinTH2(num_MC_raw, xBins, yBins,
+                                       Form("eff_%s_%s_MC_rebin", trg.c_str(), obsName.c_str()));
+            TH2D *eff_DATA_rb = RebinTH2(num_DATA_raw, xBins, yBins,
+                                         Form("eff_%s_%s_DATA_rebin", trg.c_str(), obsName.c_str()));
+            eff_MC_rb->SetDirectory(0);
+            eff_DATA_rb->SetDirectory(0);
+            eff_MC_rb->Divide(den_MC_rb);
+            eff_DATA_rb->Divide(den_DATA_rb);
+ 
+            TH2D *sf_rb = (TH2D*)eff_DATA_rb->Clone(Form("sf_%s_%s_rebin", trg.c_str(), obsName.c_str()));
+            sf_rb->SetDirectory(0);
+            sf_rb->Divide(eff_MC_rb);
+ 
+            // ==========================================================
+            // drawing + saving : fine binning
+            // ==========================================================
+            TCanvas *c_MC_fine = DrawCanvas(eff_MC_fine, Form("eff_%s_%s_MC_fineBin", trg.c_str(), obsName.c_str()),
+                                            xtitle_obs, ytitle, Form("Eff. %s (MC)", trg.c_str()),
+                                            "COLZ", 0, 1200, 0, 1200);
+            c_MC_fine->cd(); latex1->Draw();
+            TCanvas *c_DATA_fine = DrawCanvas(eff_DATA_fine, Form("eff_%s_%s_DATA_fineBin", trg.c_str(), obsName.c_str()),
+                                              xtitle_obs, ytitle, Form("Eff. %s (DATA)", trg.c_str()),
+                                              "COLZ", 0, 1200, 0, 1200);
+            c_DATA_fine->cd(); latex1->Draw();
+            TCanvas *c_SF_fine = DrawCanvas(sf_fine, Form("sf_%s_%s_fineBin", trg.c_str(), obsName.c_str()),
+                                            xtitle_obs, ytitle, Form("SF (DATA/MC) %s", trg.c_str()),
+                                            "COLZ", 0, 1200, 0, 1200, 0, 1);
+            c_SF_fine->cd(); latex1->Draw();
+ 
+            c_MC_fine->SaveAs(Form("TriggEff/c_%s_%s_MC_fineBin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
+            c_DATA_fine->SaveAs(Form("TriggEff/c_%s_%s_DATA_fineBin__%s.pdf", trg.c_str(), obsName.c_str(), ofilename));
+            c_SF_fine->SaveAs(Form("TriggEff/c_%s_%s_SF_fineBin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
+ 
+            // ==========================================================
+            // drawing + saving : rebinned
+            // ==========================================================
+            TCanvas *c_MC_rb = DrawCanvas(eff_MC_rb, Form("eff_%s_%s_MC_rebin", trg.c_str(), obsName.c_str()),
+                                          xtitle_obs, ytitle, Form("Eff. %s (MC)", trg.c_str()),
+                                          "COLZ", 0, 1200, 0, 1200);
+            c_MC_rb->cd(); latex1->Draw();
+            TCanvas *c_DATA_rb = DrawCanvas(eff_DATA_rb, Form("eff_%s_%s_DATA_rebin", trg.c_str(), obsName.c_str()),
+                                            xtitle_obs, ytitle, Form("Eff. %s (DATA)", trg.c_str()),
+                                            "COLZ", 0, 1200, 0, 1200);
+            c_DATA_rb->cd(); latex1->Draw();
+            TCanvas *c_SF_rb = DrawCanvas(sf_rb, Form("sf_%s_%s_rebin", trg.c_str(), obsName.c_str()),
+                                          xtitle_obs, ytitle, Form("SF (DATA/MC) %s", trg.c_str()),
+                                          "TEXT", 0, 1200, 0, 1200, 0, 1);
+            c_SF_rb->cd(); latex1->Draw();
+ 
+            c_MC_rb->SaveAs(Form("TriggEff/c_%s_%s_MC_rebin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
+            c_DATA_rb->SaveAs(Form("TriggEff/c_%s_%s_DATA_rebin__%s.pdf", trg.c_str(), obsName.c_str(), ofilename));
+            c_SF_rb->SaveAs(Form("TriggEff/c_%s_%s_SF_rebin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
+        }
+    }
+ 
+    return;
+}
+
+
+void SignalEffVsMass(const char *ofilename = "EffVsMass") {
+
+    gErrorIgnoreLevel = kError;
+
+    // ------------------------------------------------------------------
+    // configuration
+    // ------------------------------------------------------------------
+    // gluino mass points (GeV) and matching file names
+    std::vector<int> masses = {1100, 1200, 1300, 1400, 1600, 1800, 2000, 2200, 2400, 2600};
+
+    auto fileName = [&](int m) {
+        return Form("../output/Gluino_V19/Gluino_Run3_MET_madgraph_%d_V19p6.root", m);
+    };
+
+    // the 3 selections -> one plot each
+    std::vector<std::string> AfterHSCPsel = {
+        "METanalysis_TestPseudoMETCut_Eta2p4",
+        "METanalysis_TestPUppiMETCut_Eta2p4",
+        "METanalysis_TestPseudoMETCut_TestPUppiMETCut_Eta2p4"
+    };
+
+    // after-trigger numerator histo name, one per selection (same index order)
+
+    std::vector<std::string> AfterTriggerNameRaw = {
+        "PostTrigger_P",
+        "PostTrigger_P",
+        "PostTrigger_P"
+    };
+
+    std::vector<std::string> AfterTriggerNameBis = {
+        "PostTriggerbis_P",
+        "PostTriggerbis_P",
+        "PostTriggerbis_P"
+    };
+
+    std::vector<std::string> AfterTriggerNameCut = {
+        "PostTrigger_PseudoCaloMETcut_P",
+        "PostTrigger_PUppiMETcut_P",
+        "PostTrigger_PseudoCaloMETcut_PUppiMETcut_P"
+    };
+
+    std::vector<std::string> AfterTriggerSFNameCut = {
+        "PostTriggerWsf_PseudoCaloMETcut_P",
+        "PostTriggerWsf_PUppiMETcut_P",
+        "PostTriggerWsf_PseudoCaloMETcut_PUppiMETcut_P"
+    };
+    std::vector<std::string> AfterTriggerSFupNameCut = {
+        "PostTriggerWsfup_PseudoCaloMETcut_P",
+        "PostTriggerWsfup_PUppiMETcut_P",
+        "PostTriggerWsfup_PseudoCaloMETcut_PUppiMETcut_P"
+    };
+    std::vector<std::string> AfterTriggerSFdownNameCut = {
+        "PostTriggerWsfdown_PseudoCaloMETcut_P",
+        "PostTriggerWsfdown_PUppiMETcut_P",
+        "PostTriggerWsfdown_PseudoCaloMETcut_PUppiMETcut_P"
+    };
+
+    const std::string denName = "Nosel_P";   // common denominator histo name
+
+    // ------------------------------------------------------------------
+    // binomial integrated efficiency (full histo, under/overflow included)
+    // ------------------------------------------------------------------
+    auto integratedEff = [](TH1 *num, TH1 *den, double &eff, double &err) {
+        double N = den->Integral(0, den->GetNbinsX() + 1);
+        double k = num->Integral(0, num->GetNbinsX() + 1);
+        if (N > 0) {
+            eff = k / N;
+            double var = eff * (1.0 - eff) / N;   // gaussian binomial approx
+            err = (var > 0) ? std::sqrt(var) : 0.0;
+        } else { eff = 0.0; err = 0.0; }
+    };
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    // ------------------------------------------------------------------
+    // one plot per selection (iterate by index to fetch the matching label)
+    // ------------------------------------------------------------------
+    for (size_t isel = 0; isel < AfterHSCPsel.size(); ++isel) {
+
+        const std::string &sel      = AfterHSCPsel[isel];
+
+        const std::string &trigNameraw = AfterTriggerNameRaw[isel];
+        const std::string &trigNamebis = AfterTriggerNameBis[isel];
+        const std::string &trigName = AfterTriggerNameCut[isel];
+        const std::string &trigNameSF = AfterTriggerSFNameCut[isel];
+        const std::string &trigNameSFup = AfterTriggerSFupNameCut[isel];
+        const std::string &trigNameSFdown = AfterTriggerSFdownNameCut[isel];
+
+        // curves:
+        //   gSel        : (sel + "_P")      / Nosel_P
+        //   gSelsfup    : (sel + "_Psfup")  / Nosel_P
+        //   gSelsfdown  : (sel + "_Psfdown")/ Nosel_P
+        //   gTrig       : (trigName)        / Nosel_P
+        TGraphErrors *gSel  = new TGraphErrors();
+        TGraphErrors *gSel2  = new TGraphErrors();
+        TGraphErrors *gSelsfup = new TGraphErrors();
+        TGraphErrors *gSelsfdown = new TGraphErrors();
+        TGraphErrors *gTrigraw = new TGraphErrors();
+        TGraphErrors *gTrigbis = new TGraphErrors();
+        TGraphErrors *gTrig = new TGraphErrors();
+        TGraphErrors *gTrigsf = new TGraphErrors();
+        TGraphErrors *gTrigsfup = new TGraphErrors();
+        TGraphErrors *gTrigsfdown = new TGraphErrors();
+
+        gSel->SetName(Form("g_%s_sel",  sel.c_str()));
+        gSel2->SetName(Form("g_%s_sel2",  sel.c_str()));
+        gSelsfup->SetName(Form("g_%ssfup", sel.c_str()));
+        gSelsfdown->SetName(Form("g_%ssfdown", sel.c_str()));
+        gTrigraw->SetName(Form("g_%s_trigraw", sel.c_str()));
+        gTrigbis->SetName(Form("g_%s_trigbis", sel.c_str()));
+        gTrig->SetName(Form("g_%s_trig", sel.c_str()));
+        gTrigsf->SetName(Form("g_%s_trigsf", sel.c_str()));
+        gTrigsfup->SetName(Form("g_%s_trigsfup", sel.c_str()));
+        gTrigsfdown->SetName(Form("g_%s_trigsfdown", sel.c_str()));
+
+        int iPoint = 0;
+        for (int m : masses) {
+
+            TFile *f = new TFile(fileName(m), "READ");
+            if (!f || f->IsZombie()) {
+                std::cerr << "Warning: cannot open " << fileName(m) << ", skipping mass " << m << std::endl;
+                continue;
+            }
+
+            TH1 *den     = (TH1*)f->Get(denName.c_str());
+            TH1 *numSel  = (TH1*)f->Get(Form("%s_P", sel.c_str()));
+            TH1 *numSel2  = (TH1*)f->Get(Form("%s_P2", sel.c_str()));
+            TH1 *numSelsfup   = (TH1*)f->Get(Form("%s_Psfup", sel.c_str()));
+            TH1 *numSelsfdown = (TH1*)f->Get(Form("%s_Psfdown", sel.c_str()));
+            TH1 *numTrigraw = (TH1*)f->Get(trigNameraw.c_str());
+            TH1 *numTrigbis = (TH1*)f->Get(trigNamebis.c_str());
+            TH1 *numTrig = (TH1*)f->Get(trigName.c_str());
+
+            TH1 *numTrigSF = (TH1*)f->Get(trigNameSF.c_str());
+            TH1 *numTrigSFup = (TH1*)f->Get(trigNameSFup.c_str());
+            TH1 *numTrigSFdown = (TH1*)f->Get(trigNameSFdown.c_str());
+
+            if (!den || !numSel || !numSelsfup || !numSelsfdown || !numTrig || !numTrigSF || !numTrigSFup || !numTrigSFdown) {
+                std::cerr << "Warning: missing histo in " << fileName(m)
+                          << " (den=" << den << ", sel=" << numSel
+                          << ", selsfup=" << numSelsfup << ", selsfdown=" << numSelsfdown
+                          << ", trig=" << numTrig << "), skipping mass " << m << std::endl;
+                f->Close();
+                continue;
+            }
+
+            double effS = 0., errS = 0., effSup = 0., errSup = 0., effSdown = 0., errSdown = 0., effT = 0., errT = 0., effTsf = 0., errTsf = 0., effTsfup = 0., errTsfup = 0., effTsfdown = 0., errTsfdown = 0.;
+            double effraw = 0., errraw = 0, effbis = 0., errbis = 0;
+            double effSel2 = 0., errSel2 = 0.;
+
+            integratedEff(numSel,  den, effS, errS);
+            integratedEff(numSel2,  den, effSel2, errSel2);
+            integratedEff(numSelsfup,   den, effSup, errSup);
+            integratedEff(numSelsfdown, den, effSdown, errSdown);
+            integratedEff(numTrigraw, den, effraw, errraw);
+            integratedEff(numTrigbis, den, effbis, errbis);
+            integratedEff(numTrig, den, effT, errT);
+            integratedEff(numTrigSF, den, effTsf, errTsf);
+            integratedEff(numTrigSFup, den, effTsfup, errTsfup);
+            integratedEff(numTrigSFdown, den, effTsfdown, errTsfdown);
+
+
+            gSel->SetPoint(iPoint, m, effS);
+            gSel->SetPointError(iPoint, 0., errS);
+            gSel2->SetPoint(iPoint, m, effSel2);
+            gSel2->SetPointError(iPoint, 0., errSel2);
+            gSelsfup->SetPoint(iPoint, m, effSup);
+            gSelsfup->SetPointError(iPoint, 0., errSup);
+            gSelsfdown->SetPoint(iPoint, m, effSdown);
+            gSelsfdown->SetPointError(iPoint, 0., errSdown);
+            gTrigbis->SetPoint(iPoint, m, effbis);
+            gTrigbis->SetPointError(iPoint, 0., errbis);
+            gTrigraw->SetPoint(iPoint, m, effraw);
+            gTrigraw->SetPointError(iPoint, 0., errraw);
+            gTrig->SetPoint(iPoint, m, effT);
+            gTrig->SetPointError(iPoint, 0., errT);
+            gTrigsf->SetPoint(iPoint, m, effTsf);
+            gTrigsf->SetPointError(iPoint, 0., errTsf);
+            gTrigsfup->SetPoint(iPoint, m, effTsfup);
+            gTrigsfup->SetPointError(iPoint, 0., errTsfup);
+            gTrigsfdown->SetPoint(iPoint, m, effTsfdown);
+            gTrigsfdown->SetPointError(iPoint, 0., errTsfdown);
+
+            ++iPoint;
+
+            f->Close();
+        }
+
+        // ---- styling ----
+        gSel->SetMarkerStyle(20);
+        gSel->SetMarkerColor(kRed+1);
+        gSel->SetLineColor(kRed+1);
+        gSel->SetLineWidth(2);
+
+        gSel2->SetMarkerStyle(20);
+        gSel2->SetMarkerColor(kYellow+1);
+        gSel2->SetLineColor(kYellow+1);
+        gSel2->SetLineWidth(2);
+
+        gSelsfup->SetMarkerStyle(22);
+        gSelsfup->SetMarkerColor(kOrange+7);
+        gSelsfup->SetLineColor(kOrange+7);
+        gSelsfup->SetLineWidth(2);
+
+        gSelsfdown->SetMarkerStyle(23);
+        gSelsfdown->SetMarkerColor(kMagenta+1);
+        gSelsfdown->SetLineColor(kMagenta+1);
+        gSelsfdown->SetLineWidth(2);
+
+        gTrigraw->SetMarkerStyle(29);
+        gTrigraw->SetMarkerColor(kBlack);
+        gTrigraw->SetLineColor(kBlack);
+        gTrigraw->SetLineWidth(2);
+
+        gTrigbis->SetMarkerStyle(30);
+        gTrigbis->SetMarkerColor(kGray);
+        gTrigbis->SetLineColor(kGray);
+        gTrigbis->SetLineWidth(2);
+
+        gTrig->SetMarkerStyle(21);
+        gTrig->SetMarkerColor(kBlue+1);
+        gTrig->SetLineColor(kBlue+1);
+        gTrig->SetLineWidth(2);
+
+        gTrigsf->SetMarkerStyle(24);
+        gTrigsf->SetMarkerColor(kGreen+0);
+        gTrigsf->SetLineColor(kGreen+0);
+        gTrigsf->SetLineWidth(2);
+
+        gTrigsfup->SetMarkerStyle(25);
+        gTrigsfup->SetMarkerColor(kGreen+3);
+        gTrigsfup->SetLineColor(kGreen+3);
+        gTrigsfup->SetLineWidth(2);
+
+        gTrigsfdown->SetMarkerStyle(26);
+        gTrigsfdown->SetMarkerColor(kGreen-10);
+        gTrigsfdown->SetLineColor(kGreen-10);
+        gTrigsfdown->SetLineWidth(2);
+
+        // ---- drawing ----
+        TCanvas *c = new TCanvas(Form("c_eff_%s", sel.c_str()),
+                                 Form("c_eff_%s", sel.c_str()), 800, 600);
+        c->cd();
+        c->SetGrid();
+        c->SetLeftMargin(0.16);
+        c->SetBottomMargin(0.16);
+
+        TMultiGraph *mg = new TMultiGraph();
+        mg->Add(gSel,  "PL");
+        mg->Add(gSel2,  "PL");
+        mg->Add(gSelsfup, "PL");
+        mg->Add(gSelsfdown, "PL");
+        mg->Add(gTrigraw, "PL");
+        mg->Add(gTrigbis, "PL");
+        mg->Add(gTrig, "PL");
+        mg->Add(gTrigsf, "PL");
+        mg->Add(gTrigsfup, "PL");
+        mg->Add(gTrigsfdown, "PL");
+        mg->Draw("A");
+        mg->GetXaxis()->SetTitle("m_{#tilde{g}} [GeV]");
+        mg->GetYaxis()->SetTitle("Acceptance");
+        mg->SetMinimum(0.0);
+        mg->SetMaximum(0.5);
+        mg->GetXaxis()->SetLimits(1000, 2700);
+
+        mg->SetTitle("");
+        mg->GetYaxis()->SetTitleSize(0.06);
+        mg->GetXaxis()->SetTitleSize(0.06);
+        mg->GetXaxis()->SetTitleOffset(0.9);
+        mg->GetYaxis()->SetTitleOffset(1);
+        mg->GetXaxis()->SetLabelSize(0.05);
+        mg->GetYaxis()->SetLabelSize(0.05);
+
+        TLegend *leg = new TLegend(0.18, 0.79, 0.89, 0.89);
+        leg->SetBorderSize(0);
+        leg->SetNColumns(2);
+        leg->AddEntry(gTrigraw, "Trigger + METfilters", "lep");
+        leg->AddEntry(gTrigbis, "Trigger (no jet check) + METfilters", "lep");
+        leg->AddEntry(gTrig, "Trigger + METfilters + Cut", "lep");
+        leg->AddEntry(gSel2,  "HSCP pre-sel. + SF (2D)", "lep");
+        leg->AddEntry(gTrigsf, "Trigger + METfilters + Cut + SF (1D)", "lep");
+        leg->AddEntry(gSel,  "HSCP pre-sel. + SF (1D)", "lep");
+        leg->AddEntry(gTrigsfup, "Trigger + METfilters + Cut + SF_{up} (1D)", "lep");
+        leg->AddEntry(gSelsfup, "HSCP pre-sel. + SF_{up} (1D)", "lep");
+        leg->AddEntry(gTrigsfdown, "Trigger + METfilters + Cut + SF_{down} (1D)", "lep");
+        leg->AddEntry(gSelsfdown, "HSCP pre-sel. + SF_{down} (1D)", "lep");
+        leg->Draw();
+
+        latex1->Draw();
+
+        c->SaveAs(Form("TriggEff/c_EffVsMass_%s__%s.pdf", sel.c_str(), ofilename));
+
+        latex1->SetTitle("#it{Private work (CMS simulation)}");
+        c->Modified();
+        c->Update();
+        c->SaveAs(Form("TriggEff/c_EffVsMass_%s__%s_bis.pdf", sel.c_str(), ofilename));
+        latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    }
+
+    return;
+}
+
+
+void DisplayTriggerEff(const TString& inputFile = "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p6.root") {
+    
+    gStyle->SetOptStat(0);
+
+    TFile* f = TFile::Open(inputFile);
+    if (!f || f->IsZombie()) {
+        std::cerr << "Error: cannot open file " << inputFile << std::endl;
+        return;
+    }
+
+    const char* names[3] = {
+        "TriggerEffCalib__Signal_if___orMETtrg___PseudoCaloMET",
+        "TriggerEffCalib__Signal_if___orMETtrg___PUppiMET",
+        "TriggerEffCalib__Signal_if___orMETtrg___PUppiMETNoMu"
+    };
+    const char* labels[3] = { "Pseudo MET", "PUppi MET", "PUppi MET (NoMu)" };
+    const int colors[3] = { kRed + 1, kBlue + 1, kGreen + 2 };
+
+    TH1* h[3] = { nullptr, nullptr, nullptr };
+    for (int i = 0; i < 3; ++i) {
+        h[i] = dynamic_cast<TH1*>(f->Get(names[i]));
+        if (!h[i]) {
+            std::cerr << "Error: histogram " << names[i] << " not found" << std::endl;
+            return;
+        }
+        h[i]->SetDirectory(nullptr);
+        h[i]->SetLineColor(colors[i]);
+        h[i]->SetLineWidth(2);
+        h[i]->SetMarkerColor(colors[i]);
+        h[i]->SetMarkerStyle(20 + i);
+    }
+    f->Close();
+
+    TCanvas* c = new TCanvas("c_TriggerEff", "Trigger efficiency (orMETtrg)", 800, 600);
+    c->SetLeftMargin(0.16);
+    c->SetBottomMargin(0.16);
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    // Determine common y-axis range
+    double ymax = 0.;
+    for (int i = 0; i < 3; ++i) ymax = std::max(ymax, h[i]->GetMaximum());
+    h[0]->SetMaximum(1.2 * ymax);
+    h[0]->SetMinimum(0.);
+
+    h[0]->GetYaxis()->SetTitleSize(0.06);
+    h[0]->GetXaxis()->SetTitleSize(0.06);
+    h[0]->GetXaxis()->SetTitleOffset(0.9);
+    h[0]->GetYaxis()->SetTitleOffset(1);
+    h[0]->GetXaxis()->SetLabelSize(0.05);
+    h[0]->GetYaxis()->SetLabelSize(0.05);
+
+    h[0]->SetTitle(";MET [GeV];Nb of Events");
+
+    for (int i = 0; i < 3; ++i)
+        h[i]->Draw(i == 0 ? "HIST" : "HIST SAME");
+
+    TLegend* leg = new TLegend(0.60, 0.60, 0.88, 0.80);
+    leg->SetBorderSize(0);
+    leg->SetFillStyle(0);
+    for (int i = 0; i < 3; ++i)
+        leg->AddEntry(h[i], labels[i], "l");
+    leg->Draw();
+
+    latex1->Draw();
+
+    c->Update();
+    c->SaveAs("TriggEff/METdistSIGNAL.pdf");
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    c->Modified();
+    c->Update();
+    c->SaveAs("TriggEff/METdistSIGNAL_bis.pdf");
+}
+
+
+void FpixelInSignalAndData() {
+
+    TFile *ifileData   = new TFile("../output/JetMET2024_V12/JetMET2024_V12p24.root", "READ");
+    TFile *ifileSignal = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p6.root", "READ");
+
+    TH1D *FpixSignal = (TH1D*)ifileSignal->Get("METanalysis_TestPUppiMETCut_Eta2p4_Fpix");
+    TH2D *FpixData_A3fp9 = (TH2D*)ifileData->Get("fpix_eta_regionA_3fp9_METanalysis_Eta2p4");
+    TH2D *FpixData_A9fp10 = (TH2D*)ifileData->Get("fpix_eta_regionA_9fp10_METanalysis_Eta2p4");
+    TH2D *FpixData_C3fp9 = (TH2D*)ifileData->Get("fpix_eta_regionC_3fp9_METanalysis_Eta2p4");
+    TH2D *FpixData_C9fp10 = (TH2D*)ifileData->Get("fpix_eta_regionC_9fp10_METanalysis_Eta2p4");
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+
+    FpixSignal->SetBinContent(FpixSignal->GetNbinsX()-1, FpixSignal->GetBinContent(FpixSignal->GetNbinsX()-1) + FpixSignal->GetBinContent(FpixSignal->GetNbinsX()));
+    FpixSignal->SetBinContent(FpixSignal->GetNbinsX(), 0);
+    FpixSignal->SetBinContent(FpixSignal->GetNbinsX()-2, FpixSignal->GetBinContent(FpixSignal->GetNbinsX()-2) + FpixSignal->GetBinContent(FpixSignal->GetNbinsX()-1));
+    FpixSignal->SetBinContent(FpixSignal->GetNbinsX()-1, 0);
+
+    //
+    FpixData_A9fp10->Add(FpixData_A3fp9);
+
+    TH1D *FpixData  = FpixData_A9fp10->ProjectionX("FpixData");
+
+    TCanvas *cSignal = DrawCanvas(FpixSignal, "", "F_{pixel}", "Entries", "E1", 0.06, 0, 0.99, 633, 1, -1, true);
+
+
+    TCanvas *cSignalCDF = DrawWithCDF(FpixSignal, cSignal, "FpixelInSignal_CDF", "F_{pixel}", "Signal", 0, 0.99, 633);
+    TPad* p1 = (TPad*)cSignalCDF->GetPrimitive("pad1");
+    p1->cd();
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->Draw();
+    p1->Modified(); p1->Update();
+    cSignalCDF->SaveAs("PlayWithHistos/FpixelInSignal.pdf");
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    p1->Modified(); p1->Update();
+    cSignalCDF->SaveAs("PlayWithHistos/FpixelInSignal_bis.pdf");
+
+
+    TCanvas *cData = DrawCanvas(FpixData, "", "F_{pixel}", "Entries", "E1", 0.06, 0, 1, 602, 1, 3000, true);
+
+    TCanvas *cDataCDF = DrawWithCDF(FpixData, cData, "FpixelInData_CDF", "F_{pixel}", "Data", 0, 1, 602);
+    TPad* p2 = (TPad*)cDataCDF->GetPrimitive("pad1");
+    p2->cd();
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->Draw();
+    p2->Modified(); p2->Update();
+    cDataCDF->SaveAs("PlayWithHistos/FpixelInData.pdf");
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    p2->Modified(); p2->Update();
+    cDataCDF->SaveAs("PlayWithHistos/FpixelInData_bis.pdf");
+
+
+    return;
+}
+
+
+// ===================================================================
+//  PairTypeStages_SingleMass
+//  ------------------------------------------------------------------
+//  Pour un unique sample de masse (défaut gluino 2000), 5 histos
+//  superposés donnant la répartition des pairTypes (ch-ch / neut-ch /
+//  neut-neut) à différents stades, TOUS normalisés par l'intégrale de
+//  "Nosel_Gen__PairType" (bins 2,3,4) :
+//    h1 : Nosel_Gen__PairType                                  (raw)
+//    h2 : Nosel_Gen__PairType__if_ORtrigger                    (post OR trig)
+//    h3 : Nosel_GenHSCPmatching__PairType__0HSCP_if_ORtrigger  (0 HSCP match)
+//    h4 : Nosel_GenHSCPmatching__PairType__1HSCP_if_ORtrigger  (1 HSCP match)
+//    h5 : Nosel_GenHSCPmatching__PairType__2HSCP_if_ORtrigger  (2 HSCP match)
+// ===================================================================
+void PairTypeStages_SingleMass(int mass = 2000,
+                               const char *ofilename = "PairTypeStages") {
+
+    gErrorIgnoreLevel = kError;
+    gStyle->SetOptStat(0);
+
+    auto fileName = [&](int m) {
+        return Form("../output/Gluino_V19/Gluino_Run3_MET_madgraph_%d_V19p6.root", m);
+    };
+
+    // convention : valeur pairType=v -> bin ROOT v+1  => 1,2,3 dans les bins 2,3,4
+    std::vector<int>         pairBins = {2, 3, 4};
+    std::vector<std::string> catLabels = {"charged-charged", "neutral-charged", "neutral-neutral"};
+
+    // les 5 stades : nom d'histo + label légende + style
+    std::vector<std::string> stageHistos = {
+        "Nosel_Gen__PairType",
+        "Nosel_Gen__PairType__if_ORtrigger",
+        "Nosel_GenHSCPmatching__PairType__0HSCP_if_ORtrigger",
+        "Nosel_GenHSCPmatching__PairType__1HSCP_if_ORtrigger",
+        "Nosel_GenHSCPmatching__PairType__2HSCP_if_ORtrigger"
+    };
+    std::vector<std::string> stageLabels = {
+        "No trigger",
+        "with OR trigger",
+        "with OR trigger + 0 HSCP matched",
+        "with OR trigger + 1 HSCP matched",
+        "with OR trigger + 2 HSCP matched"
+    };
+    std::vector<int> stageColors  = {kBlack, kRed+1, kAzure+1, kGreen+2, kMagenta+1};
+    std::vector<int> stageMarkers = {20, 21, 22, 23, 29};
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    TFile *f = new TFile(fileName(mass), "READ");
+    if (!f || f->IsZombie()) {
+        std::cerr << "Error: cannot open " << fileName(mass) << std::endl;
+        return;
+    }
+
+    // dénominateur commun = intégrale des 3 catégories de Nosel_Gen__PairType
+    TH1 *hDen = (TH1*)f->Get("Nosel_Gen__PairType");
+    if (!hDen) {
+        std::cerr << "Error: missing Nosel_Gen__PairType in " << fileName(mass) << std::endl;
+        f->Close();
+        return;
+    }
+    double tot = 0.;
+    for (int b : pairBins) tot += hDen->GetBinContent(b);
+    if (tot <= 0) {
+        std::cerr << "Error: null integral of Nosel_Gen__PairType" << std::endl;
+        f->Close();
+        return;
+    }
+
+    TCanvas *c = new TCanvas("c_PairTypeStages", "c_PairTypeStages", 800, 600);
+    c->cd();
+    c->SetGrid();
+    c->SetLeftMargin(0.16);
+    c->SetBottomMargin(0.16);
+
+    TLegend *leg = new TLegend(0.45, 0.63, 0.88, 0.88);
+    leg->SetBorderSize(0);
+
+    std::vector<TH1F*> hStages;
+    double ymax = 0.;
+
+    for (size_t is = 0; is < stageHistos.size(); ++is) {
+
+        TH1 *hSrc = (TH1*)f->Get(stageHistos[is].c_str());
+        if (!hSrc) {
+            std::cerr << "Warning: missing " << stageHistos[is]
+                      << " in " << fileName(mass) << ", skipping stage." << std::endl;
+            continue;
+        }
+
+        // histo condensé à 3 bins étiquetés
+        TH1F *h = new TH1F(Form("hStage%zu_m%d", is, mass),
+                           "", (int)pairBins.size(), 0.5, pairBins.size() + 0.5);
+        h->SetDirectory(0);
+        for (size_t ic = 0; ic < pairBins.size(); ++ic) {
+            h->GetXaxis()->SetBinLabel(ic + 1, catLabels[ic].c_str());
+            double num  = hSrc->GetBinContent(pairBins[ic]);
+            double frac = num / tot;                       // normalisé par l'intégrale de Nosel_Gen__PairType
+            double err  = std::sqrt(num) / tot;            // erreur poissonienne sur le numérateur
+            h->SetBinContent(ic + 1, frac);
+            h->SetBinError(ic + 1, err);
+            ymax = std::max(ymax, frac + err);
+        }
+
+        h->SetMarkerStyle(stageMarkers[is]);
+        h->SetMarkerColor(stageColors[is]);
+        h->SetMarkerSize(1.5);
+        h->SetLineColor(stageColors[is]);
+        h->SetLineWidth(2);
+
+        hStages.push_back(h);
+        leg->AddEntry(h, stageLabels[is].c_str(), "lep");
+    }
+    f->Close();
+
+    if (hStages.empty()) { delete c; return; }
+
+    hStages[0]->SetTitle("");
+    hStages[0]->GetXaxis()->SetTitle("HSCP pair type");
+    hStages[0]->GetYaxis()->SetTitle("Fraction");
+    hStages[0]->GetYaxis()->SetTitleSize(0.06);
+    hStages[0]->GetXaxis()->SetTitleSize(0.06);
+    hStages[0]->GetYaxis()->SetTitleOffset(1);
+    hStages[0]->GetXaxis()->SetTitleOffset(1);
+    hStages[0]->GetYaxis()->SetLabelSize(0.05);
+    hStages[0]->GetXaxis()->SetLabelSize(0.06);
+    hStages[0]->SetMinimum(0.0);
+    hStages[0]->SetMaximum(1);
+
+    for (size_t j = 0; j < hStages.size(); ++j)
+        hStages[j]->Draw(j == 0 ? "E1" : "E1 same");
+    leg->Draw();
+    latex1->Draw();
+
+    // annotation de la masse
+    TLatex *mtext = new TLatex(0.18, 0.85, Form("m_{#tilde{g}} = %d GeV", mass));
+    mtext->SetNDC(); mtext->SetTextFont(42); mtext->SetTextSize(0.05);
+    mtext->Draw();
+
+    c->Modified(); c->Update();
+    c->SaveAs(Form("TriggEff/c_PairTypeStages_m%d__%s.pdf", mass, ofilename));
+
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    c->Modified(); c->Update();
+    c->SaveAs(Form("TriggEff/c_PairTypeStages_m%d__%s_bis.pdf", mass, ofilename));
+
+    return;
+}
+
+// ===================================================================
+//  PFType_ProportionAndTrigEff
+//  ------------------------------------------------------------------
+//  Pour tous les samples de masse (palette arc-en-ciel) :
+//    h1 (trait plein)  : GenHSCPmatching__PFType normalisé par sa
+//                        propre intégrale -> proportion des types de PF
+//    h2 (pointillé)    : GenHSCPmatching__PFType__if_ORtrigger,
+//                        chaque bin divisé par l'intégrale de
+//                        GenHSCPmatching__PFType (même masse)
+//  Axe x condensé sur 3 bins étiquetés : e / mu / pi
+// ===================================================================
+void PFType_ProportionAndTrigEff(const char *ofilename = "PFTypeProp") {
+
+    gErrorIgnoreLevel = kError;
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(kRainBow);
+
+    auto fileName = [&](int m) {
+        return Form("../output/Gluino_V19/Gluino_Run3_MET_madgraph_%d_V19p6.root", m);
+    };
+
+    std::vector<int> masses = {1100, 1200, 1300, 1400, 1600, 1800, 2000, 2200, 2400, 2600};
+
+    // catégories PF : PDG id -> label
+    std::vector<int>         pfPdg    = {11, 13, 211};
+    std::vector<std::string> pfLabels = {"electrons", "muons", "charged pions"};
+
+    const std::string hPFIncl = "GenHSCPmatching__PFType";
+    const std::string hPFTrig = "GenHSCPmatching__PFType__if_ORtrigger";
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    TCanvas *c = new TCanvas("c_PFTypeProp", "c_PFTypeProp", 800, 600);
+    c->cd();
+    c->SetGrid();
+    c->SetLeftMargin(0.16);
+    c->SetBottomMargin(0.16);
+
+    TLegend *leg = new TLegend(0.60, 0.45, 0.88, 0.88);
+    leg->SetBorderSize(0);
+
+    std::vector<TH1F*> hProp;   // trait plein (proportion)
+    std::vector<TH1F*> hEff;    // pointillé (eff OR trigger)
+    std::vector<int>   hMassVal;
+    double ymax = 0.;
+
+    for (int m : masses) {
+
+        TFile *f = new TFile(fileName(m), "READ");
+        if (!f || f->IsZombie()) {
+            std::cerr << "Warning: cannot open " << fileName(m) << ", skipping mass " << m << std::endl;
+            continue;
+        }
+
+        TH1 *hIncl = (TH1*)f->Get(hPFIncl.c_str());
+        TH1 *hTrig = (TH1*)f->Get(hPFTrig.c_str());
+        if (!hIncl || !hTrig) {
+            std::cerr << "Warning: missing PFType histo in " << fileName(m)
+                      << " (incl=" << hIncl << ", trig=" << hTrig << "), skipping mass " << m << std::endl;
+            f->Close();
+            continue;
+        }
+
+        // intégrale de reference = somme des 3 categories de GenHSCPmatching__PFType
+        double totIncl = 0.;
+        for (int pdg : pfPdg) totIncl += hIncl->GetBinContent(hIncl->GetXaxis()->FindBin(pdg));
+        if (totIncl <= 0) { f->Close(); continue; }
+
+        // --- h1 : proportion des PF ---
+        TH1F *hp = new TH1F(Form("hPFprop_m%d", m), "", (int)pfPdg.size(), 0.5, pfPdg.size() + 0.5);
+        hp->SetDirectory(0);
+        // --- h2 : eff OR trigger (meme denominateur) ---
+        TH1F *he = new TH1F(Form("hPFeff_m%d", m), "", (int)pfPdg.size(), 0.5, pfPdg.size() + 0.5);
+        he->SetDirectory(0);
+
+        for (size_t ic = 0; ic < pfPdg.size(); ++ic) {
+            hp->GetXaxis()->SetBinLabel(ic + 1, pfLabels[ic].c_str());
+            he->GetXaxis()->SetBinLabel(ic + 1, pfLabels[ic].c_str());
+
+            double nIncl = hIncl->GetBinContent(hIncl->GetXaxis()->FindBin(pfPdg[ic]));
+            double nTrig = hTrig->GetBinContent(hTrig->GetXaxis()->FindBin(pfPdg[ic]));
+
+            double prop = nIncl / totIncl;
+            double effT = nTrig / totIncl;
+
+            hp->SetBinContent(ic + 1, prop);
+            hp->SetBinError(ic + 1, std::sqrt(nIncl) / totIncl);
+            he->SetBinContent(ic + 1, effT);
+            he->SetBinError(ic + 1, std::sqrt(nTrig) / totIncl);
+
+            ymax = std::max(ymax, prop + std::sqrt(nIncl) / totIncl);
+        }
+        f->Close();
+
+        hProp.push_back(hp);
+        hEff.push_back(he);
+        hMassVal.push_back(m);
+    }
+
+    if (hProp.empty()) { delete c; return; }
+
+    int nCurves = (int)hProp.size();
+
+    for (int j = 0; j < nCurves; ++j) {
+        int ci = (nCurves > 1)
+               ? TColor::GetColorPalette((int)((j / double(nCurves - 1)) * (gStyle->GetNumberOfColors() - 1)))
+               : TColor::GetColorPalette(gStyle->GetNumberOfColors() / 2);
+
+        // trait plein : proportion
+        hProp[j]->SetMarkerStyle(20);
+        hProp[j]->SetMarkerColor(ci);
+        hProp[j]->SetLineColor(ci);
+        hProp[j]->SetLineWidth(2);
+        hProp[j]->SetLineStyle(1);
+
+        // pointillé : eff OR trigger, même couleur
+        hEff[j]->SetMarkerStyle(24);
+        hEff[j]->SetMarkerColor(ci);
+        hEff[j]->SetLineColor(ci);
+        hEff[j]->SetLineWidth(2);
+        hEff[j]->SetLineStyle(2);
+
+        leg->AddEntry(hProp[j], Form("m_{#tilde{g}} = %d GeV", hMassVal[j]), "lep");
+    }
+
+    hProp[0]->SetTitle("");
+    hProp[0]->GetXaxis()->SetTitle("PF type");
+    hProp[0]->GetYaxis()->SetTitle("Fraction");
+    hProp[0]->GetYaxis()->SetTitleSize(0.06);
+    hProp[0]->GetXaxis()->SetTitleSize(0.06);
+    hProp[0]->GetYaxis()->SetTitleOffset(1);
+    hProp[0]->GetXaxis()->SetTitleOffset(1);
+    hProp[0]->GetYaxis()->SetLabelSize(0.05);
+    hProp[0]->GetXaxis()->SetLabelSize(0.06);
+    hProp[0]->SetMinimum(0.0);
+    hProp[0]->SetMaximum(1.35 * ymax);
+    hProp[0]->GetXaxis()->SetRangeUser(2,3);
+
+    // dessin : d'abord tous les traits pleins, puis tous les pointillés
+    hProp[0]->Draw("E1");
+    for (int j = 1; j < nCurves; ++j) hProp[j]->Draw("E1 same");
+    for (int j = 0; j < nCurves; ++j) hEff[j]->Draw("E1 same");
+
+    leg->Draw();
+
+    // légende de style (plein vs pointillé)
+    TLegend *legStyle = new TLegend(0.18, 0.75, 0.45, 0.88);
+    legStyle->SetBorderSize(0);
+    TH1F *hSolid = new TH1F("hSolidLeg", "", 1, 0, 1); hSolid->SetLineColor(kBlack); hSolid->SetLineWidth(2); hSolid->SetLineStyle(1); hSolid->SetMarkerStyle(20);
+    TH1F *hDash  = new TH1F("hDashLeg",  "", 1, 0, 1); hDash->SetLineColor(kBlack);  hDash->SetLineWidth(2);  hDash->SetLineStyle(2);  hDash->SetMarkerStyle(24);
+    legStyle->AddEntry(hSolid, "No trigger", "lp");
+    legStyle->AddEntry(hDash,  "with OR trigger", "lp");
+    legStyle->Draw();
+
+    latex1->Draw();
+
+    c->Modified(); c->Update();
+    c->SaveAs(Form("TriggEff/c_PFTypeProp__%s.pdf", ofilename));
+
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    c->Modified(); c->Update();
+    c->SaveAs(Form("TriggEff/c_PFTypeProp__%s_bis.pdf", ofilename));
+
+    return;
+}
+
+void TriggerEfficiency_ByMass(const char *ofilename = "TriggerEff") {
+
+    gErrorIgnoreLevel = kError;
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(kRainBow);
+
+    auto fileName = [&](int m) {
+        return Form("../output/Gluino_V19/Gluino_Run3_MET_madgraph_%d_V19p6.root", m);
+    };
+
+    std::vector<int> masses = {1100, 1200, 1300, 1400, 1600, 1800, 2000, 2200, 2400, 2600};
+
+    // trigger : label court -> nom d'histo "passing"
+    std::vector<std::string> trigLabels = {
+        "PFMET120_PFMHT120", "PFHT500_PFMET100_PFMHT100",
+        "PFMETNoMu120_PFMHTNoMu120", "MET105_IsoTrk50", "OR trigger"
+    };
+    std::vector<std::string> trigHistos = {
+        "Nosel_Gen__PairType__if_HLT_PFMET120_PFMHT120_IDTight",
+        "Nosel_Gen__PairType__if_HLT_PFHT500_PFMET100_PFMHT100_IDTight",
+        "Nosel_Gen__PairType__if_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60",
+        "Nosel_Gen__PairType__if_HLT_MET105_IsoTrk50",
+        "Nosel_Gen__PairType__if_ORtrigger"
+    };
+
+    const std::string hDenomName = "Nosel_Gen__PairType";
+    std::vector<int> pairTypeVals = {1, 2, 3};
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    TCanvas *c = new TCanvas("c_TriggerEfficiency", "c_TriggerEfficiency", 800, 600);
+    c->cd();
+    c->SetGrid();
+    c->SetLeftMargin(0.16);
+    c->SetBottomMargin(0.19);
+
+    TLegend *leg = new TLegend(0.60, 0.48, 0.88, 0.88);
+    leg->SetBorderSize(0);
+
+    std::vector<TH1F*> hEff;
+    std::vector<int>   hMassVal;
+    double ymax = 0.;
+
+    for (int m : masses) {
+
+        TFile *f = new TFile(fileName(m), "READ");
+        if (!f || f->IsZombie()) {
+            std::cerr << "Warning: cannot open " << fileName(m) << ", skipping mass " << m << std::endl;
+            continue;
+        }
+
+        TH1 *hDenom = (TH1*)f->Get(hDenomName.c_str());
+        if (!hDenom) {
+            std::cerr << "Warning: missing " << hDenomName << " in " << fileName(m) << ", skipping mass " << m << std::endl;
+            f->Close();
+            continue;
+        }
+
+        double totDenom = 0.;
+        for (int pt : pairTypeVals) totDenom += hDenom->GetBinContent(hDenom->GetXaxis()->FindBin(pt));
+        if (totDenom <= 0) { f->Close(); continue; }
+
+        std::vector<TH1*> hNum(trigHistos.size(), nullptr);
+        bool allFound = true;
+        for (size_t it = 0; it < trigHistos.size(); ++it) {
+            hNum[it] = (TH1*)f->Get(trigHistos[it].c_str());
+            if (!hNum[it]) {
+                std::cerr << "Warning: missing " << trigHistos[it] << " in " << fileName(m) << std::endl;
+                allFound = false;
+            }
+        }
+        if (!allFound) { f->Close(); continue; }
+
+        TH1F *he = new TH1F(Form("hTrigEff_m%d", m), "", (int)trigLabels.size(), 0.5, trigLabels.size() + 0.5);
+        he->SetDirectory(0);
+
+        for (size_t it = 0; it < trigLabels.size(); ++it) {
+            he->GetXaxis()->SetBinLabel(it + 1, trigLabels[it].c_str());
+
+            double nNum = 0.;
+            for (int pt : pairTypeVals) nNum += hNum[it]->GetBinContent(hNum[it]->GetXaxis()->FindBin(pt));
+
+            double eff = nNum / totDenom;
+            he->SetBinContent(it + 1, eff);
+            he->SetBinError(it + 1, std::sqrt(nNum) / totDenom);
+
+            ymax = std::max(ymax, eff + std::sqrt(nNum) / totDenom);
+        }
+        f->Close();
+
+        hEff.push_back(he);
+        hMassVal.push_back(m);
+    }
+
+    if (hEff.empty()) { delete c; return; }
+
+    int nCurves = (int)hEff.size();
+
+    for (int j = 0; j < nCurves; ++j) {
+        int ci = (nCurves > 1)
+               ? TColor::GetColorPalette((int)((j / double(nCurves - 1)) * (gStyle->GetNumberOfColors() - 1)))
+               : TColor::GetColorPalette(gStyle->GetNumberOfColors() / 2);
+
+        hEff[j]->SetMarkerStyle(20);
+        hEff[j]->SetMarkerColor(ci);
+        hEff[j]->SetLineColor(ci);
+        hEff[j]->SetLineWidth(2);
+        hEff[j]->SetLineStyle(1);
+
+        leg->AddEntry(hEff[j], Form("m_{#tilde{g}} = %d GeV", hMassVal[j]), "lep");
+    }
+
+    hEff[0]->SetTitle("");
+    hEff[0]->GetXaxis()->SetTitle("");
+    hEff[0]->GetYaxis()->SetTitle("Efficiency");
+    hEff[0]->GetYaxis()->SetTitleSize(0.06);
+    hEff[0]->GetXaxis()->SetTitleSize(0.06);
+    hEff[0]->GetYaxis()->SetTitleOffset(1);
+    hEff[0]->GetXaxis()->SetTitleOffset(1);
+    hEff[0]->GetYaxis()->SetLabelSize(0.05);
+    hEff[0]->GetXaxis()->SetLabelSize(0.045);
+    hEff[0]->SetMinimum(0.0);
+    hEff[0]->SetMaximum(1);
+
+    hEff[0]->Draw("E1");
+    for (int j = 1; j < nCurves; ++j) hEff[j]->Draw("E1 same");
+
+    leg->Draw();
+    latex1->Draw();
+
+    c->Modified(); c->Update();
+    c->SaveAs(Form("TriggEff/c_TriggerEfficiency__%s.pdf", ofilename));
+
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    c->Modified(); c->Update();
+    c->SaveAs(Form("TriggEff/c_TriggerEfficiency__%s_bis.pdf", ofilename));
+
+    return;
+}
+
+
 void CombineHistos()
 {
     //MET_trg_eff("../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", false);
@@ -4182,10 +6496,10 @@ void CombineHistos()
     //MET_trg_eff("CalibPseudoMET", "MET_trg_eff_MC_vs_data", "../output/MuonEG_V17/MuonEG2024_V17p3.root", "../output/TTbar2024_V15/TTbar2024_V15p5.root");
     //MET_trg_eff("METanalysis_Eta2p4_EffTrg", "../output/Gluino_V13/Gluino2000_Run2_MET_V13p1.root", false);
     //Comp_muonEG("../output/MuonEG_V17/MuonEG2024_V17p3.root", "../output/TTbar2024_V15/TTbar2024_V15p5.root");
-    MET_trg_eff("CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay", "WMuNu_PseudoMET", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root");
-    MET_trg_eff("CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay_isRescaled", "WMuNu_PseudoMET_rescaled", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root");
-    MET_trg_eff("CalibPseudoMET", "CalibPseudoMET_isRescaled", "TTbar_PseudoMET_rescaled", "../output/MuonEG_V17/MuonEG2024_V17p4.root", "../output/TTbar2024_V15/TTbar2024_V15p8_weighted.root");
-    //MET_trg_eff("CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay_OTHERisRescaled", "TriggerEff_Mu2024_Wjets_PseudoMET_OTHERrescaled", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p10_weighted.root");
+    // MET_trg_eff("CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay", "WMuNu_PseudoMET", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root");
+    // MET_trg_eff("CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay_isRescaled", "WMuNu_PseudoMET_rescaled", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p8_weighted.root");
+    // MET_trg_eff("CalibPseudoMET", "CalibPseudoMET_isRescaled", "TTbar_PseudoMET_rescaled", "../output/MuonEG_V17/MuonEG2024_V17p4.root", "../output/TTbar2024_V15/TTbar2024_V15p8_weighted.root");
+    // MET_trg_eff("CalibPseudoMET_MuWay", "CalibPseudoMET_MuWay_OTHERisRescaled", "TriggerEff_Mu2024_Wjets_PseudoMET_OTHERrescaled", "../output/Mu2024_V18/Mu2024_V18.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p10_weighted.root");
     
 
     //Old_vs_New_fits("../output/JetMET2024_V12/JetMET2024_V12p24.root");
@@ -4233,6 +6547,57 @@ void CombineHistos()
     //FpixSlices();
     //Ihand1oP_fits();
     //DefineIhCut();
+
+    //SignalAcceptance_EtaSlice();
+    //SignalAcceptance_EtaSlice(true);
+    //Corr_Ih_1oP("Eta2p4"); Corr_Ih_1oP("Eta1"); Corr_Ih_1oP("Eta1_2p4");
+
+    //Acceptance_EtaSlice_DataMC();
+
+
+    //------------------------------------------------------------------
+    // Trigger efficiencies
+    //------------------------------------------------------------------
+
+    // TriggerEffCalib__Signal("TriggerEffCalib__Signal",
+    //                         "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p4.root", 
+    //                         "Gluino2000");
+
+    //TriggerEffCalib__Signal__2D("TriggerEffCalib__Signal", "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p4.root", "Gluino2000");
+
+    // TriggerEffCalib("TriggerEffCalib", "TriggerEffCalib",
+    //                 "../output/Mu2024_V18/Mu2024_V18p1.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p12.root",
+    //                 "TriggerEffCalib");
+
+    // TriggerEffCalib__2D("TriggerEffCalib", "TriggerEffCalib",
+    //                     "../output/Mu2024_V18/Mu2024_V18p1.root", "../output/Wjets2024_V14/WjetMuNu2024_V14p12.root",
+    //                     "TriggerEffCalib");
+
+    //SignalEffVsMass();
+    //DisplayTriggerEff();
+
+    // ExtractSF("TriggEff/SF_PseudoMET.txt",
+    //         "TriggEff/SF_PseudoMET_tex.txt",
+    //         "TriggerEffCalib_PseudoCaloMET",
+    //         "TriggerEffCalib_if___orMETtrg___PseudoCaloMET",
+    //         "TriggerEffCalib_PseudoCaloMET",
+    //         "TriggerEffCalib_if___orMETtrg___PseudoCaloMET",
+    //         "../output/Mu2024_V18/Mu2024_V18p1.root",
+    //         "../output/Wjets2024_V14/WjetMuNu2024_V14p12.root");
+
+    // ExtractSF("TriggEff/SF_PUppiMET.txt",
+    //         "TriggEff/SF_PUppiMET_tex.txt",
+    //         "TriggerEffCalib_PUppiMET",
+    //         "TriggerEffCalib_if___orMETtrg___PUppiMET",
+    //         "TriggerEffCalib_PUppiMET",
+    //         "TriggerEffCalib_if___orMETtrg___PUppiMET",
+    //         "../output/Mu2024_V18/Mu2024_V18p1.root",
+    //         "../output/Wjets2024_V14/WjetMuNu2024_V14p12.root");
+
+    //FpixelInSignalAndData();
+
+    //PairTypeStages_SingleMass(); PFType_ProportionAndTrigEff();
+    TriggerEfficiency_ByMass();
 
 
     return;

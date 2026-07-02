@@ -1,0 +1,27 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Trigger scale factors (data/MC) for \texttt{orMETtrg} on the custom binning.}
+  \begin{tabular}{cc}
+    \hline
+    MET bin [GeV] & SF \\
+    \hline
+    $\left[0, 25\right]$ & 0.8595 $\pm$ 0.0351 \\
+    $\left[25, 50\right]$ & 0.7263 $\pm$ 0.0123 \\
+    $\left[50, 75\right]$ & 0.5639 $\pm$ 0.0049 \\
+    $\left[75, 100\right]$ & 0.4454 $\pm$ 0.0024 \\
+    $\left[100, 125\right]$ & 0.4367 $\pm$ 0.0018 \\
+    $\left[125, 150\right]$ & 0.4864 $\pm$ 0.0019 \\
+    $\left[150, 175\right]$ & 0.5587 $\pm$ 0.0024 \\
+    $\left[175, 200\right]$ & 0.6438 $\pm$ 0.0034 \\
+    $\left[200, 225\right]$ & 0.7305 $\pm$ 0.0048 \\
+    $\left[225, 250\right]$ & 0.8217 $\pm$ 0.0069 \\
+    $\left[250, 275\right]$ & 0.8921 $\pm$ 0.0096 \\
+    $\left[275, 300\right]$ & 0.9426 $\pm$ 0.0130 \\
+    $\left[300, 325\right]$ & 0.9752 $\pm$ 0.0174 \\
+    $\left[325, 350\right]$ & 0.9844 $\pm$ 0.0218 \\
+    $\left[350, 375\right]$ & 0.9947 $\pm$ 0.0268 \\
+    $\left[375, 400\right]$ & 0.9945 $\pm$ 0.0333 \\
+    $\left[400, 2500\right]$ & 0.9969 $\pm$ 0.0207 \\
+    \hline
+  \end{tabular}
+\end{table}

@@ -29,7 +29,6 @@ class RegionMassPlot{
         void OneOverPreweighting(TH2F* ih_p_1, TH1F* p2);
         void fillMassFrom1DTemplatesEtaBinning(float weight_);
         void plotMass();
-        void cross1D();
         void write();
         void addToList(TList* list);	
 
