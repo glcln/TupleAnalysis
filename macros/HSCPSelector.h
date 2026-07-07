@@ -17,6 +17,7 @@
 #include <fstream>
 #include "ROOT/RConfig.hxx"
 #include "TObjString.h"
+#include <TProof.h>
 
 #include "../inc/RegionMassPlot.h"
 #include "../inc/CPlots.h"
