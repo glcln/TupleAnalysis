@@ -13,10 +13,7 @@
 #70         96        400      1000      400         0          20           Gluino2000_miniAOD_FULL_MET  V11p12
 #70         96        400      1000      400         0          20           Gluino2000_AOD_FULL_MET      V11p12
 
-#70         96        400      1000      400         0          20           JetMET2024C                  V12p310
-#70         96        400      1000      400         0          20           JetMET2024D                  V12p311
-#70         96        400      1000      400         0          20           JetMET2024E                  V12p312
-#70         96        400      1000      400         0          20           JetMET2024F                  V12p313
+70         96        400      1000      400         0          20           JetMET2024F                  V12p313
 #70         96        400      1000      400         0          20           JetMET2024G                  V12p314
 #70         96        400      1000      400         0          20           JetMET2024H                  V12p315
 #70         96        400      1000      400         0          20           JetMET2024I                  V12p316
@@ -75,16 +72,16 @@
 #70         96        400      1000      400         0          20           Gluino_Run3_MET_pythia_2400         V19p0
 #70         96        400      1000      400         0          20           Gluino_Run3_MET_pythia_2600         V19p0
 
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1100       V19p6
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1200       V19p6
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1300       V19p6
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1400       V19p6
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1600       V19p6
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1800       V19p6
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_2000       V19p6
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_2200       V19p6
-#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_2400       V19p6
-70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_2600       V19p6
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1100       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1200       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1300       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1400       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1600       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_1800       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_2000       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_2200       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_2400       V19p7
+#70         96        400      1000      400         0          20           Gluino_Run3_MET_madgraph_2600       V19p7
 
 #70         96        400      1000      400         0          20           Gluino_Run2_MET_madgraph_2000       V13p2
 

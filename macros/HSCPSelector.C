@@ -23,23 +23,7 @@ float K_data2024(2.8202), C_data2024(2.9784); //Data 2024
 
 
 //ADD-SELECTION-METHODS
-bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta2p4(int i){
-   if (i<0 || i>(int)Pt.GetSize()) {
-      cout << i << endl;
-      return false;
-   }
-   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
-}
-
-bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1(int i){
-   if (i<0 || i>(int)Pt.GetSize()) {
-      cout << i << endl;
-      return false;
-   }
-   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) < 1) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
-}
-
-bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4(int i){
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_IhC(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
       return false;
@@ -47,20 +31,84 @@ bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4(int i){
    return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
 }
 
-bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p4(int i){
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p1(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
       return false;
    }
-   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1.2 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.1) ));
 }
 
-bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2(int i){
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p2(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
       return false;
    }
-   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1.2 && std::abs(Eta[i]) < 2.2) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 2.9784) ));
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.2) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p3(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.3) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p4(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.4) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p5(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.5) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p6(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.6) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p7(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.7) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p8(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.8) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p9(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 3.9) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih4p0(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > 4.0) ));
 }
 
 
@@ -95,20 +143,38 @@ void HSCPSelector::Begin(TTree *tree) {
 
 
     //FILL-SELECTION-VECTOR
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta2p4);
-selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta2p4");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_IhC);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_IhC");
 
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1);
-selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p1);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p1");
 
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4);
-selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p2);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p2");
 
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p4);
-selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1p2_2p4");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p3);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p3");
 
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2);
-selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1p2_2p2");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p4);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p4");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p5);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p5");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p6);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p6");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p7);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p7");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p8);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p8");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p9);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p9");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih4p0);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4_Ih4p0");
 
 
     std::cout << std::endl;
@@ -458,7 +524,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto1F(selLabels_[i] + "_PtErr_over_PtPt", 500, 0, 0.01);
         plots.AddHisto1F(selLabels_[i] + "_Fpix", 21, 0, 1.1);
         plots.AddHisto1F(selLabels_[i] + "_PtErr_over_Pt", 800, 0, 4);
-        plots.AddHisto1F(selLabels_[i] + "_Ih", 200, 0, 10);
+        plots.AddHisto1F(selLabels_[i] + "_Ih", 600, 0, 30);
         plots.AddHisto1F(selLabels_[i] + "_Ih_rescaled", 200, 0, 10);
         plots.AddHisto1F(selLabels_[i] + "_Ih_oldCorr", 200, 0, 10);
         plots.AddHisto1F(selLabels_[i] + "_Ih_noSF", 200, 0, 10);
@@ -596,7 +662,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nosel_PtErr_over_PtPt", 500, 0, 0.01);
     plots.AddHisto1F("Nosel_Fpix", 21, 0, 1.1);
     plots.AddHisto1F("Nosel_PtErr_over_Pt", 800, 0, 4);
-    plots.AddHisto1F("Nosel_Ih", 200, 0, 10);
+    plots.AddHisto1F("Nosel_Ih", 600, 0, 30);
     plots.AddHisto1F("Nosel_Ih_rescaled", 200, 0, 10);
     plots.AddHisto1F("Nosel_Ih_oldCorr", 200, 0, 10);
     plots.AddHisto1F("Nosel_Ih_noSF", 200, 0, 10);
@@ -651,6 +717,9 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nosel_muon_trackIso_dr03", 500, 0, 500);
     plots.AddHisto1F("Nosel_muon_pfMiniRelIsoAll", 500, 0, 500);
     
+    plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__PFmuon", 100, 0, 2500, 100, 0, 2500);
+    plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__PFpion", 100, 0, 2500, 100, 0, 2500);
+    plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__HSCPmatched", 100, 0, 5000, 100, 0, 5000);
     plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT", 100, 0, 2500, 100, 0, 2500);
     plots.AddHisto2F("trackETA_vs_trackPseudoTrackETA", 60, -3, +3, 60, -3, +3);
     plots.AddHisto2F("trackPHI_vs_trackPseudoTrackPHI", 64, -3.2, 3.2, 64, -3.2, 3.2);
@@ -1665,6 +1734,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         if (PseudoCaloMET[0] > 0 && RecoPUppiMET[0] > 0) vcp_nosel[0].FillHisto1F("Noselbis_P", Pt_pseudo[i_track]*cosh(Eta[i_track]), *weightPU);
 
 
+        if (PF_type[i_track]==13) vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT__PFmuon", Pt[i_track], Pt_pseudo[i_track], *weightPU);
+        if (PF_type[i_track]==211) vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT__PFpion", Pt[i_track], Pt_pseudo[i_track], *weightPU);
         vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT", Pt[i_track], Pt_pseudo[i_track], *weightPU);
         vcp_nosel[0].FillHisto2F("trackETA_vs_trackPseudoTrackETA", Eta[i_track], Eta_pseudo[i_track], *weightPU);
         vcp_nosel[0].FillHisto2F("trackPHI_vs_trackPseudoTrackPHI", Phi[i_track], Phi_pseudo[i_track], *weightPU);
@@ -1973,6 +2044,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                 if (dRgen < 0.05) {
                     countMatching++;
 
+                    vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT__HSCPmatched", Pt[i_track], Pt_pseudo[i_track], *weightPU);
                     vcp_nosel[0].FillHisto1F("GenHSCPmatching__PFType", PF_type[i_track], *weightPU);
                     if (trigger) vcp_nosel[0].FillHisto1F("GenHSCPmatching__PFType__if_ORtrigger", PF_type[i_track], *weightPU);
 

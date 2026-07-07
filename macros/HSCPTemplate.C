@@ -403,7 +403,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto1F(selLabels_[i] + "_PtErr_over_PtPt", 500, 0, 0.01);
         plots.AddHisto1F(selLabels_[i] + "_Fpix", 21, 0, 1.1);
         plots.AddHisto1F(selLabels_[i] + "_PtErr_over_Pt", 800, 0, 4);
-        plots.AddHisto1F(selLabels_[i] + "_Ih", 200, 0, 10);
+        plots.AddHisto1F(selLabels_[i] + "_Ih", 600, 0, 30);
         plots.AddHisto1F(selLabels_[i] + "_Ih_rescaled", 200, 0, 10);
         plots.AddHisto1F(selLabels_[i] + "_Ih_oldCorr", 200, 0, 10);
         plots.AddHisto1F(selLabels_[i] + "_Ih_noSF", 200, 0, 10);
@@ -541,7 +541,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nosel_PtErr_over_PtPt", 500, 0, 0.01);
     plots.AddHisto1F("Nosel_Fpix", 21, 0, 1.1);
     plots.AddHisto1F("Nosel_PtErr_over_Pt", 800, 0, 4);
-    plots.AddHisto1F("Nosel_Ih", 200, 0, 10);
+    plots.AddHisto1F("Nosel_Ih", 600, 0, 30);
     plots.AddHisto1F("Nosel_Ih_rescaled", 200, 0, 10);
     plots.AddHisto1F("Nosel_Ih_oldCorr", 200, 0, 10);
     plots.AddHisto1F("Nosel_Ih_noSF", 200, 0, 10);
@@ -596,6 +596,9 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nosel_muon_trackIso_dr03", 500, 0, 500);
     plots.AddHisto1F("Nosel_muon_pfMiniRelIsoAll", 500, 0, 500);
     
+    plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__PFmuon", 100, 0, 2500, 100, 0, 2500);
+    plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__PFpion", 100, 0, 2500, 100, 0, 2500);
+    plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__HSCPmatched", 100, 0, 5000, 100, 0, 5000);
     plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT", 100, 0, 2500, 100, 0, 2500);
     plots.AddHisto2F("trackETA_vs_trackPseudoTrackETA", 60, -3, +3, 60, -3, +3);
     plots.AddHisto2F("trackPHI_vs_trackPseudoTrackPHI", 64, -3.2, 3.2, 64, -3.2, 3.2);
@@ -1610,6 +1613,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         if (PseudoCaloMET[0] > 0 && RecoPUppiMET[0] > 0) vcp_nosel[0].FillHisto1F("Noselbis_P", Pt_pseudo[i_track]*cosh(Eta[i_track]), *weightPU);
 
 
+        if (PF_type[i_track]==13) vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT__PFmuon", Pt[i_track], Pt_pseudo[i_track], *weightPU);
+        if (PF_type[i_track]==211) vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT__PFpion", Pt[i_track], Pt_pseudo[i_track], *weightPU);
         vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT", Pt[i_track], Pt_pseudo[i_track], *weightPU);
         vcp_nosel[0].FillHisto2F("trackETA_vs_trackPseudoTrackETA", Eta[i_track], Eta_pseudo[i_track], *weightPU);
         vcp_nosel[0].FillHisto2F("trackPHI_vs_trackPseudoTrackPHI", Phi[i_track], Phi_pseudo[i_track], *weightPU);
@@ -1918,6 +1923,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                 if (dRgen < 0.05) {
                     countMatching++;
 
+                    vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT__HSCPmatched", Pt[i_track], Pt_pseudo[i_track], *weightPU);
                     vcp_nosel[0].FillHisto1F("GenHSCPmatching__PFType", PF_type[i_track], *weightPU);
                     if (trigger) vcp_nosel[0].FillHisto1F("GenHSCPmatching__PFType__if_ORtrigger", PF_type[i_track], *weightPU);
 

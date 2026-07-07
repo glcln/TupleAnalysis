@@ -558,6 +558,105 @@ TCanvas* DrawWithCDF(TH1* h1,
     return c_new;
 }
 
+TCanvas* DrawWithCDF2(TH1* h1,
+                      TH1* h2,
+                      TCanvas* c1,
+                      std::string CanvasTitle,
+                      std::string XaxisTitle,
+                      std::string leg_h1,
+                      std::string leg_h2,
+                      float Xmin,
+                      float Xmax,
+                      int color1,
+                      int color2) {
+
+    TCanvas* c_new = new TCanvas(CanvasTitle.c_str(), CanvasTitle.c_str(), 800, 600);
+
+    // Define pads
+    TPad* pad1 = new TPad("pad1", "pad1", 0.0, 0.3, 1.0, 1.0);
+    pad1->SetLeftMargin(0.16);
+    pad1->SetBottomMargin(0.02);
+    pad1->Draw();
+
+    TPad* pad2 = new TPad("pad2", "pad2", 0.0, 0.0, 1.0, 0.315);
+    pad2->SetLeftMargin(0.16); pad2->SetBottomMargin(0.33);
+    pad2->Draw();
+
+    // Draw upper plot (the pre-drawn distributions)
+    pad1->cd();
+    c1->DrawClonePad();
+
+    // Clone histograms
+    TH1F* h1c = (TH1F*)h1->Clone(TString(h1->GetName()) + "_" + CanvasTitle.c_str() + "_h1");
+    TH1F* h2c = (TH1F*)h2->Clone(TString(h2->GetName()) + "_" + CanvasTitle.c_str() + "_h2");
+
+    // Normalize clones before computing CDF (so CDF goes from 0 to 1)
+    if (h1c->Integral() > 0) h1c->Scale(1.0 / h1c->Integral());
+    if (h2c->Integral() > 0) h2c->Scale(1.0 / h2c->Integral());
+
+    // Build CDFs by cumulative sum
+    TH1* hCDF1 = h1c->GetCumulative();
+    hCDF1->SetName(TString("hCDF1_") + CanvasTitle.c_str());
+    TH1* hCDF2 = h2c->GetCumulative();
+    hCDF2->SetName(TString("hCDF2_") + CanvasTitle.c_str());
+
+    // Style CDF1
+    hCDF1->SetLineColor(color1);
+    hCDF1->SetMarkerColor(color1);
+    hCDF1->SetMarkerStyle(20);
+
+    // Style CDF2
+    hCDF2->SetLineColor(color2);
+    hCDF2->SetMarkerColor(color2);
+    hCDF2->SetMarkerStyle(21);
+
+    // Draw CDFs in lower pad
+    pad2->cd();
+    gStyle->SetOptStat(0);
+    gPad->SetTickx(0);
+
+    hCDF1->SetTitle("");
+    hCDF1->GetYaxis()->SetTitle("CDF");
+    hCDF1->GetXaxis()->SetTitle(XaxisTitle.c_str());
+    hCDF1->GetYaxis()->SetRangeUser(0, 1);
+    hCDF1->GetYaxis()->SetNdivisions(505);
+    hCDF1->GetYaxis()->SetTitleFont(43);
+    hCDF1->GetXaxis()->SetTitleFont(43);
+    hCDF1->GetYaxis()->SetLabelFont(43);
+    hCDF1->GetXaxis()->SetLabelFont(43);
+    hCDF1->GetYaxis()->SetTitleSize(24);
+    hCDF1->GetXaxis()->SetTitleSize(24);
+    hCDF1->GetYaxis()->SetLabelSize(20);
+    hCDF1->GetXaxis()->SetLabelSize(20);
+    hCDF1->GetYaxis()->SetTitleOffset(1.3);
+    hCDF1->GetXaxis()->SetTitleOffset(1.0);
+    hCDF1->LabelsOption("v", "X");
+    hCDF1->GetXaxis()->SetRangeUser(Xmin, Xmax);
+
+    // draw horizontal dashed line at y=0.5
+    TLine* line = new TLine(Xmin, 0.5, Xmax, 0.5);
+    line->SetLineColor(kBlack);
+    line->SetLineStyle(2);
+
+    hCDF1->Draw("P");
+    hCDF2->Draw("P SAME");
+    line->Draw("same");
+
+    // Legend
+    TLegend* leg = new TLegend(0.12, 0.55, 0.45, 0.92);
+    leg->AddEntry(hCDF1, leg_h1.c_str(), "pe");
+    leg->AddEntry(hCDF2, leg_h2.c_str(), "pe");
+    leg->SetBorderSize(0);
+    leg->SetFillStyle(0);
+    //leg->Draw();
+
+    c_new->Update();
+    cout << "Canvas " << CanvasTitle << " drawn with CDFs of: "
+         << h1->GetName() << " and " << h2->GetName() << endl;
+
+    return c_new;
+}
+
 void ExtractSF (const char *ofiletxt,
                 const char *ofiletex,
                 const char *htemp_pseudoCaloMET_dataname,
@@ -4098,11 +4197,22 @@ void TableGluino(bool isRescaled) {
 
 void CompareKinematics() {
 
-    TFile *ifile = new TFile("../output/JetMET2024_V12/JetMET2024_V12p26.root", "READ");
+    TFile *ifile = new TFile("JetMET2024F_V12p313.root", "READ");
+
+    TFile *ifileSig1400 = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_1400_V19p6.root", "READ");
+    TFile *ifileSig2000 = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p6.root", "READ");
+    TFile *ifileSig2600 = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2600_V19p6.root", "READ");
 
     TH2F *trackPT_vs_trackPseudoTrackPT = (TH2F*)ifile->Get("trackPT_vs_trackPseudoTrackPT");
     TH2F *trackETA_vs_trackPseudoTrackETA = (TH2F*)ifile->Get("trackETA_vs_trackPseudoTrackETA");
     TH2F *trackPHI_vs_trackPseudoTrackPHI = (TH2F*)ifile->Get("trackPHI_vs_trackPseudoTrackPHI");
+
+    TH2F *trackPT_vs_trackPseudoTrackPT__PFmuon = (TH2F*)ifile->Get("trackPT_vs_trackPseudoTrackPT__PFmuon");
+    TH2F *trackPT_vs_trackPseudoTrackPT__PFpion = (TH2F*)ifile->Get("trackPT_vs_trackPseudoTrackPT__PFpion");
+
+    TH2F *trackPT_vs_trackPseudoTrackPT__HSCPmatched_1400 = (TH2F*)ifileSig1400->Get("trackPT_vs_trackPseudoTrackPT__HSCPmatched");
+    TH2F *trackPT_vs_trackPseudoTrackPT__HSCPmatched_2000 = (TH2F*)ifileSig2000->Get("trackPT_vs_trackPseudoTrackPT__HSCPmatched");
+    TH2F *trackPT_vs_trackPseudoTrackPT__HSCPmatched_2600 = (TH2F*)ifileSig2600->Get("trackPT_vs_trackPseudoTrackPT__HSCPmatched");
 
     trackPT_vs_trackPseudoTrackPT->GetXaxis()->SetTitle("PF p_{T} [GeV/c]");
     trackPT_vs_trackPseudoTrackPT->GetYaxis()->SetTitle("Track p_{T} [GeV/c]");
@@ -4133,8 +4243,8 @@ void CompareKinematics() {
     trackETA_vs_trackPseudoTrackETA->GetZaxis()->SetTitleOffset(0.9);
     trackETA_vs_trackPseudoTrackETA->GetZaxis()->SetLabelSize(0.05);
 
-    trackPHI_vs_trackPseudoTrackPHI->GetXaxis()->SetTitle("PF #phi");
-    trackPHI_vs_trackPseudoTrackPHI->GetYaxis()->SetTitle("Track #phi ");
+    trackPHI_vs_trackPseudoTrackPHI->GetXaxis()->SetTitle("PF #phi (rad)");
+    trackPHI_vs_trackPseudoTrackPHI->GetYaxis()->SetTitle("Track #phi (rad)");
     trackPHI_vs_trackPseudoTrackPHI->GetZaxis()->SetTitle("Events");
     trackPHI_vs_trackPseudoTrackPHI->SetTitle("");
     trackPHI_vs_trackPseudoTrackPHI->GetYaxis()->SetTitleSize(0.06);
@@ -4147,6 +4257,29 @@ void CompareKinematics() {
     trackPHI_vs_trackPseudoTrackPHI->GetZaxis()->SetTitleOffset(0.9);
     trackPHI_vs_trackPseudoTrackPHI->GetZaxis()->SetLabelSize(0.05);
 
+    // --- Styling helper for the extra PT histograms (same style as trackPT_vs_trackPseudoTrackPT) ---
+    auto stylePT = [](TH2F *h, double sizelabel=0.04) {
+        h->GetXaxis()->SetTitle("PF p_{T} [GeV/c]");
+        h->GetYaxis()->SetTitle("Track p_{T} [GeV/c]");
+        h->GetZaxis()->SetTitle("Events");
+        h->SetTitle("");
+        h->GetYaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleOffset(0.9);
+        h->GetYaxis()->SetTitleOffset(1);
+        h->GetXaxis()->SetLabelSize(sizelabel);
+        h->GetYaxis()->SetLabelSize(sizelabel);
+        h->GetZaxis()->SetTitleSize(0.06);
+        h->GetZaxis()->SetTitleOffset(0.9);
+        h->GetZaxis()->SetLabelSize(0.05);
+    };
+
+    stylePT(trackPT_vs_trackPseudoTrackPT__PFmuon);
+    stylePT(trackPT_vs_trackPseudoTrackPT__PFpion);
+    stylePT(trackPT_vs_trackPseudoTrackPT__HSCPmatched_1400);
+    stylePT(trackPT_vs_trackPseudoTrackPT__HSCPmatched_2000);
+    stylePT(trackPT_vs_trackPseudoTrackPT__HSCPmatched_2600);
+
     TLatex *tex = new TLatex(0.62, 0.91, "110 fb^{-1} (13.6 TeV)");
     tex->SetNDC();
     tex->SetTextFont(42);
@@ -4156,6 +4289,16 @@ void CompareKinematics() {
     latex1->SetNDC();
     latex1->SetTextFont(42);
     latex1->SetTextSize(0.04);
+
+    TLatex *latexPF = new TLatex(0.62, 0.95, "#bf{PF muons}");
+    latexPF->SetNDC();
+    latexPF->SetTextFont(42);
+    latexPF->SetTextSize(0.04);
+
+    TLatex *latexglu = new TLatex(0.85, 0.91, "#bf{PF muons}");
+    latexglu->SetNDC();
+    latexglu->SetTextFont(42);
+    latexglu->SetTextSize(0.04);
     
 
     TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
@@ -4206,6 +4349,101 @@ void CompareKinematics() {
     c3->Update();
     c3->SaveAs("PlayWithHistos/CompareKinematics_PHI_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+
+
+    TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
+    c4->SetRightMargin(0.16);
+    c4->SetLeftMargin(0.16); c4->SetBottomMargin(0.16);
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(kViridis);
+    trackPT_vs_trackPseudoTrackPT__PFmuon->Draw("COLZ");
+    tex->Draw();
+    c4->SetLogz();
+    latex1->Draw();
+    latexPF->Draw();
+    c4->SaveAs("PlayWithHistos/CompareKinematics_PT_PFmuon.pdf");
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c4->Modified();
+    c4->Update();
+    c4->SaveAs("PlayWithHistos/CompareKinematics_PT_PFmuon_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+
+
+    TCanvas *c5 = new TCanvas("c5", "c5", 800, 600);
+    c5->SetRightMargin(0.16);
+    c5->SetLeftMargin(0.16); c5->SetBottomMargin(0.16);
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(kViridis);
+    trackPT_vs_trackPseudoTrackPT__PFpion->Draw("COLZ");
+    tex->Draw();
+    c5->SetLogz();
+    latex1->Draw();
+    latexPF->SetTitle("#bf{PF pions}");
+    latexPF->Draw();
+    c5->SaveAs("PlayWithHistos/CompareKinematics_PT_PFpion.pdf");
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c5->Modified();
+    c5->Update();
+    c5->SaveAs("PlayWithHistos/CompareKinematics_PT_PFpion_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+
+
+    // --- HSCP matched: gluino 1400 GeV ---
+    TCanvas *c6 = new TCanvas("c6", "c6", 800, 600);
+    c6->SetRightMargin(0.16);
+    c6->SetLeftMargin(0.16); c6->SetBottomMargin(0.16);
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(kViridis);
+    trackPT_vs_trackPseudoTrackPT__HSCPmatched_1400->Draw("COLZ");
+    c6->SetLogz();
+    latex1->Draw();
+    latexglu->SetTitle("#bf{HSCP matched (m#scale[0.7]{#tilde{g}}=1400 GeV)}");
+    latexglu->SetX(0.53);
+    latexglu->Draw();
+    c6->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_1400.pdf");
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    c6->Modified();
+    c6->Update();
+    c6->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_1400_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+
+
+    // --- HSCP matched: gluino 2000 GeV ---
+    TCanvas *c7 = new TCanvas("c7", "c7", 800, 600);
+    c7->SetRightMargin(0.16);
+    c7->SetLeftMargin(0.16); c7->SetBottomMargin(0.16);
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(kViridis);
+    trackPT_vs_trackPseudoTrackPT__HSCPmatched_2000->Draw("COLZ");
+    c7->SetLogz();
+    latex1->Draw();
+    latexglu->SetTitle("#bf{HSCP matched (m#scale[0.7]{#tilde{g}}=2000 GeV)}");
+    latexglu->Draw();
+    c7->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_2000.pdf");
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    c7->Modified();
+    c7->Update();
+    c7->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_2000_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+
+
+    // --- HSCP matched: gluino 2600 GeV ---
+    TCanvas *c8 = new TCanvas("c8", "c8", 800, 600);
+    c8->SetRightMargin(0.16);
+    c8->SetLeftMargin(0.16); c8->SetBottomMargin(0.16);
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(kViridis);
+    trackPT_vs_trackPseudoTrackPT__HSCPmatched_2600->Draw("COLZ");
+    c8->SetLogz();
+    latex1->Draw();
+    latexglu->SetTitle("#bf{HSCP matched (m#scale[0.7]{#tilde{g}}=2600 GeV)}");
+    latexglu->Draw();
+    c8->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_2600.pdf");
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    c8->Modified();
+    c8->Update();
+    c8->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_2600_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
 
 
     return;
@@ -6483,6 +6721,301 @@ void TriggerEfficiency_ByMass(const char *ofilename = "TriggerEff") {
     return;
 }
 
+void ProfileVsRunNumber() {
+
+    TFile *ifile = new TFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/output/JetMET2024_V12/JetMET2024_V12p31.root", "READ");
+
+    // --- Fpix ---
+    TH2F *h_Fpix_nosel = (TH2F*)ifile->Get("Nosel_Fpix_vs_RunNumber");
+    TH2F *h_Fpix_sel   = (TH2F*)ifile->Get("METanalysis_TestPUppiMETCut_Eta2p4_Fpix_vs_RunNumber");
+
+    // --- Ih ---
+    TH2F *h_Ih_nosel = (TH2F*)ifile->Get("Nosel_Ih_vs_RunNumber");
+    TH2F *h_Ih_sel   = (TH2F*)ifile->Get("METanalysis_TestPUppiMETCut_Eta2p4_Ih_vs_RunNumber");
+
+    // --- ProfileX (mean of Y per X bin = mean Fpix/Ih per run number) ---
+    TProfile *p_Fpix_nosel = h_Fpix_nosel->ProfileX("p_Fpix_nosel");
+    TProfile *p_Fpix_sel   = h_Fpix_sel->ProfileX("p_Fpix_sel");
+    TProfile *p_Ih_nosel   = h_Ih_nosel->ProfileX("p_Ih_nosel");
+    TProfile *p_Ih_sel     = h_Ih_sel->ProfileX("p_Ih_sel");
+
+    p_Fpix_nosel->Rebin(5);
+    p_Fpix_sel->Rebin(5);
+    p_Ih_nosel->Rebin(5);
+    p_Ih_sel->Rebin(5);
+
+    // --- Fill a TH1D with the distribution of the profile bin values ---
+    // For each run-number bin, take the profile mean and fill it into a 1D histo.
+    // X axis = mean value (Fpix / Ih), Y axis = number of runs.
+    auto profileToHist = [](TProfile *p, const char *name, int nbins, double xlo, double xhi) {
+        TH1D *h = new TH1D(name, "", nbins, xlo, xhi);
+        for (int i = 1; i <= p->GetNbinsX(); ++i) {
+            if (p->GetBinEntries(i) > 0)
+                h->Fill(p->GetBinContent(i));
+        }
+        return h;
+    };
+
+    TH1D *hp_Fpix_nosel = profileToHist(p_Fpix_nosel, "hp_Fpix_nosel", 50, 0.55, 0.75);
+    TH1D *hp_Fpix_sel   = profileToHist(p_Fpix_sel,   "hp_Fpix_sel",   50, 0.55, 0.75);
+    TH1D *hp_Ih_nosel   = profileToHist(p_Ih_nosel,   "hp_Ih_nosel",   50, 3.25, 3.5);
+    TH1D *hp_Ih_sel     = profileToHist(p_Ih_sel,     "hp_Ih_sel",     50, 3.25, 3.5);
+
+    // --- Styling helper ---
+    auto styleProf = [](TProfile *p, int color, int marker, const char *ytitle) {
+        p->SetTitle("");
+        p->GetXaxis()->SetTitle("Run number");
+        p->GetYaxis()->SetTitle(ytitle);
+        p->GetYaxis()->SetTitleSize(0.06);
+        p->GetXaxis()->SetTitleSize(0.06);
+        p->GetXaxis()->SetTitleOffset(0.9);
+        p->GetYaxis()->SetTitleOffset(1.0);
+        p->GetXaxis()->SetLabelSize(0.04);
+        p->GetYaxis()->SetLabelSize(0.05);
+        p->SetLineColor(color);
+        p->SetMarkerColor(color);
+        p->SetMarkerStyle(marker);
+        p->SetMarkerSize(0.8);
+        p->SetLineWidth(2);
+    };
+
+    styleProf(p_Fpix_nosel, kAzure+2, 20, "#LT F_{pixel} #GT");
+    styleProf(p_Fpix_sel,   kRed+1,  21, "#LT F_{pixel} #GT");
+    styleProf(p_Ih_nosel,   kAzure+2, 20, "#LT I_{h} #GT [MeV/cm]");
+    styleProf(p_Ih_sel,     kRed+1,  21, "#LT I_{h} #GT [MeV/cm]");
+
+    // --- Styling helper for the distribution histograms ---
+    auto styleHist = [](TH1D *h, int color, const char *xtitle) {
+        h->SetTitle("");
+        h->GetXaxis()->SetTitle(xtitle);
+        h->GetYaxis()->SetTitle("Number of runs");
+        h->GetYaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleOffset(0.9);
+        h->GetYaxis()->SetTitleOffset(1.1);
+        h->GetXaxis()->SetLabelSize(0.05);
+        h->GetYaxis()->SetLabelSize(0.05);
+        h->SetLineColor(color);
+        h->SetLineWidth(2);
+    };
+
+    styleHist(hp_Fpix_nosel, kAzure+2, "#LT F_{pixel}#GT per run");
+    styleHist(hp_Fpix_sel,   kRed+1,  "#LT F_{pixel}#GT per run");
+    styleHist(hp_Ih_nosel,   kAzure+2, "#LT I_{h}#GT per run [MeV/cm]");
+    styleHist(hp_Ih_sel,     kRed+1,  "#LT I_{h}#GT per run [MeV/cm]");
+
+    TLatex *tex = new TLatex(0.68, 0.91, "110 fb^{-1} (13.6 TeV)");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    gStyle->SetOptStat(0);
+
+    // ================= Canvas 1: Fpix with and without selection =================
+    TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
+    c1->SetLeftMargin(0.16); c1->SetBottomMargin(0.16);
+
+    p_Fpix_nosel->Draw("E1");
+    p_Fpix_nosel->GetYaxis()->SetRangeUser(0.55, 0.75);
+    p_Fpix_sel->Draw("E1 SAME");
+
+    TLegend *leg1 = new TLegend(0.60, 0.72, 0.89, 0.89);
+    leg1->SetBorderSize(0);
+    leg1->SetTextFont(42);
+    leg1->AddEntry(p_Fpix_nosel, "No selection", "lep");
+    leg1->AddEntry(p_Fpix_sel,   "HSCP pre-selection", "lep");
+    leg1->Draw();
+
+    tex->Draw();
+    latex1->Draw();
+    c1->SaveAs("PlayWithHistos/ProfileVsRunNumber_Fpix.pdf");
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c1->Modified(); c1->Update();
+    c1->SaveAs("PlayWithHistos/ProfileVsRunNumber_Fpix_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+
+    // ================= Canvas 2: Ih with and without selection =================
+    TCanvas *c2 = new TCanvas("c2", "c2", 800, 600);
+    c2->SetLeftMargin(0.16); c2->SetBottomMargin(0.16);
+
+    p_Ih_nosel->Draw("E1");
+    p_Ih_nosel->GetYaxis()->SetRangeUser(3.25, 3.5);
+    p_Ih_sel->Draw("E1 SAME");
+
+    TLegend *leg2 = new TLegend(0.60, 0.72, 0.89, 0.89);
+    leg2->SetBorderSize(0);
+    leg2->SetTextFont(42);
+    leg2->AddEntry(p_Ih_nosel, "No selection", "lep");
+    leg2->AddEntry(p_Ih_sel,   "HSCP pre-selection", "lep");
+    leg2->Draw();
+
+    tex->Draw();
+    latex1->Draw();
+    c2->SaveAs("PlayWithHistos/ProfileVsRunNumber_Ih.pdf");
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c2->Modified(); c2->Update();
+    c2->SaveAs("PlayWithHistos/ProfileVsRunNumber_Ih_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+
+    // ============ Canvas 3: distribution of per-run Fpix profile means ============
+    TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
+    c3->SetLeftMargin(0.16); c3->SetBottomMargin(0.16);
+
+    hp_Fpix_nosel->Draw("HIST");
+    hp_Fpix_nosel->GetYaxis()->SetRangeUser(0, 60);
+    hp_Fpix_sel->Draw("HIST SAME");
+
+    TLegend *leg3 = new TLegend(0.60, 0.72, 0.89, 0.89);
+    leg3->SetBorderSize(0);
+    leg3->SetTextFont(42);
+    leg3->AddEntry(hp_Fpix_nosel, "No selection", "l");
+    leg3->AddEntry(hp_Fpix_sel,   "HSCP pre-selection", "l");
+    leg3->Draw();
+
+    tex->Draw();
+    latex1->Draw();
+    c3->SaveAs("PlayWithHistos/ProfileVsRunNumber_Fpix_hist.pdf");
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c3->Modified(); c3->Update();
+    c3->SaveAs("PlayWithHistos/ProfileVsRunNumber_Fpix_hist_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+
+    // ============ Canvas 4: distribution of per-run Ih profile means ============
+    TCanvas *c4 = new TCanvas("c4", "c4", 800, 600);
+    c4->SetLeftMargin(0.16); c4->SetBottomMargin(0.16);
+
+    hp_Ih_nosel->Draw("HIST");
+    hp_Ih_nosel->GetYaxis()->SetRangeUser(0, 60);
+    hp_Ih_sel->Draw("HIST SAME");
+
+    TLegend *leg4 = new TLegend(0.60, 0.72, 0.89, 0.89);
+    leg4->SetBorderSize(0);
+    leg4->SetTextFont(42);
+    leg4->AddEntry(hp_Ih_nosel, "No selection", "l");
+    leg4->AddEntry(hp_Ih_sel,   "HSCP pre-selection", "l");
+    leg4->Draw();
+
+    tex->Draw();
+    latex1->Draw();
+    c4->SaveAs("PlayWithHistos/ProfileVsRunNumber_Ih_hist.pdf");
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    c4->Modified(); c4->Update();
+    c4->SaveAs("PlayWithHistos/ProfileVsRunNumber_Ih_hist_bis.pdf");
+    latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+
+    return;
+}
+
+
+void CompareIhWithCDF() {
+
+    TFile *ifileData   = new TFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/output/JetMET2024_V12/JetMET2024_V12p31.root", "READ");
+    TFile *ifileSignal = new TFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p7.root", "READ");
+
+    TH1D *IhSignal   = (TH1D*)ifileSignal->Get("METanalysis_TestPUppiMETCut_Eta2p4_Ih");
+    TH1D *IhDataRaw  = (TH1D*)ifileData->Get("METanalysis_TestPUppiMETCut_Eta2p4_Ih");
+
+    // --- Rebin data (200 bins, 0-10) onto signal binning (600 bins, 0-30) ---
+    TH1D *IhData = (TH1D*)IhSignal->Clone("IhData");
+    IhData->Reset();
+    for (int i = 1; i <= IhDataRaw->GetNbinsX(); ++i) {
+        double x = IhDataRaw->GetBinCenter(i);
+        int j = IhData->FindBin(x);
+        IhData->AddBinContent(j, IhDataRaw->GetBinContent(i));
+    }
+    for (int j = 1; j <= IhData->GetNbinsX(); ++j)
+        IhData->SetBinError(j, TMath::Sqrt(IhData->GetBinContent(j)));
+
+    // --- Normalize to unit area for shape comparison ---
+    if (IhData->Integral()   > 0) IhData->Scale(1.0 / IhData->Integral());
+    if (IhSignal->Integral() > 0) IhSignal->Scale(1.0 / IhSignal->Integral());
+
+    // --- Styling ---
+    auto styleHist = [](TH1D *h, int color, int marker) {
+        h->SetTitle("");
+        h->GetXaxis()->SetTitle("I_{h} [MeV/cm]");
+        h->GetYaxis()->SetTitle("Normalised entries");
+        h->GetYaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleSize(0.06);
+        h->GetXaxis()->SetTitleOffset(0.9);
+        h->GetYaxis()->SetTitleOffset(0.9);
+        h->GetXaxis()->SetLabelSize(0.05);
+        h->GetYaxis()->SetLabelSize(0.05);
+        h->SetLineColor(color);
+        h->SetMarkerColor(color);
+        h->SetMarkerStyle(marker);
+        h->SetMarkerSize(0.8);
+        h->SetLineWidth(2);
+    };
+
+    styleHist(IhData,   kBlue, 20);
+    styleHist(IhSignal, kRed+1,   21);
+
+    TLatex *tex = new TLatex(0.75, 0.91, "110 fb^{-1} (13.6 TeV)");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    gStyle->SetOptStat(0);
+
+    // --- Build the top canvas (distributions) that DrawWithCDF2 will clone ---
+    TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
+    c1->SetLeftMargin(0.16); c1->SetBottomMargin(0.16);
+
+    IhSignal->Rebin(4);
+    IhData->Rebin(4);
+
+    IhSignal->Draw("HIST");
+    double ymax = TMath::Max(IhData->GetMaximum(), IhSignal->GetMaximum());
+    IhSignal->GetYaxis()->SetRangeUser(1, 1.3 * ymax);
+    IhSignal->GetXaxis()->SetRangeUser(0, 30);
+    IhData->Draw("hist SAME");
+    c1->SetLogy();
+
+    TLegend *leg1 = new TLegend(0.60, 0.72, 0.89, 0.89);
+    leg1->SetBorderSize(0);
+    leg1->SetTextFont(42);
+    leg1->AddEntry(IhData,   "Data", "lep");
+    leg1->AddEntry(IhSignal, "Gluino 2000 GeV", "lep");
+    leg1->Draw();
+
+    tex->Draw();
+    latex1->Draw();
+    c1->Modified(); c1->Update();
+
+    // --- Build the combined canvas with the CDF ratio pad ---
+    TCanvas *cCDF = DrawWithCDF2(IhData, IhSignal, c1,
+                                 "CompareIh_CDF",
+                                 "I_{h} [MeV/cm]",
+                                 "Data", "Gluino 2000 GeV",
+                                 0.0, 30.0,
+                                 kBlue, kRed+1);
+
+    cCDF->SaveAs("PlayWithHistos/CompareIh_CDF.pdf");
+    latex1->SetTitle("#it{Private work (CMS data)}");
+    // rebuild top pad label for the "bis" version
+    c1->cd(); c1->Modified(); c1->Update();
+    TCanvas *cCDF_bis = DrawWithCDF2(IhData, IhSignal, c1,
+                                     "CompareIh_CDF_bis",
+                                     "I_{h} [MeV/cm]",
+                                     "Data", "Gluino 2000 GeV",
+                                     0.0, 30.0,
+                                     kBlue, kRed+1);
+    cCDF_bis->SaveAs("PlayWithHistos/CompareIh_CDF_bis.pdf");
+
+    return;
+}
+
 
 void CombineHistos()
 {
@@ -6532,7 +7065,6 @@ void CombineHistos()
     //PlotSF();
 
     //MyClusters();
-    //CompareKinematics();
 
 
     // Run2_vs_Run3_gluino__TriggerEff();
@@ -6596,9 +7128,13 @@ void CombineHistos()
 
     //FpixelInSignalAndData();
 
-    //PairTypeStages_SingleMass(); PFType_ProportionAndTrigEff();
-    TriggerEfficiency_ByMass();
+    //PairTypeStages_SingleMass(); PFType_ProportionAndTrigEff();TriggerEfficiency_ByMass();
 
+    //CompareKinematics();
+
+    //ProfileVsRunNumber();
+
+    CompareIhWithCDF();
 
     return;
 }

@@ -1,6 +1,8 @@
 {
     gSystem->Load("../libTools.so");
     ROOT::EnableImplicitMT(4);
+    TProof::Open("workers=4");           //change number of worker.
+
 
     ifstream ifile;
     // /opt/sbg/cms/safe1/cms/gcoulon
@@ -231,11 +233,11 @@
                 }
             }
         }
-        else if (version=="V19p6") {
+        else if (version=="V19p6" || version=="V19p7") {
             for (size_t i = 0; i < GluinonamesMadgraph.size(); ++i) {
                 if (dataset == GluinonamesMadgraph[i]) {
                     chain = new TChain("HSCPMiniAODAnalyzer/Events");
-                    chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/%s/%s", version.c_str(), GluinoInputnamesMadgraph[i].Data()));
+                    chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/V19p6/%s", GluinoInputnamesMadgraph[i].Data()));
                 }
             }
         }
@@ -577,6 +579,7 @@
     chain->SetCacheSize(200 * 1024 * 1024); // 200 MB
     chain->AddBranchToCache("*", true);
     
+    chain->SetProof();
     chain->Process("HSCPSelector.C+",binning.c_str());
 
     delete chain;
