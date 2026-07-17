@@ -17,7 +17,6 @@
 #include <fstream>
 #include "ROOT/RConfig.hxx"
 #include "TObjString.h"
-#include <TProof.h>
 
 #include "../inc/RegionMassPlot.h"
 #include "../inc/CPlots.h"
@@ -39,7 +38,6 @@ public :
    int ihbins_;
    int pbins_;
    int massbins_;
-   int masscut_;
    int fpixbins_;
    double ptcut_;
    std::string dataset_;

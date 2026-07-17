@@ -1,8 +1,6 @@
 {
     gSystem->Load("../libTools.so");
     ROOT::EnableImplicitMT(4);
-    TProof::Open("workers=4");           //change number of worker.
-
 
     ifstream ifile;
     // /opt/sbg/cms/safe1/cms/gcoulon
@@ -13,17 +11,16 @@
     std::string version;
     int etabins, ihbins, pbins, massbins, fpixbins;
     double ptcut;
-    int masscut;
     std::cout << std::endl;
     std::cout << "   Reading config file: " << std::endl;
     std::cout << endl;
-    std::cout << "pT cut - eta bins - ih bins - p bins - mass bins - massCut - FPIXbins -  type - version" << std::endl;
+    std::cout << "pT cut - eta bins - ih bins - p bins - mass bins - FPIXbins -  type - version" << std::endl;
     while(std::getline(ifile,line))
     {
         if(strncmp(line.c_str(),"#",1)==0) continue;
         std::cout << line << std::endl;
         std::stringstream ss(line);
-        ss >> ptcut >> etabins >> ihbins >> pbins >> massbins >> masscut >> fpixbins >> dataset >> version;
+        ss >> ptcut >> etabins >> ihbins >> pbins >> massbins >> fpixbins >> dataset >> version;
     }
     ifile.close();
     std::cout << std::endl;
@@ -139,6 +136,38 @@
         "HSCP-Pair-Stau_Par-M-1599_merged.root"
     };
 
+
+    std::vector<TString> StopRun3Name = {
+        "Stop_Run3_MET_700",
+        "Stop_Run3_MET_800",
+        "Stop_Run3_MET_900",
+        "Stop_Run3_MET_1000",
+        "Stop_Run3_MET_1200",
+        "Stop_Run3_MET_1400",
+        "Stop_Run3_MET_1600",
+        "Stop_Run3_MET_1800",
+        "Stop_Run3_MET_2000",
+        "Stop_Run3_MET_2200",
+        "Stop_Run3_MET_2400",
+        "Stop_Run3_MET_2600"
+    };
+
+    std::vector<TString> StopRun3File = {
+        "HSCP-Stop_Par-M-700_merged.root",
+        "HSCP-Stop_Par-M-800_merged.root",
+        "HSCP-Stop_Par-M-900_merged.root",
+        "HSCP-Stop_Par-M-1000_merged.root",
+        "HSCP-Stop_Par-M-1200_merged.root",
+        "HSCP-Stop_Par-M-1400_merged.root",
+        "HSCP-Stop_Par-M-1600_merged.root",
+        "HSCP-Stop_Par-M-1800_merged.root",
+        "HSCP-Stop_Par-M-2000_merged.root",
+        "HSCP-Stop_Par-M-2200_merged.root",
+        "HSCP-Stop_Par-M-2400_merged.root",
+        "HSCP-Stop_Par-M-2600_merged.root",
+    };
+
+
     std::vector<TString> GluinoInputnamesPythia = {
         Form("Par-M-1000_Code%s_merged.root", version.c_str()),
         Form("Par-M-1200_Code%s_merged.root", version.c_str()),
@@ -233,7 +262,7 @@
                 }
             }
         }
-        else if (version=="V19p6" || version=="V19p7") {
+        else if (version=="V19p6" || version=="V19p7" || version=="V19p8") {
             for (size_t i = 0; i < GluinonamesMadgraph.size(); ++i) {
                 if (dataset == GluinonamesMadgraph[i]) {
                     chain = new TChain("HSCPMiniAODAnalyzer/Events");
@@ -253,6 +282,15 @@
             if (dataset == StauRun3Name[i]) {
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
                 chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/%s/%s", version.c_str(), StauRun3File[i].Data()));
+            }
+        }
+    }
+
+    else if (dataset.find("Stop_Run3") != std::string::npos) {
+        for (size_t i = 0; i < StopRun3Name.size(); ++i) {
+            if (dataset == StopRun3Name[i]) {
+                chain = new TChain("HSCPMiniAODAnalyzer/Events");
+                chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/%s/%s", version.c_str(), StopRun3Name[i].Data()));
             }
         }
     }
@@ -464,7 +502,7 @@
     else if(dataset == "TTbar2024") {
        chain = new TChain("HSCPMiniAODAnalyzer/Events");
        std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/TTbar2024/";
-       std::string fileNames[] = { (pathData + "V15p5.txt").c_str()};
+       std::string fileNames[] = { (pathData + "V15p9.txt").c_str()};
        
        for (const std::string& fileName : fileNames) {
             std::ifstream file(fileName);
@@ -491,7 +529,7 @@
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
 
                 std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/QCD2024/";
-                std::string fileName = pathData + "V16p1" + std::to_string(i + 1) + ".txt";
+                std::string fileName = pathData + "V16p2" + std::to_string(i + 1) + ".txt";
 
                 std::ifstream file(fileName);
                 if (!file.is_open()) {
@@ -539,7 +577,7 @@
     else if (dataset == "WjetMuNu2024") {
         chain = new TChain("HSCPMiniAODAnalyzer/Events");
             std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/Wjets2024/";
-            std::string fileName = pathData + "V14p12.txt";
+            std::string fileName = pathData + "V14p13.txt";
 
             std::ifstream file(fileName);
             if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
@@ -567,8 +605,8 @@
 
 
     std::string binning = std::to_string(ptcut) + "," + std::to_string(etabins) + "," + std::to_string(ihbins) + ","
-                        + std::to_string(pbins) + "," + std::to_string(massbins) + "," + std::to_string(masscut) + ","
-                        + std::to_string(fpixbins) + "," + dataset + "," + version;
+                        + std::to_string(pbins) + "," + std::to_string(massbins) + "," + std::to_string(fpixbins) + ","
+                        + dataset + "," + version;
 
     std::cout << "Running over dataset : " << dataset << std::endl;
     std::cout << "        code version : " << version << std::endl; 
@@ -579,7 +617,6 @@
     chain->SetCacheSize(200 * 1024 * 1024); // 200 MB
     chain->AddBranchToCache("*", true);
     
-    chain->SetProof();
     chain->Process("HSCPSelector.C+",binning.c_str());
 
     delete chain;

@@ -17,7 +17,6 @@
 #include <fstream>
 #include "ROOT/RConfig.hxx"
 #include "TObjString.h"
-#include <TProof.h>
 
 #include "../inc/RegionMassPlot.h"
 #include "../inc/CPlots.h"
@@ -34,34 +33,21 @@ public :
    TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_IhC(int hscpIndex);
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta2p4(int hscpIndex);
 
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p1(int hscpIndex);
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1(int hscpIndex);
 
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p2(int hscpIndex);
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4(int hscpIndex);
 
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p3(int hscpIndex);
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p4(int hscpIndex);
 
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p4(int hscpIndex);
-
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p5(int hscpIndex);
-
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p6(int hscpIndex);
-
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p7(int hscpIndex);
-
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p8(int hscpIndex);
-
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih3p9(int hscpIndex);
-
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4_Ih4p0(int hscpIndex);
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2(int hscpIndex);
 
 
    int etabins_;
    int ihbins_;
    int pbins_;
    int massbins_;
-   int masscut_;
    int fpixbins_;
    double ptcut_;
    std::string dataset_;

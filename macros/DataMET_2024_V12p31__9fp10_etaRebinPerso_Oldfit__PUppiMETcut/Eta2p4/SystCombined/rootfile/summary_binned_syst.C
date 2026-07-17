@@ -4,22 +4,20 @@
 void summary_binned_syst()
 {
 //=========Macro generated from canvas: c1/c1
-//=========  (Mon Jul  6 15:36:54 2026) by ROOT version 6.32.13
+//=========  (Fri Jul 17 10:25:56 2026) by ROOT version 6.32.13
    TCanvas *c1 = new TCanvas("c1", "c1",0,0,700,500);
    gStyle->SetOptStat(0);
    gStyle->SetOptTitle(0);
    c1->SetHighLightColor(2);
-   c1->Range(-720.0405,-0.668563,3780.213,3.509956);
+   c1->Range(-418.2588,-0.3883565,3764.329,3.495208);
    c1->SetFillColor(0);
    c1->SetBorderMode(0);
    c1->SetBorderSize(2);
    c1->SetLogy();
    c1->SetGridx();
    c1->SetGridy();
-   c1->SetLeftMargin(0.16);
    c1->SetRightMargin(0.05);
    c1->SetTopMargin(0.05);
-   c1->SetBottomMargin(0.16);
    c1->SetFrameLineWidth(2);
    c1->SetFrameBorderMode(0);
    c1->SetFrameLineWidth(2);
@@ -51,17 +49,17 @@ void summary_binned_syst()
    Graph_Graph01->GetXaxis()->SetRange(1,101);
    Graph_Graph01->GetXaxis()->SetLabelFont(43);
    Graph_Graph01->GetXaxis()->SetLabelOffset(0.015);
-   Graph_Graph01->GetXaxis()->SetLabelSize(16);
-   Graph_Graph01->GetXaxis()->SetTitleSize(0.04);
-   Graph_Graph01->GetXaxis()->SetTitleOffset(1.1);
+   Graph_Graph01->GetXaxis()->SetLabelSize(20);
+   Graph_Graph01->GetXaxis()->SetTitleSize(0.05);
+   Graph_Graph01->GetXaxis()->SetTitleOffset(1);
    Graph_Graph01->GetXaxis()->SetTitleFont(42);
    Graph_Graph01->GetYaxis()->SetTitle("Systematic Uncertainty [%]");
    Graph_Graph01->GetYaxis()->SetLabelFont(43);
    Graph_Graph01->GetYaxis()->SetLabelOffset(0.015);
-   Graph_Graph01->GetYaxis()->SetLabelSize(16);
-   Graph_Graph01->GetYaxis()->SetTitleSize(0.04);
+   Graph_Graph01->GetYaxis()->SetLabelSize(20);
+   Graph_Graph01->GetYaxis()->SetTitleSize(0.05);
    Graph_Graph01->GetYaxis()->SetTickLength(0.02);
-   Graph_Graph01->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph01->GetYaxis()->SetTitleOffset(1);
    Graph_Graph01->GetYaxis()->SetTitleFont(42);
    Graph_Graph01->GetZaxis()->SetLabelFont(42);
    Graph_Graph01->GetZaxis()->SetLabelOffset(0.015);
@@ -73,7 +71,7 @@ void summary_binned_syst()
    
    graph->Draw("ap");
    
-   TLegend *leg = new TLegend(0.27,0.7,0.5,0.93,NULL,"brNDC");
+   TLegend *leg = new TLegend(0.12,0.7,0.5,0.93,NULL,"brNDC");
    leg->SetTextFont(62);
    leg->SetLineColor(1);
    leg->SetLineStyle(1);
@@ -474,13 +472,13 @@ void summary_binned_syst()
    graph->SetHistogram(Graph_Graph78);
    
    graph->Draw("p");
-   TLatex *   tex = new TLatex(0.16,0.96,"#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+   TLatex *   tex = new TLatex(0.1,0.96,"#scale[1.3]{#it{Private work (CMS data)}}");
    tex->SetNDC();
    tex->SetTextFont(42);
    tex->SetTextSize(0.04);
    tex->SetLineWidth(2);
    tex->Draw();
-      tex = new TLatex(0.7,0.96,"108.95 fb^{-1} (13.6 TeV)");
+      tex = new TLatex(0.74,0.96,"109 fb^{-1} (13.6 TeV)");
    tex->SetNDC();
    tex->SetTextFont(42);
    tex->SetTextSize(0.04);

@@ -5,33 +5,33 @@
     \hline
     Trigger & Observable & $\varepsilon$ (after cut) \\
     \hline
-\texttt{HLT\_PFMET120\_PFMHT120\_IDTight} & \texttt{PseudoCaloMET} & 0.9428 $\pm$ 0.0033 \\
-\texttt{HLT\_PFHT500\_PFMET100\_PFMHT100\_IDTight} & \texttt{PseudoCaloMET} & 0.5697 $\pm$ 0.0071 \\
-\texttt{HLT\_PFMETNoMu120\_PFMHTNoMu120\_IDTight\_PFHT60} & \texttt{PseudoCaloMET} & 0.9712 $\pm$ 0.0024 \\
+\texttt{HLT\_PFMET120\_PFMHT120\_IDTight} & \texttt{PseudoCaloMET} & 0.9406 $\pm$ 0.0034 \\
+\texttt{HLT\_PFHT500\_PFMET100\_PFMHT100\_IDTight} & \texttt{PseudoCaloMET} & 0.5666 $\pm$ 0.0071 \\
+\texttt{HLT\_PFMETNoMu120\_PFMHTNoMu120\_IDTight\_PFHT60} & \texttt{PseudoCaloMET} & 0.9692 $\pm$ 0.0025 \\
 \texttt{HLT\_MET105\_IsoTrk50} & \texttt{PseudoCaloMET} & 0.8570 $\pm$ 0.0050 \\
 \texttt{orMETtrg} & \texttt{PseudoCaloMET} & 0.9952 $\pm$ 0.0010 \\
-\texttt{orMET3a4trg1} & \texttt{PseudoCaloMET} & 0.9872 $\pm$ 0.0016 \\
+\texttt{orMET3a4trg1} & \texttt{PseudoCaloMET} & 0.9852 $\pm$ 0.0017 \\
 \texttt{orMET3a4trg2} & \texttt{PseudoCaloMET} & 0.9910 $\pm$ 0.0014 \\
 \texttt{orMET3a4trg3} & \texttt{PseudoCaloMET} & 0.9952 $\pm$ 0.0010 \\
 \texttt{orMET3a4trg4} & \texttt{PseudoCaloMET} & 0.9936 $\pm$ 0.0011 \\
-\texttt{HLT\_PFMET120\_PFMHT120\_IDTight} & \texttt{PUppiMET} & 0.3318 $\pm$ 0.0026 \\
-\texttt{HLT\_PFHT500\_PFMET100\_PFMHT100\_IDTight} & \texttt{PUppiMET} & 0.1168 $\pm$ 0.0018 \\
-\texttt{HLT\_PFMETNoMu120\_PFMHTNoMu120\_IDTight\_PFHT60} & \texttt{PUppiMET} & 0.3282 $\pm$ 0.0026 \\
+\texttt{HLT\_PFMET120\_PFMHT120\_IDTight} & \texttt{PUppiMET} & 0.3241 $\pm$ 0.0026 \\
+\texttt{HLT\_PFHT500\_PFMET100\_PFMHT100\_IDTight} & \texttt{PUppiMET} & 0.1123 $\pm$ 0.0018 \\
+\texttt{HLT\_PFMETNoMu120\_PFMHTNoMu120\_IDTight\_PFHT60} & \texttt{PUppiMET} & 0.3259 $\pm$ 0.0026 \\
 \texttt{HLT\_MET105\_IsoTrk50} & \texttt{PUppiMET} & 0.3095 $\pm$ 0.0026 \\
-\texttt{orMETtrg} & \texttt{PUppiMET} & 0.3690 $\pm$ 0.0027 \\
-\texttt{orMET3a4trg1} & \texttt{PUppiMET} & 0.3461 $\pm$ 0.0027 \\
-\texttt{orMET3a4trg2} & \texttt{PUppiMET} & 0.3667 $\pm$ 0.0027 \\
-\texttt{orMET3a4trg3} & \texttt{PUppiMET} & 0.3682 $\pm$ 0.0027 \\
-\texttt{orMET3a4trg4} & \texttt{PUppiMET} & 0.3651 $\pm$ 0.0027 \\
-\texttt{HLT\_PFMET120\_PFMHT120\_IDTight} & \texttt{PUppiMETNoMu} & 0.3324 $\pm$ 0.0025 \\
-\texttt{HLT\_PFHT500\_PFMET100\_PFMHT100\_IDTight} & \texttt{PUppiMETNoMu} & 0.1175 $\pm$ 0.0017 \\
-\texttt{HLT\_PFMETNoMu120\_PFMHTNoMu120\_IDTight\_PFHT60} & \texttt{PUppiMETNoMu} & 0.3355 $\pm$ 0.0025 \\
+\texttt{orMETtrg} & \texttt{PUppiMET} & 0.3684 $\pm$ 0.0027 \\
+\texttt{orMET3a4trg1} & \texttt{PUppiMET} & 0.3432 $\pm$ 0.0027 \\
+\texttt{orMET3a4trg2} & \texttt{PUppiMET} & 0.3651 $\pm$ 0.0027 \\
+\texttt{orMET3a4trg3} & \texttt{PUppiMET} & 0.3678 $\pm$ 0.0027 \\
+\texttt{orMET3a4trg4} & \texttt{PUppiMET} & 0.3647 $\pm$ 0.0027 \\
+\texttt{HLT\_PFMET120\_PFMHT120\_IDTight} & \texttt{PUppiMETNoMu} & 0.3249 $\pm$ 0.0025 \\
+\texttt{HLT\_PFHT500\_PFMET100\_PFMHT100\_IDTight} & \texttt{PUppiMETNoMu} & 0.1131 $\pm$ 0.0017 \\
+\texttt{HLT\_PFMETNoMu120\_PFMHTNoMu120\_IDTight\_PFHT60} & \texttt{PUppiMETNoMu} & 0.3332 $\pm$ 0.0025 \\
 \texttt{HLT\_MET105\_IsoTrk50} & \texttt{PUppiMETNoMu} & 0.3176 $\pm$ 0.0025 \\
-\texttt{orMETtrg} & \texttt{PUppiMETNoMu} & 0.3759 $\pm$ 0.0026 \\
-\texttt{orMET3a4trg1} & \texttt{PUppiMETNoMu} & 0.3533 $\pm$ 0.0025 \\
-\texttt{orMET3a4trg2} & \texttt{PUppiMETNoMu} & 0.3730 $\pm$ 0.0026 \\
-\texttt{orMET3a4trg3} & \texttt{PUppiMETNoMu} & 0.3752 $\pm$ 0.0026 \\
-\texttt{orMET3a4trg4} & \texttt{PUppiMETNoMu} & 0.3721 $\pm$ 0.0026 \\
+\texttt{orMETtrg} & \texttt{PUppiMETNoMu} & 0.3753 $\pm$ 0.0026 \\
+\texttt{orMET3a4trg1} & \texttt{PUppiMETNoMu} & 0.3504 $\pm$ 0.0025 \\
+\texttt{orMET3a4trg2} & \texttt{PUppiMETNoMu} & 0.3716 $\pm$ 0.0026 \\
+\texttt{orMET3a4trg3} & \texttt{PUppiMETNoMu} & 0.3747 $\pm$ 0.0026 \\
+\texttt{orMET3a4trg4} & \texttt{PUppiMETNoMu} & 0.3718 $\pm$ 0.0026 \\
 \texttt{HLT\_MET105\_IsoTrk50} & \texttt{PFtrackPT} & -- \\
     \hline
   \end{tabular}

@@ -4,22 +4,20 @@
 void summary_binned_syst()
 {
 //=========Macro generated from canvas: c1/c1
-//=========  (Mon Jul  6 15:50:49 2026) by ROOT version 6.32.13
+//=========  (Fri Jul 17 14:32:09 2026) by ROOT version 6.32.13
    TCanvas *c1 = new TCanvas("c1", "c1",0,0,700,500);
    gStyle->SetOptStat(0);
    gStyle->SetOptTitle(0);
    c1->SetHighLightColor(2);
-   c1->Range(-720.0405,-0.668563,3780.213,3.509956);
+   c1->Range(-418.2588,-0.3883565,3764.329,3.495208);
    c1->SetFillColor(0);
    c1->SetBorderMode(0);
    c1->SetBorderSize(2);
    c1->SetLogy();
    c1->SetGridx();
    c1->SetGridy();
-   c1->SetLeftMargin(0.16);
    c1->SetRightMargin(0.05);
    c1->SetTopMargin(0.05);
-   c1->SetBottomMargin(0.16);
    c1->SetFrameLineWidth(2);
    c1->SetFrameBorderMode(0);
    c1->SetFrameLineWidth(2);
@@ -28,9 +26,9 @@ void summary_binned_syst()
    Double_t Graph0_fx1[35] = { 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320,
    340, 360, 380, 410, 440, 480, 530, 590, 660, 760, 880, 1030, 1210, 1440, 1730, 2000,
    2500, 3200 };
-   Double_t Graph0_fy1[35] = { 1.218494, 0.9490783, 0.9012239, 0.9040875, 0.9364884, 1.006327, 1.052299, 1.133097, 1.18826, 1.29197, 1.364035, 1.598704, 1.789763, 2.186184, 2.281154, 2.673038, 2.895303,
-   2.984097, 3.349777, 3.050902, 3.277371, 2.885551, 2.849065, 2.859507, 3.044568, 3.101035, 3.458703, 3.805209, 4.427388, 5.033431, 5.432709, 6.983212, 7.860528,
-   8.761227, 1.519216e-07 };
+   Double_t Graph0_fy1[35] = { 1.377411, 0.7496403, 0.6416451, 0.6519093, 0.7386317, 0.8836952, 0.9664216, 1.060075, 1.186058, 1.340119, 1.520711, 1.783171, 2.070547, 2.554003, 3.315539, 3.73311, 4.472665,
+   5.110104, 6.018425, 5.420696, 6.667297, 6.615562, 5.598219, 5.123355, 4.320883, 3.90195, 4.291174, 4.770807, 5.642038, 6.614304, 7.450625, 9.898645, 11.42169,
+   14.54016, 8.597441e-08 };
    TGraph *graph = new TGraph(35,Graph0_fx1,Graph0_fy1);
    graph->SetName("Graph0");
    graph->SetTitle("Graph");
@@ -51,17 +49,17 @@ void summary_binned_syst()
    Graph_Graph01->GetXaxis()->SetRange(1,101);
    Graph_Graph01->GetXaxis()->SetLabelFont(43);
    Graph_Graph01->GetXaxis()->SetLabelOffset(0.015);
-   Graph_Graph01->GetXaxis()->SetLabelSize(16);
-   Graph_Graph01->GetXaxis()->SetTitleSize(0.04);
-   Graph_Graph01->GetXaxis()->SetTitleOffset(1.1);
+   Graph_Graph01->GetXaxis()->SetLabelSize(20);
+   Graph_Graph01->GetXaxis()->SetTitleSize(0.05);
+   Graph_Graph01->GetXaxis()->SetTitleOffset(1);
    Graph_Graph01->GetXaxis()->SetTitleFont(42);
    Graph_Graph01->GetYaxis()->SetTitle("Systematic Uncertainty [%]");
    Graph_Graph01->GetYaxis()->SetLabelFont(43);
    Graph_Graph01->GetYaxis()->SetLabelOffset(0.015);
-   Graph_Graph01->GetYaxis()->SetLabelSize(16);
-   Graph_Graph01->GetYaxis()->SetTitleSize(0.04);
+   Graph_Graph01->GetYaxis()->SetLabelSize(20);
+   Graph_Graph01->GetYaxis()->SetTitleSize(0.05);
    Graph_Graph01->GetYaxis()->SetTickLength(0.02);
-   Graph_Graph01->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph01->GetYaxis()->SetTitleOffset(1);
    Graph_Graph01->GetYaxis()->SetTitleFont(42);
    Graph_Graph01->GetZaxis()->SetLabelFont(42);
    Graph_Graph01->GetZaxis()->SetLabelOffset(0.015);
@@ -73,7 +71,7 @@ void summary_binned_syst()
    
    graph->Draw("ap");
    
-   TLegend *leg = new TLegend(0.27,0.7,0.5,0.93,NULL,"brNDC");
+   TLegend *leg = new TLegend(0.12,0.7,0.5,0.93,NULL,"brNDC");
    leg->SetTextFont(62);
    leg->SetLineColor(1);
    leg->SetLineStyle(1);
@@ -149,9 +147,9 @@ void summary_binned_syst()
    Double_t Graph1_fx2[35] = { 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320,
    340, 360, 380, 410, 440, 480, 530, 590, 660, 760, 880, 1030, 1210, 1440, 1730, 2000,
    2500, 3200 };
-   Double_t Graph1_fy2[35] = { 0.1731277, 0.1439691, 0.1384795, 0.1749694, 0.2702594, 0.3586888, 0.4627824, 0.5382657, 0.5106091, 0.8005619, 0.6170154, 0.7799268, 1.154208, 1.11357, 1.713073, 1.369858, 1.786864,
-   1.313818, 2.363527, 2.200699, 2.572167, 2.62717, 2.648568, 2.728319, 2.856612, 2.726769, 2.707469, 2.825999, 2.308893, 2.675009, 3.786862, 5.033171, 5.503809,
-   8.552467, 10.92312 };
+   Double_t Graph1_fy2[35] = { 0.1590133, 0.01363754, 0.2973795, 0.1762927, 0.2218008, 0.3855348, 0.4069328, 0.4746079, 0.5177379, 0.8460999, 0.554955, 0.9540796, 1.015472, 1.694047, 2.373219, 1.670563, 2.369511,
+   3.57275, 3.386879, 2.690196, 3.68365, 2.174222, 3.051031, 2.14498, 3.922373, 6.06851, 8.534986, 11.64682, 16.09686, 21.26383, 27.744, 35.05503, 41.82108,
+   53.42657, 63.67384 };
    graph = new TGraph(35,Graph1_fx2,Graph1_fy2);
    graph->SetName("Graph1");
    graph->SetTitle("Graph");
@@ -163,8 +161,8 @@ void summary_binned_syst()
    graph->SetMarkerSize(0.9);
    
    TH1F *Graph_Graph12 = new TH1F("Graph_Graph12","Graph",100,0,3520);
-   Graph_Graph12->SetMinimum(0.1246315);
-   Graph_Graph12->SetMaximum(12.00159);
+   Graph_Graph12->SetMinimum(0.01227379);
+   Graph_Graph12->SetMaximum(70.03986);
    Graph_Graph12->SetDirectory(nullptr);
    Graph_Graph12->SetStats(0);
    Graph_Graph12->SetLineWidth(2);
@@ -196,9 +194,9 @@ void summary_binned_syst()
    Double_t Graph2_fx3[35] = { 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320,
    340, 360, 380, 410, 440, 480, 530, 590, 660, 760, 880, 1030, 1210, 1440, 1730, 2000,
    2500, 3200 };
-   Double_t Graph2_fy3[35] = { 1.709104, 0.3789425, 0.2305388, 0.9126067, 1.080728, 1.334029, 1.30071, 1.555836, 1.707196, 1.66505, 1.247245, 0.6382108, 5.09941, 7.296145, 4.824162, 2.092218, 8.710599,
-   3.6641, 2.330315, 4.01572, 1.121026, 3.09906, 3.399944, 1.4126, 1.815712, 3.127813, 3.71244, 3.474391, 1.376444, 3.095424, 2.67961, 4.729295, 3.59742,
-   2.868253, 2.119219 };
+   Double_t Graph2_fy3[35] = { 8.67362, 2.2421, 0.7294774, 0.7794023, 1.088572, 1.674396, 1.186782, 1.980579, 2.128911, 2.366734, 1.859826, 0.8183539, 7.08003, 10.70392, 8.858877, 1.703918, 14.79499,
+   8.453101, 1.399326, 11.65353, 4.230684, 9.835667, 5.607176, 4.296512, 4.048139, 4.991812, 3.432775, 2.589488, 5.79592, 6.088668, 8.293205, 4.291654, 8.856326,
+   9.034693, 9.079229 };
    graph = new TGraph(35,Graph2_fx3,Graph2_fy3);
    graph->SetName("Graph2");
    graph->SetTitle("Graph");
@@ -210,8 +208,8 @@ void summary_binned_syst()
    graph->SetMarkerSize(0.9);
    
    TH1F *Graph_Graph23 = new TH1F("Graph_Graph23","Graph",100,0,3520);
-   Graph_Graph23->SetMinimum(0.207485);
-   Graph_Graph23->SetMaximum(9.558605);
+   Graph_Graph23->SetMinimum(0.6565297);
+   Graph_Graph23->SetMaximum(16.20155);
    Graph_Graph23->SetDirectory(nullptr);
    Graph_Graph23->SetStats(0);
    Graph_Graph23->SetLineWidth(2);
@@ -243,9 +241,9 @@ void summary_binned_syst()
    Double_t Graph3_fx4[35] = { 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320,
    340, 360, 380, 410, 440, 480, 530, 590, 660, 760, 880, 1030, 1210, 1440, 1730, 2000,
    2500, 3200 };
-   Double_t Graph3_fy4[35] = { 0.5281866, 0.5497456, 0.2081633, 0.04127026, 0.8716941, 0.7480443, 1.570785, 3.670704, 2.662998, 4.346311, 6.218987, 10.77018, 18.17785, 19.27056, 30.25564, 34.54641, 41.60985,
-   51.91547, 54.79227, 64.48753, 70.43007, 77.61105, 82.44734, 86.48012, 88.3428, 89.30703, 89.30271, 89.12265, 89.21224, 89.27053, 88.66566, 86.81582, 84.38295,
-   77.82706, 67.77074 };
+   Double_t Graph3_fy4[35] = { 0.3423452, 0.3685355, 0.346458, 0.2539694, 0.7249951, 0.7662058, 1.648784, 3.960085, 1.420462, 1.539063, 0.558728, 14.34506, 12.00701, 30.75567, 6.001711, 18.95114, 11.70961,
+   13.16886, 31.3691, 32.18384, 47.97432, 44.56936, 80.16489, 101.1135, 120.2335, 132.5304, 129.425, 127.0679, 117.0999, 84.73051, 79.95921, 93.04742, 70.15537,
+   55.15269, 23.50821 };
    graph = new TGraph(35,Graph3_fx4,Graph3_fy4);
    graph->SetName("Graph3");
    graph->SetTitle("Graph");
@@ -257,8 +255,8 @@ void summary_binned_syst()
    graph->SetMarkerSize(0.9);
    
    TH1F *Graph_Graph34 = new TH1F("Graph_Graph34","Graph",100,0,3520);
-   Graph_Graph34->SetMinimum(0.03714323);
-   Graph_Graph34->SetMaximum(98.23361);
+   Graph_Graph34->SetMinimum(0.2285725);
+   Graph_Graph34->SetMaximum(145.758);
    Graph_Graph34->SetDirectory(nullptr);
    Graph_Graph34->SetStats(0);
    Graph_Graph34->SetLineWidth(2);
@@ -290,9 +288,9 @@ void summary_binned_syst()
    Double_t Graph4_fx5[35] = { 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320,
    340, 360, 380, 410, 440, 480, 530, 590, 660, 760, 880, 1030, 1210, 1440, 1730, 2000,
    2500, 3200 };
-   Double_t Graph4_fy5[35] = { 0.004589558, 0.00743866, 0.0007629395, 0.004732609, 0.008064508, 0.01200438, 0.01498461, 0.02026558, 0.01532435, 0.02153516, 0.02197623, 0.02210736, 0.02885461, 0.03569722, 0.04767179, 0.03759861, 0.05099177,
-   0.04791617, 0.05634427, 0.0655055, 0.07141829, 0.08301735, 0.087291, 0.1017809, 0.1155078, 0.130564, 0.1485229, 0.1698077, 0.190568, 0.2130687, 0.2346873, 0.2568245, 0.2729654,
-   0.28193, 0.2825439 };
+   Double_t Graph4_fy5[35] = { 0.01585484, 0.001603365, 0.002533197, 0.002515316, 0.002300739, 0.00525713, 0.006639957, 0.009548664, 0.009512901, 0.01071692, 0.01517534, 0.01237392, 0.01755953, 0.009846687, 0.01500845, 0.01235008, 0.0361979,
+   0.02621412, 0.03650784, 0.05944967, 0.05659461, 0.06971955, 0.07361174, 0.07735491, 0.08183718, 0.09204149, 0.1047313, 0.122118, 0.1399755, 0.1775026, 0.2175212, 0.2670884, 0.3085315,
+   0.3690422, 0.4263759 };
    graph = new TGraph(35,Graph4_fx5,Graph4_fy5);
    graph->SetName("Graph4");
    graph->SetTitle("Graph");
@@ -304,8 +302,8 @@ void summary_binned_syst()
    graph->SetMarkerSize(0.9);
    
    TH1F *Graph_Graph45 = new TH1F("Graph_Graph45","Graph",100,0,3520);
-   Graph_Graph45->SetMinimum(0.0006866455);
-   Graph_Graph45->SetMaximum(0.310722);
+   Graph_Graph45->SetMinimum(0.001443028);
+   Graph_Graph45->SetMaximum(0.4688531);
    Graph_Graph45->SetDirectory(nullptr);
    Graph_Graph45->SetStats(0);
    Graph_Graph45->SetLineWidth(2);
@@ -337,9 +335,9 @@ void summary_binned_syst()
    Double_t Graph5_fx6[35] = { 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320,
    340, 360, 380, 410, 440, 480, 530, 590, 660, 760, 880, 1030, 1210, 1440, 1730, 2000,
    2500, 3200 };
-   Double_t Graph5_fy6[35] = { 1.448435, 0.5439162, 0.2843142, 0.6171703, 0.7699609, 0.8482933, 0.9194136, 0.9880185, 1.02427, 1.104331, 1.090038, 1.11804, 1.106608, 1.069093, 1.062679, 1.0234, 1.041484,
-   0.915122, 1.009309, 0.9771347, 1.121163, 1.095092, 1.159966, 1.249373, 1.40301, 1.343405, 1.316738, 1.270807, 1.117301, 0.931561, 0.7552147, 0.5758524, 0.4664063,
-   0.1351953, 0.4802048 };
+   Double_t Graph5_fy6[35] = { 1.544148, 1.081169, 0.1964927, 0.4851937, 0.8197784, 0.9844303, 1.08577, 1.208067, 1.247895, 1.392472, 1.402497, 1.491523, 1.412284, 1.686752, 1.505506, 1.6101, 1.680601,
+   1.460063, 1.66384, 1.747882, 1.829088, 1.524174, 1.65813, 1.166093, 1.041412, 0.6860852, 0.3798604, 0.05259514, 0.5859613, 1.287711, 2.02446, 2.83407, 3.523487,
+   4.819685, 5.50667 };
    graph = new TGraph(35,Graph5_fx6,Graph5_fy6);
    graph->SetName("Graph5");
    graph->SetTitle("Graph");
@@ -351,8 +349,8 @@ void summary_binned_syst()
    graph->SetMarkerSize(0.9);
    
    TH1F *Graph_Graph56 = new TH1F("Graph_Graph56","Graph",100,0,3520);
-   Graph_Graph56->SetMinimum(0.003871322);
-   Graph_Graph56->SetMaximum(1.579759);
+   Graph_Graph56->SetMinimum(0.04733562);
+   Graph_Graph56->SetMaximum(6.052078);
    Graph_Graph56->SetDirectory(nullptr);
    Graph_Graph56->SetStats(0);
    Graph_Graph56->SetLineWidth(2);
@@ -384,9 +382,9 @@ void summary_binned_syst()
    Double_t Graph6_fx7[35] = { 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320,
    340, 360, 380, 410, 440, 480, 530, 590, 660, 760, 880, 1030, 1210, 1440, 1730, 2000,
    2500, 3200 };
-   Double_t Graph6_fy7[35] = { 0.03006458, 0.02841949, 0.01600981, 0.02571344, 0.05620718, 0.08023977, 0.09737611, 0.1121223, 0.1130521, 0.1204073, 0.125128, 0.1366735, 0.1362085, 0.1620531, 0.1449227, 0.1799345, 0.1842022,
-   0.1740098, 0.1929998, 0.1958251, 0.2019346, 0.2236307, 0.2727389, 0.3142476, 0.3651619, 0.4195273, 0.4827619, 0.5399942, 0.5809903, 0.6232738, 0.6753743, 0.8268714, 0.8932769,
-   0.9977162, 1.00202 };
+   Double_t Graph6_fy7[35] = { 0.06045103, 0.05408525, 0.05453229, 0.03932714, 0.07275343, 0.1556754, 0.20051, 0.2346277, 0.2544761, 0.2851009, 0.3188252, 0.3558159, 0.3604531, 0.4517794, 0.4380941, 0.5259871, 0.5549908,
+   0.5858362, 0.7100582, 0.8230746, 0.9751618, 1.077819, 1.248169, 1.132441, 0.9972751, 0.8966088, 0.8932114, 0.953573, 0.9810388, 1.011926, 1.065308, 1.232392, 1.312625,
+   1.331806, 1.31194 };
    graph = new TGraph(35,Graph6_fx7,Graph6_fy7);
    graph->SetName("Graph6");
    graph->SetTitle("Graph");
@@ -398,8 +396,8 @@ void summary_binned_syst()
    graph->SetMarkerSize(0.9);
    
    TH1F *Graph_Graph67 = new TH1F("Graph_Graph67","Graph",100,0,3520);
-   Graph_Graph67->SetMinimum(0.01440883);
-   Graph_Graph67->SetMaximum(1.100621);
+   Graph_Graph67->SetMinimum(0.03539443);
+   Graph_Graph67->SetMaximum(1.461054);
    Graph_Graph67->SetDirectory(nullptr);
    Graph_Graph67->SetStats(0);
    Graph_Graph67->SetLineWidth(2);
@@ -431,9 +429,9 @@ void summary_binned_syst()
    Double_t Graph7_fx8[35] = { 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320,
    340, 360, 380, 410, 440, 480, 530, 590, 660, 760, 880, 1030, 1210, 1440, 1730, 2000,
    2500, 3200 };
-   Double_t Graph7_fy8[35] = { 2.610288, 1.289962, 1.004466, 1.436707, 1.86385, 2.051034, 2.51709, 4.296219, 3.569441, 5.020698, 6.608861, 10.99261, 19.03202, 20.77927, 30.78907, 34.75535, 42.66088,
-   52.15499, 55.00446, 64.72956, 70.57132, 77.77894, 82.61769, 86.59155, 88.47198, 89.46831, 89.49882, 89.32703, 89.37155, 89.51314, 88.95908, 87.37581, 85.00938,
-   78.84335, 68.68765 };
+   Double_t Graph7_fy8[35] = { 8.92523, 2.626182, 1.092659, 1.168332, 1.727053, 2.305123, 2.538828, 4.740099, 3.137969, 3.535862, 2.908701, 14.59081, 14.20346, 32.75557, 11.55785, 19.53574, 19.61529,
+   16.91825, 32.20163, 34.81324, 48.80324, 46.2077, 80.64001, 101.3701, 120.4518, 132.8253, 129.8262, 127.7196, 118.4831, 87.83475, 85.39774, 100.0635, 83.02953,
+   78.83146, 68.71428 };
    graph = new TGraph(35,Graph7_fx8,Graph7_fy8);
    graph->SetName("Graph7");
    graph->SetTitle("Graph");
@@ -445,8 +443,8 @@ void summary_binned_syst()
    graph->SetMarkerSize(0.9);
    
    TH1F *Graph_Graph78 = new TH1F("Graph_Graph78","Graph",100,0,3520);
-   Graph_Graph78->SetMinimum(0.9040197);
-   Graph_Graph78->SetMaximum(98.364);
+   Graph_Graph78->SetMinimum(0.9833928);
+   Graph_Graph78->SetMaximum(145.9985);
    Graph_Graph78->SetDirectory(nullptr);
    Graph_Graph78->SetStats(0);
    Graph_Graph78->SetLineWidth(2);
@@ -474,13 +472,13 @@ void summary_binned_syst()
    graph->SetHistogram(Graph_Graph78);
    
    graph->Draw("p");
-   TLatex *   tex = new TLatex(0.16,0.96,"#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+   TLatex *   tex = new TLatex(0.1,0.96,"#scale[1.3]{#it{Private work (CMS data)}}");
    tex->SetNDC();
    tex->SetTextFont(42);
    tex->SetTextSize(0.04);
    tex->SetLineWidth(2);
    tex->Draw();
-      tex = new TLatex(0.7,0.96,"108.95 fb^{-1} (13.6 TeV)");
+      tex = new TLatex(0.74,0.96,"109 fb^{-1} (13.6 TeV)");
    tex->SetNDC();
    tex->SetTextFont(42);
    tex->SetTextSize(0.04);

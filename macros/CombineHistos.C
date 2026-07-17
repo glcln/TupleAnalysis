@@ -579,7 +579,7 @@ TCanvas* DrawWithCDF2(TH1* h1,
     pad1->Draw();
 
     TPad* pad2 = new TPad("pad2", "pad2", 0.0, 0.0, 1.0, 0.315);
-    pad2->SetLeftMargin(0.16); pad2->SetBottomMargin(0.33);
+    pad2->SetLeftMargin(0.16);pad2->SetBottomMargin(0.33);
     pad2->Draw();
 
     // Draw upper plot (the pre-drawn distributions)
@@ -641,14 +641,6 @@ TCanvas* DrawWithCDF2(TH1* h1,
     hCDF1->Draw("P");
     hCDF2->Draw("P SAME");
     line->Draw("same");
-
-    // Legend
-    TLegend* leg = new TLegend(0.12, 0.55, 0.45, 0.92);
-    leg->AddEntry(hCDF1, leg_h1.c_str(), "pe");
-    leg->AddEntry(hCDF2, leg_h2.c_str(), "pe");
-    leg->SetBorderSize(0);
-    leg->SetFillStyle(0);
-    //leg->Draw();
 
     c_new->Update();
     cout << "Canvas " << CanvasTitle << " drawn with CDFs of: "
@@ -1424,9 +1416,9 @@ void Cutflows(std::string QCD, std::string TTbar, std::string Wjets, std::string
     hs->Add(Cutflow_TTbar);
     hs->Add(Cutflow_Wjets);
 
-    auto PrintCutflowPercent = [](TH1D* h, const std::string& name)
+    auto PrintCutflowPercent = [](TH1D* h, const std::string& name, int cut = 1)
     {
-        double N0 = h->GetBinContent(2);
+        double N0 = h->GetBinContent(cut);
 
         std::cout << "\n=== " << name << " ===\n";
         std::cout << "Cut\t\tEvents\t\tRemaining (%)\n";
@@ -1444,8 +1436,8 @@ void Cutflows(std::string QCD, std::string TTbar, std::string Wjets, std::string
     // --- Style   
     int colorWjets = kBlue-7;
     int colorTTbar = kRed;
-    int colorQCD = kGreen-4;
-    int colorSignal = kOrange+1;
+    int colorQCD = kGreen;
+    int colorSignal = kViolet-1;
     int colorJetMET = kBlack;
     gStyle->SetOptStat(0);
 
@@ -1462,50 +1454,51 @@ void Cutflows(std::string QCD, std::string TTbar, std::string Wjets, std::string
     Cutflow_JetMETdata->SetMarkerColor(colorJetMET);
     Cutflow_JetMETdata->SetMarkerStyle(20);
 
+    TLatex *tex = new TLatex(0.68, 0.91, "109 fb^{-1} (13.6 TeV)");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#it{Private work (CMS simulation/data)}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
 
 
 
     // --- Canvas + pads
-    TCanvas* c = new TCanvas("Cutflow_BKG_data_signal", "", 800, 800);
-    
-    c->SetBottomMargin(0.25);
-    c->SetLeftMargin(0.12);
-    c->SetRightMargin(0.05);
-    c->SetTopMargin(0.08);
-
+    TCanvas* c = new TCanvas("Cutflow_BKG_data_signal", "", 800, 600);
+    c->SetBottomMargin(0.28);
+    c->SetLeftMargin(0.16);
     c->cd();
-    hs->SetMaximum(std::max(hs->GetMaximum()*3, Cutflow_JetMETdata->GetMaximum())*3);
-    hs->SetMinimum(std::min(hs->GetMinimum()/2, Cutflow_Gluino2000->GetMinimum())/2);
-    Cutflow_Wjets->GetXaxis()->SetLabelSize(0.04);
-    Cutflow_Wjets->GetXaxis()->SetRangeUser(1, 20);
-    Cutflow_Wjets->GetXaxis()->SetTitle("");
+
+    hs->SetMaximum(1e9);
+    hs->SetMinimum(5e2);
+
     hs->Draw("HIST");
-    hs->GetHistogram()->GetYaxis()->SetTitle("Events");
+    hs->GetHistogram()->GetYaxis()->SetTitle("Number of events");
     Cutflow_Gluino2000->Draw("E1 same");
     Cutflow_JetMETdata->Draw("E1 same");
     c->SetLogy();
 
     // --- Légende
-    TLegend* leg = new TLegend(0.60, 0.65, 0.92, 0.92);
+    TLegend* leg = new TLegend(0.60, 0.70, 0.89, 0.89);
     leg->SetBorderSize(0);
-    leg->SetFillStyle(0);
-    leg->AddEntry(Cutflow_JetMETdata, "2024 JetMET data", "ep");
-    leg->AddEntry(Cutflow_Wjets, "W+jets", "f");
+    leg->AddEntry(Cutflow_JetMETdata, "MET data","lep");
+    leg->AddEntry(Cutflow_Wjets, "W(#rightarrow#mu#nu)+jets", "f");
     leg->AddEntry(Cutflow_TTbar, "TTbar", "f");
-    leg->AddEntry(Cutflow_QCD, "QCD muEnriched", "f");
-    leg->AddEntry(Cutflow_Gluino2000, "#tilde{g}_{m=2000}", "ep");
+    leg->AddEntry(Cutflow_QCD, "QCD (#mu enriched)",       "f");
+    leg->AddEntry(Cutflow_Gluino2000, "#tilde{g} (m=2000 GeV)", "ep");
     leg->Draw();
 
     // --- Label CMS
-    TLatex latex;
-    latex.SetNDC();
-    latex.SetTextSize(0.035);
-    latex.SetTextFont(42);
-    latex.DrawLatex(0.12, 0.93, "#it{Work in progress}");
+    latex1->Draw();
+    tex->Draw();
 
     // --- Labels X
-    std::vector<TString> xlabel = {"All","HLT MET","METfilters", "PseudoMET > 170", "p_{T}>50","|#eta|<2.4","N_{no-L1 pixel hits}#geq2","f_{valid hits}>0.8",
-                "N_{dEdx hits}#geq10","HighPurity","#chi^{2}/N_{dof}<5","|d_{z}|<0.1","|d_{xy}|<0.02","I^{rel}_{PF}<0.02","I^{trk}_{dr03}<15",
+    std::vector<TString> xlabel = {"All","or MET trigger","MET filters", "PUppi MET > 150", "p_{T}>50","|#eta|<2.4","N_{pixel hits}#geq2","f_{valid hits}>0.8",
+                "N_{dEdx hits}#geq10","High Purity","#chi^{2}/N_{dof}<5","|d_{z}|<0.1","|d_{xy}|<0.02","I^{rel}_{PF}<0.02","I^{trk}_{dr03}<15",
                 "E/p<0.3","#sigma_{p_{T}}/p_{T}^{2}<0.0008","F_{pixel}>0.3","#sigma_{p_{T}}/p_{T}<1","I_{h}>C"};
 
     for (int i = 1; i <= Cutflow_Wjets->GetNbinsX(); i++) {
@@ -1518,27 +1511,34 @@ void Cutflows(std::string QCD, std::string TTbar, std::string Wjets, std::string
     }
 
     gPad->SetTickx(0);
+    hs->GetYaxis()->SetTitleSize(0.06);
+    hs->GetYaxis()->SetTitleOffset(0.9);
+    hs->GetYaxis()->SetLabelSize(0.05);
     hs->GetXaxis()->LabelsOption("v");
     hs->GetXaxis()->SetRangeUser(1, 20);
-    hs->GetXaxis()->SetLabelSize(0.04);
+    hs->GetXaxis()->SetLabelSize(0.05);
+
+    gPad->SetTicky(1);
+    gPad->SetTickx(1);
+
     c->Update();
 
     
 
     // Cout values:
-    PrintCutflowPercent(Cutflow_JetMETdata, "JetMET data");
+    PrintCutflowPercent(Cutflow_JetMETdata, "JetMET data", 1);
     TH1D* Cutflow_MC = (TH1D*)Cutflow_Wjets->Clone("Cutflow_MC");
-    Cutflow_MC->Add(Cutflow_TTbar);
-    Cutflow_MC->Add(Cutflow_QCD);
-    PrintCutflowPercent(Cutflow_MC, "MC (Wjets + TTbar + QCD)");
-    PrintCutflowPercent(Cutflow_Gluino2000, "Signal m=2000");
+    //Cutflow_MC->Add(Cutflow_TTbar);
+    //Cutflow_MC->Add(Cutflow_QCD);
+    PrintCutflowPercent(Cutflow_MC, "MC (Wjets + TTbar + QCD)", 1);
+    PrintCutflowPercent(Cutflow_Gluino2000, "Signal m=2000", 1);
 
 
 
     // --- Saving
     ofile->cd();
     c->Write();
-    c->SaveAs("PlayWithHistos/EventCutflow.pdf");
+    c->SaveAs("PlayWithHistos/Nm1plots/EventCutflow.pdf");
     ofile->Close();
 }
 
@@ -2186,13 +2186,14 @@ void Ihand1oP_fits() {
     TH1F* oP_new = (TH1F*)ifile->Get("METanalysis_Eta2p4_10000oP");
 
     // 1oP fit
-    float rangemax_p = 30;
-    if (oP_new->GetBinCenter(oP_new->GetMaximumBin()) < rangemax_p) rangemax_p = 0.8 * oP_new->GetBinCenter(oP_new->GetMaximumBin());
+    float rangemax_p = 0.9 * oP_new->GetBinCenter(oP_new->GetMaximumBin());
+    TF1 f_p_new("f_p_old","[0]*([1]+erf((log(x)-[2])/[3]))",0,rangemax_p);
+    f_p_new.SetParameter(0,560);
+    f_p_new.FixParameter(1,1.0);
+    f_p_new.SetParameter(2,3.50116e+00);
+    f_p_new.SetParameter(3,0.60152e+00);
     
-    TF1 f_p_new("f_p_new", "0.5*(exp([0]*x*x+[1]*x)+exp(-[0]*x*x-[1]*x))-1", 0, rangemax_p);
-    float end1oPFit = 0.4 * oP_new->GetBinCenter(oP_new->GetMaximumBin());
-    if (end1oPFit > 25) end1oPFit = 25;
-    oP_new->Fit(&f_p_new, "R", "", 0, end1oPFit);
+    oP_new->Fit(&f_p_new, "RL", "", 0, rangemax_p);
 
     // Ih fit
     float max_ih = Ih_new->GetBinCenter(Ih_new->GetMaximumBin());
@@ -2447,7 +2448,7 @@ void BKGdependency () {
     TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     latex1->SetNDC();
     latex1->SetTextFont(42);
-    latex1->SetTextSize(0.04);
+    latex1->SetTextSize(0.06);
 
 
     TCanvas *c_fpix_vs_ih = new TCanvas("c_fpix_vs_ih", "c_fpix_vs_ih", 800, 600);
@@ -2511,7 +2512,7 @@ void BKGdependency () {
     py_C3fp9->GetYaxis()->SetTitleSize(0.06);
     py_C3fp9->GetXaxis()->SetTitleSize(0.06);
     py_C3fp9->GetXaxis()->SetTitleOffset(0.9);
-    py_C3fp9->GetYaxis()->SetTitleOffset(1);
+    py_C3fp9->GetYaxis()->SetTitleOffset(0.9);
     py_C3fp9->GetXaxis()->SetLabelSize(0.05);
     py_C3fp9->GetYaxis()->SetLabelSize(0.05);
     py_C3fp9->GetXaxis()->SetRangeUser(0, 8);
@@ -2525,7 +2526,7 @@ void BKGdependency () {
 
     TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
     TPad *pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
-    pad1->SetBottomMargin(0.16); pad1->SetLeftMargin(0.16);
+    pad1->SetLeftMargin(0.16); pad1->SetBottomMargin(0.12);
     pad1->Draw();
     pad1->cd();
 
@@ -2533,9 +2534,9 @@ void BKGdependency () {
     py_D9fp10->Draw("hist same");
     pad1->SetLogy();
     
-    TLegend *legend = new TLegend(0.6, 0.6, 0.9, 0.9);
-    legend->AddEntry(py_C3fp9, "F_{pixel} #leq 0.9", "l");
-    legend->AddEntry(py_D9fp10, "F_{pixel} > 0.9", "l");
+    TLegend *legend = new TLegend(0.5, 0.7, 0.8, 0.9);
+    legend->AddEntry(py_C3fp9, "Control region (0.3< F_{pixel}#leq0.8)", "l");
+    legend->AddEntry(py_D9fp10, "Validation region (0.8< F_{pixel}#leq0.9)", "l");
     legend->SetBorderSize(0);
     legend->SetFillStyle(0);
     legend->SetTextSize(0.045);
@@ -2545,9 +2546,12 @@ void BKGdependency () {
     
     // Ratio plot
     c1->cd();
-    TPad *pad2 = new TPad("pad2", "pad2", 0, 0, 1, 0.3);
-    pad2->SetTopMargin(0); pad2->SetLeftMargin(0.16);
-    pad2->SetBottomMargin(0.3);
+    TPad* pad2 = new TPad("pad2", "pad2", 0, 0.0, 1, 0.3);
+    pad2->SetLeftMargin(0.16);
+    pad2->SetTopMargin(0.05);
+    pad2->SetBottomMargin(0.33);
+    pad2->SetTickx(1);
+    pad2->SetTicky(1);
     pad2->Draw();
     pad2->cd();
 
@@ -2557,25 +2561,21 @@ void BKGdependency () {
     hRatio->SetMarkerColor(kBlack);
     hRatio->SetLineColor(kBlack);
 
+
     hRatio->GetYaxis()->SetNdivisions(505);
-    hRatio->GetYaxis()->SetTitleSize(0.08);
-    hRatio->GetYaxis()->SetTitleFont(43);
-    hRatio->GetXaxis()->SetTitleFont(43);
-    hRatio->GetYaxis()->SetLabelFont(43);
-    hRatio->GetXaxis()->SetLabelFont(43);
-    hRatio->GetYaxis()->SetTitleSize(24);  // px
-    hRatio->GetXaxis()->SetTitleSize(24);
-    hRatio->GetYaxis()->SetLabelSize(20);
-    hRatio->GetXaxis()->SetLabelSize(20);
-    hRatio->GetYaxis()->SetTitleOffset(1.4);   // en font pixel, ~1.0 est correct
-    hRatio->GetXaxis()->SetTitleOffset(1.0);
+    hRatio->GetXaxis()->SetTitleSize(0.15);
+    hRatio->GetXaxis()->SetTitleOffset(0.9);
+    hRatio->GetXaxis()->SetLabelSize(0.12);
+    hRatio->GetYaxis()->SetTitleSize(0.14);
+    hRatio->GetYaxis()->SetTitleOffset(0.3);
+    hRatio->GetYaxis()->SetLabelSize(0.12);
 
     hRatio->Draw("E1");
     TLine *line = new TLine(hRatio->GetXaxis()->GetXmin(), 1, 8, 1);
     line->SetLineStyle(2);
     gStyle->SetOptStat(0);
     line->Draw("same");
-    hRatio->GetYaxis()->SetTitle("I_{h}^{C}/I_{h}^{D}  ");
+    hRatio->GetYaxis()->SetTitle("I_{h}^{CR} / I_{h}^{VR} ");
     hRatio->GetXaxis()->SetTitle("I_{h} [MeV/cm]");
     hRatio->SetMinimum(0.8);
     hRatio->SetMaximum(1.2);
@@ -2728,21 +2728,21 @@ void CompareMaping() {
 
     TFile *ofile = new TFile("PlayWithHistos/CompareMapping.root", "RECREATE");
 
-    TFile *ifileTTbar2024 = new TFile("../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "READ");
-    TFile *ifileWjets2024 = new TFile("../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root", "READ");
-    TFile *ifileQCD2024 = new TFile("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "READ");
+    TFile *ifileTTbar2024 = new TFile("../output/TTbar2024_V15/TTbar2024_V15p9_weighted.root", "READ");
+    TFile *ifileWjets2024 = new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p13_weighted.root", "READ");
+    TFile *ifileQCD2024 = new TFile("../output/QCD2024_V16/QCD2024_mu_V16p2_weighted.root", "READ");
     TFile *GluinoRun3madgraph = new TFile("PlayWithHistos/GluinoP_mass_madgraph_weighted.root", "READ");
 
-    TLatex *latex1 = new TLatex(0.155, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    TLatex *latex1 = new TLatex(0.155, 0.91, "#it{Private work (CMS simulation)}");
     latex1->SetNDC();
     latex1->SetTextFont(42);
     latex1->SetTextSize(0.04);
 
 
     // load histograms
-    TH2F *pT_vs_fpix_ttbar = (TH2F*)ifileTTbar2024->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
-    TH2F *pT_vs_fpix_wjets = (TH2F*)ifileWjets2024->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
-    TH2F *pT_vs_fpix_qcd = (TH2F*)ifileQCD2024->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
+    TH2F *pT_vs_fpix_ttbar = (TH2F*)ifileTTbar2024->Get("METanalysis_TestPUppiMETCut_Eta2p4_pT_vs_Fpixel");
+    TH2F *pT_vs_fpix_wjets = (TH2F*)ifileWjets2024->Get("METanalysis_TestPUppiMETCut_Eta2p4_pT_vs_Fpixel");
+    TH2F *pT_vs_fpix_qcd = (TH2F*)ifileQCD2024->Get("METanalysis_TestPUppiMETCut_Eta2p4_pT_vs_Fpixel");
     TH2F *pT_vs_fpix_gluino = (TH2F*)GluinoRun3madgraph->Get("pT_vs_Fpixel_sum");
 
     // sum the MC backgrounds together
@@ -2817,7 +2817,7 @@ void CompareMaping() {
         cout << "Number of entries with Fpixel <= " << fpix_cut << ": " << nEntries_bkg << " (bkg), " << nEntries_gluino << " (gluino)" << "    (" << 100.0*nEntries_gluino/nEntries_bkg << " %)" << endl;
     }
     gStyle->SetOptStat(0);
-    c_bkg_gluino->SaveAs("PlayWithHistos/CompareMaping_mc.pdf");
+    c_bkg_gluino->SaveAs("PlayWithHistos/CompareMaping_MC.pdf");
 
 
     ofile->cd();
@@ -2920,10 +2920,10 @@ void Nm1Eff (bool isRescaled, bool isOnlyWjets, std::string QCD, std::string TTb
 
     std::vector<TH1F*> hNM1_QCD, hNM1_TTbar, hNM1_Wjets, hNM1_MC, hNM1_JetMETdata, hNM1_Gluino;
     
-    std::vector<string> cutNames = {"trigger", "METfilters", "CaloMET", "CaloMET_rescaled", "Ptpseudo", "eta", "NOPH", "FOVH", "NOM", "HighPurity", 
+    std::vector<string> cutNames = {"trigger", "METfilters", "PUppiMET", "Ptpseudo", "eta", "NOPH", "FOVH", "NOM", "HighPurity", 
     "Chi2", "dZ", "dXY", "PFMiniIso", "TrkIso", "EoverP", "PtErr_over_PtPt", "Fpix", "PtErr_over_Pt", "Ih_StripOnly", "Ih_StripOnly_rescaled"};
 
-    std::vector<string> Xlabel = {"orMETtrigger", "METfilters", "PseudoMET", "PseudoMET rescaled", "p_{T} [GeV]", "eta", "Nb pixel hits", "frac. valid hits", "Nb dE/dx", "HighPurity", 
+    std::vector<string> Xlabel = {"or MET trigger", "MET filters", "PUppi MET", "p_{T} [GeV]", "eta", "Nb pixel hits", "frac. valid hits", "Nb dE/dx", "HighPurity", 
     "#chi^{2}/NDOF", "dz [cm]", "dxy [cm]", "I_{PF}^{rel}", "I_{dr03}^{trk}", "E/p", "#sigma_{p_{T}}/p_{T}^{2}", "F_{pixel}", "#sigma_{p_{T}}/p_{T}", "I_{h} [MeV/cm]", "I_{h} rescaled [MeV/cm]"};
 
     // Step 1: retrieve the Nm1 hists
@@ -2940,17 +2940,10 @@ void Nm1Eff (bool isRescaled, bool isOnlyWjets, std::string QCD, std::string TTb
             hNM1_MC.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i-1].c_str())));
         }
         
-        if (cutNames[i] == "CaloMET_rescaled") {
-            hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i-1].c_str())));
-            hNM1_QCD.push_back((TH1F*)ifile_QCD->Get("Nm1_event_CaloMET_weighted"));
-            hNM1_TTbar.push_back((TH1F*)ifile_TTbar->Get("Nm1_event_CaloMET_weighted"));
-        }
-        else {
-            hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
-            hNM1_QCD.push_back((TH1F*)ifile_QCD->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
-            hNM1_TTbar.push_back((TH1F*)ifile_TTbar->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
-        }
-
+        
+        hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_QCD.push_back((TH1F*)ifile_QCD->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_TTbar.push_back((TH1F*)ifile_TTbar->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
         hNM1_Wjets.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
         hNM1_Gluino.push_back((TH1F*)ifile_Gluino->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
 
@@ -3071,8 +3064,7 @@ void Nm1Eff (bool isRescaled, bool isOnlyWjets, std::string QCD, std::string TTb
     std::vector<CutInfo> cutInfos = {
         {0,      true,  false},  // trigger
         {0,      true,  false},  // METfilters
-        {170,    true,  false},  // CaloMET       > 170
-        {170,    true,  false},  // CaloMET rescaled       > 170
+        {150,    true,  false},  // PUppiMET > 150
         {50,     true,  false},  // Pt_pseudo     > 50
         {2.4,    false, true },  // |eta|         < 2.4  ← symétrique
         {2,      true,  false},  // NOPH          >= 2
@@ -3088,8 +3080,8 @@ void Nm1Eff (bool isRescaled, bool isOnlyWjets, std::string QCD, std::string TTb
         {0.0008, false, false},  // PtErr/PtPt    < 0.0008
         {0.3,    true,  false},  // Fpix          > 0.3
         {1,      false, false},  // PtErr/Pt      < 1
-        {3.14,   true,  false},  // Ih_StripOnly  > 3.14
-        {3.14,   true,  false},  // Ih_StripOnly rescaled > 3.14
+        {2.9784,   true,  false},  // Ih_StripOnly  > 3.14
+        {2.9784,   true,  false},  // Ih_StripOnly rescaled > 3.14
     };
 
     // Helper lambda étendu: avec option symétrique pour |var| < threshold
@@ -4280,7 +4272,7 @@ void CompareKinematics() {
     stylePT(trackPT_vs_trackPseudoTrackPT__HSCPmatched_2000);
     stylePT(trackPT_vs_trackPseudoTrackPT__HSCPmatched_2600);
 
-    TLatex *tex = new TLatex(0.62, 0.91, "110 fb^{-1} (13.6 TeV)");
+    TLatex *tex = new TLatex(0.62, 0.91, "109 fb^{-1} (13.6 TeV)");
     tex->SetNDC();
     tex->SetTextFont(42);
     tex->SetTextSize(0.04);
@@ -5199,6 +5191,11 @@ void TriggerEffCalib__Signal(const char *labelSIGNAL, const char *inputfileSIGNA
             eff->SetDirectory(0);
             eff->Divide(den);
 
+            if (eff->GetEntries() == 0 || eff->Integral() == 0) {
+                std::cerr << "Warning: empty efficiency histo " << effName << ", skipping draw." << std::endl;
+                continue;
+            }
+
             // ---- integrated efficiency for the LaTeX table ----
             // full range
             double effInt = 0., effErr = 0.;
@@ -5231,12 +5228,14 @@ void TriggerEffCalib__Signal(const char *labelSIGNAL, const char *inputfileSIGNA
                                                       : Form("eff. %s", trg.c_str());
 
             TCanvas *c = DrawCanvas(eff, cName.c_str(), obs.xtitle.c_str(), ytitle.c_str(),
-                                    "E1", msize, 0, xUp, 0, 1, false);
+                                    "E1", msize, 0, xUp, kBlack, 0, 1, false);
             c->cd();
             latex1->Draw();
 
             // ---- saving ----
             c->SaveAs(Form("TriggEff/c_%s___%s__SIGNAL__%s.pdf",
+                           trg.c_str(), obs.tag.c_str(), ofilename));
+            c->SaveAs(Form("TriggEff/c_%s___%s__SIGNAL__%s.C",
                            trg.c_str(), obs.tag.c_str(), ofilename));
 
             ofile->cd();
@@ -5609,6 +5608,8 @@ void TriggerEffCalib (const char *labelData, const char *labelMC,
                                                 obs.xtitle.c_str(), 0, xUp);
             cRatio_bis->SaveAs(Form("TriggEff/cRatio_%s_%s_bis.pdf",
                                     ratioTag.c_str(), ofilename));
+            cRatio_bis->SaveAs(Form("TriggEff/cRatio_%s_%s_bis.C",
+                                    ratioTag.c_str(), ofilename));
         }
     }
 
@@ -5825,7 +5826,7 @@ void SignalEffVsMass(const char *ofilename = "EffVsMass") {
     std::vector<int> masses = {1100, 1200, 1300, 1400, 1600, 1800, 2000, 2200, 2400, 2600};
 
     auto fileName = [&](int m) {
-        return Form("../output/Gluino_V19/Gluino_Run3_MET_madgraph_%d_V19p6.root", m);
+        return Form("../output/Gluino_V19/Gluino_Run3_MET_madgraph_%d_V19p8.root", m);
     };
 
     // the 3 selections -> one plot each
@@ -5890,6 +5891,15 @@ void SignalEffVsMass(const char *ofilename = "EffVsMass") {
     latex1->SetNDC();
     latex1->SetTextFont(42);
     latex1->SetTextSize(0.04);
+
+    TLatex *tex = new TLatex(0.54, 0.91, "#bf{Cut = Pseudo MET > 250 GeV}");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+    TLatex *tex2 = new TLatex(0.56, 0.95, "#bf{Cut = Pseudo MET > 250 GeV OR}");
+    tex2->SetNDC();
+    tex2->SetTextFont(42);
+    tex2->SetTextSize(0.04);
 
     // ------------------------------------------------------------------
     // one plot per selection (iterate by index to fetch the matching label)
@@ -5978,6 +5988,16 @@ void SignalEffVsMass(const char *ofilename = "EffVsMass") {
             integratedEff(numTrigSFup, den, effTsfup, errTsfup);
             integratedEff(numTrigSFdown, den, effTsfdown, errTsfdown);
 
+            effS *= 0.83; errS*= 0.83;  // candidate -> event efficiency
+            effSel2 *= 0.83; errSel2*= 0.83;
+            effSup *= 0.83; errSup*= 0.83;
+            effSdown *= 0.83; errSdown*= 0.83;
+            effbis *= 0.779; errbis*= 0.779;
+            effraw *= 0.779; errraw*= 0.779;
+            effT *= 0.779; errT*= 0.779;
+            effTsf *= 0.779; errTsf*= 0.779;
+            effTsfup *= 0.779; errTsfup*= 0.779;
+            effTsfdown *= 0.779; errTsfdown*= 0.779;
 
             gSel->SetPoint(iPoint, m, effS);
             gSel->SetPointError(iPoint, 0., errS);
@@ -6066,7 +6086,7 @@ void SignalEffVsMass(const char *ofilename = "EffVsMass") {
 
         TMultiGraph *mg = new TMultiGraph();
         mg->Add(gSel,  "PL");
-        mg->Add(gSel2,  "PL");
+        if(isel!=2) mg->Add(gSel2,  "PL");
         mg->Add(gSelsfup, "PL");
         mg->Add(gSelsfdown, "PL");
         mg->Add(gTrigraw, "PL");
@@ -6079,7 +6099,7 @@ void SignalEffVsMass(const char *ofilename = "EffVsMass") {
         mg->GetXaxis()->SetTitle("m_{#tilde{g}} [GeV]");
         mg->GetYaxis()->SetTitle("Acceptance");
         mg->SetMinimum(0.0);
-        mg->SetMaximum(0.5);
+        mg->SetMaximum(0.6);
         mg->GetXaxis()->SetLimits(1000, 2700);
 
         mg->SetTitle("");
@@ -6090,22 +6110,31 @@ void SignalEffVsMass(const char *ofilename = "EffVsMass") {
         mg->GetXaxis()->SetLabelSize(0.05);
         mg->GetYaxis()->SetLabelSize(0.05);
 
-        TLegend *leg = new TLegend(0.18, 0.79, 0.89, 0.89);
+        TLegend *leg = new TLegend(0.18, 0.60, 0.89, 0.89);
         leg->SetBorderSize(0);
         leg->SetNColumns(2);
         leg->AddEntry(gTrigraw, "Trigger + METfilters", "lep");
         leg->AddEntry(gTrigbis, "Trigger (no jet check) + METfilters", "lep");
         leg->AddEntry(gTrig, "Trigger + METfilters + Cut", "lep");
-        leg->AddEntry(gSel2,  "HSCP pre-sel. + SF (2D)", "lep");
-        leg->AddEntry(gTrigsf, "Trigger + METfilters + Cut + SF (1D)", "lep");
-        leg->AddEntry(gSel,  "HSCP pre-sel. + SF (1D)", "lep");
-        leg->AddEntry(gTrigsfup, "Trigger + METfilters + Cut + SF_{up} (1D)", "lep");
-        leg->AddEntry(gSelsfup, "HSCP pre-sel. + SF_{up} (1D)", "lep");
-        leg->AddEntry(gTrigsfdown, "Trigger + METfilters + Cut + SF_{down} (1D)", "lep");
-        leg->AddEntry(gSelsfdown, "HSCP pre-sel. + SF_{down} (1D)", "lep");
+        if(isel!=2) leg->AddEntry(gSel2,  "HSCP pre-sel. + SF (2D)", "lep");
+        if(isel==2) leg->AddEntry(gSel,  "HSCP pre-sel. + SF (2D)", "lep");
+        if(isel!=2) leg->AddEntry(gTrigsf, "Trigger + METfilters + Cut + SF (1D)", "lep");
+        if(isel==2) leg->AddEntry(gTrigsf, "Trigger + METfilters + Cut + SF (2D)", "lep");
+        if(isel!=2) leg->AddEntry(gSel,  "HSCP pre-sel. + SF (1D)", "lep");
+        if(isel==2) leg->AddEntry(gSelsfup, "HSCP pre-sel. + SF_{up} (2D)", "lep");
+        if(isel!=2) leg->AddEntry(gTrigsfup, "Trigger + METfilters + Cut + SF_{up} (1D)", "lep");
+        if(isel==2) leg->AddEntry(gTrigsfup, "Trigger + METfilters + Cut + SF_{up} (2D)", "lep");
+        if(isel!=2) leg->AddEntry(gSelsfup, "HSCP pre-sel. + SF_{up} (1D)", "lep");
+        if(isel==2) leg->AddEntry(gSelsfdown, "HSCP pre-sel. + SF_{down} (2D)", "lep");
+        if(isel!=2) leg->AddEntry(gTrigsfdown, "Trigger + METfilters + Cut + SF_{down} (1D)", "lep");
+        if(isel==2) leg->AddEntry(gTrigsfdown, "Trigger + METfilters + Cut + SF_{down} (2D)", "lep");
+        if(isel!=2) leg->AddEntry(gSelsfdown, "HSCP pre-sel. + SF_{down} (1D)", "lep");
         leg->Draw();
 
         latex1->Draw();
+        if (isel==1) {tex->SetTitle("#bf{Cut = PUppi MET > 150 GeV}");tex->SetX(0.56);}
+        tex->Draw();
+        if (isel==2) tex2->Draw();
 
         c->SaveAs(Form("TriggEff/c_EffVsMass_%s__%s.pdf", sel.c_str(), ofilename));
 
@@ -6120,8 +6149,9 @@ void SignalEffVsMass(const char *ofilename = "EffVsMass") {
 }
 
 
-void DisplayTriggerEff(const TString& inputFile = "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p6.root") {
-    
+void DisplayTriggerEff(const TString& inputFile = "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p6.root",
+                       bool sig = true) {
+
     gStyle->SetOptStat(0);
 
     TFile* f = TFile::Open(inputFile);
@@ -6130,16 +6160,21 @@ void DisplayTriggerEff(const TString& inputFile = "../output/Gluino_V19/Gluino_R
         return;
     }
 
-    const char* names[3] = {
+    const char* names[2] = {
         "TriggerEffCalib__Signal_if___orMETtrg___PseudoCaloMET",
-        "TriggerEffCalib__Signal_if___orMETtrg___PUppiMET",
-        "TriggerEffCalib__Signal_if___orMETtrg___PUppiMETNoMu"
+        "TriggerEffCalib__Signal_if___orMETtrg___PUppiMET"
     };
-    const char* labels[3] = { "Pseudo MET", "PUppi MET", "PUppi MET (NoMu)" };
-    const int colors[3] = { kRed + 1, kBlue + 1, kGreen + 2 };
 
-    TH1* h[3] = { nullptr, nullptr, nullptr };
-    for (int i = 0; i < 3; ++i) {
+    if (!sig) {
+        names[0] = "TriggerEffCalib_if___orMETtrg___PseudoCaloMET";
+        names[1] = "TriggerEffCalib_if___orMETtrg___PUppiMET";
+    }
+
+    const char* labels[2] = { "Pseudo MET", "PUppi MET" };
+    const int colors[2] = { kGreen+3, kOrange+8 };
+
+    TH1* h[2] = { nullptr, nullptr };
+    for (int i = 0; i < 2; ++i) {
         h[i] = dynamic_cast<TH1*>(f->Get(names[i]));
         if (!h[i]) {
             std::cerr << "Error: histogram " << names[i] << " not found" << std::endl;
@@ -6153,48 +6188,109 @@ void DisplayTriggerEff(const TString& inputFile = "../output/Gluino_V19/Gluino_R
     }
     f->Close();
 
+    // ---------------- Canvas & pads ----------------
     TCanvas* c = new TCanvas("c_TriggerEff", "Trigger efficiency (orMETtrg)", 800, 600);
-    c->SetLeftMargin(0.16);
-    c->SetBottomMargin(0.16);
 
-    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
-    latex1->SetNDC();
-    latex1->SetTextFont(42);
-    latex1->SetTextSize(0.04);
+    TPad* pad1 = new TPad("pad1", "pad1", 0.0, 0.3, 1.0, 1.0);
+    pad1->SetLeftMargin(0.16);
+    pad1->SetBottomMargin(0.16);
+    pad1->Draw();
 
-    // Determine common y-axis range
-    double ymax = 0.;
-    for (int i = 0; i < 3; ++i) ymax = std::max(ymax, h[i]->GetMaximum());
+    TPad* pad2 = new TPad("pad2", "pad2", 0.0, 0.0, 1.0, 0.315);
+    pad2->SetLeftMargin(0.16);pad2->SetBottomMargin(0.33);
+    pad2->Draw();
+
+    // ---------------- Upper pad: distributions ----------------
+    pad1->cd();
+
+    pad1->SetLogy();
+
+    double ymax = 0;
+    for (int i = 0; i < 2; ++i) ymax = std::max(ymax, h[i]->GetMaximum());
     h[0]->SetMaximum(1.2 * ymax);
-    h[0]->SetMinimum(0.);
-
-    h[0]->GetYaxis()->SetTitleSize(0.06);
-    h[0]->GetXaxis()->SetTitleSize(0.06);
-    h[0]->GetXaxis()->SetTitleOffset(0.9);
-    h[0]->GetYaxis()->SetTitleOffset(1);
-    h[0]->GetXaxis()->SetLabelSize(0.05);
-    h[0]->GetYaxis()->SetLabelSize(0.05);
+    h[0]->SetMinimum(0.1);
 
     h[0]->SetTitle(";MET [GeV];Nb of Events");
+    h[0]->GetYaxis()->SetTitleSize(0.065);
+    h[0]->GetYaxis()->SetTitleOffset(0.7);
+    h[0]->GetYaxis()->SetLabelSize(0.055);
+    h[0]->GetXaxis()->SetLabelSize(0.055);   // labels only on lower pad
+    h[0]->GetXaxis()->SetTitleSize(0.065);
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 2; ++i)
         h[i]->Draw(i == 0 ? "HIST" : "HIST SAME");
 
-    TLegend* leg = new TLegend(0.60, 0.60, 0.88, 0.80);
+    TLegend* leg = new TLegend(0.60, 0.68, 0.88, 0.88);
     leg->SetBorderSize(0);
     leg->SetFillStyle(0);
-    for (int i = 0; i < 3; ++i)
-        leg->AddEntry(h[i], labels[i], "l");
+    for (int i = 0; i < 2; ++i) leg->AddEntry(h[i], labels[i], "l");
     leg->Draw();
 
+    TLatex* latex1 = new TLatex(0.16, 0.91, "#it{Private Work (CMS simulation)}");
+    if (!sig) latex1->SetTitle("#it{Private Work (CMS data)}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.05);
     latex1->Draw();
 
+    TLatex* latex2 = new TLatex(0.78, 0.91, "#scale[1.3]{#bf{m_{#tilde{g}}=2000}}");
+    latex2->SetNDC();
+    latex2->SetTextFont(42);
+    latex2->SetTextSize(0.05);
+    if (!sig) latex2->SetTitle("109 fb^{-1} (13.6 TeV)");
+    if (!sig) latex2->SetX(0.71);
+    latex2->Draw();
+
+    // ---------------- Lower pad: CDFs ----------------
+    TH1* hc[2] = { nullptr, nullptr };
+    TH1* hCDF[2] = { nullptr, nullptr };
+    for (int i = 0; i < 2; ++i) {
+        hc[i] = (TH1*)h[i]->Clone(Form("%s_clone_cdf", h[i]->GetName()));
+        hc[i]->SetDirectory(nullptr);
+        if (hc[i]->Integral() > 0) hc[i]->Scale(1.0 / hc[i]->Integral());
+        hCDF[i] = hc[i]->GetCumulative();
+        hCDF[i]->SetName(Form("hCDF%d_TriggerEff", i));
+        hCDF[i]->SetDirectory(nullptr);
+        hCDF[i]->SetLineColor(colors[i]);
+        hCDF[i]->SetMarkerColor(colors[i]);
+        hCDF[i]->SetMarkerStyle(20 + i);
+        hCDF[i]->SetLineWidth(2);
+    }
+
+    double Xmin = h[0]->GetXaxis()->GetXmin();
+    double Xmax = h[0]->GetXaxis()->GetXmax();
+
+    pad2->cd();
+    gPad->SetTickx(0);
+
+    hCDF[0]->SetTitle("");
+    hCDF[0]->GetYaxis()->SetTitle("CDF");
+    hCDF[0]->GetXaxis()->SetTitle("MET [GeV]");
+    hCDF[0]->GetYaxis()->SetRangeUser(0, 1.05);
+    hCDF[0]->GetYaxis()->SetNdivisions(505);
+    hCDF[0]->GetYaxis()->SetTitleFont(43);
+    hCDF[0]->GetXaxis()->SetTitleFont(43);
+    hCDF[0]->GetYaxis()->SetLabelFont(43);
+    hCDF[0]->GetXaxis()->SetLabelFont(43);
+    hCDF[0]->GetYaxis()->SetTitleSize(26);
+    hCDF[0]->GetXaxis()->SetTitleSize(26);
+    hCDF[0]->GetYaxis()->SetLabelSize(22);
+    hCDF[0]->GetXaxis()->SetLabelSize(22);
+    hCDF[0]->GetYaxis()->SetTitleOffset(1.3);
+    hCDF[0]->GetXaxis()->SetTitleOffset(1.0);
+    hCDF[0]->GetXaxis()->SetRangeUser(Xmin, Xmax);
+
+    hCDF[0]->Draw("P");
+    hCDF[1]->Draw("P SAME");
+
+    TLine* line = new TLine(Xmin, 0.5, Xmax, 0.5);
+    line->SetLineColor(kBlack);
+    line->SetLineStyle(2);
+    line->Draw("same");
+
+    c->cd();
     c->Update();
-    c->SaveAs("TriggEff/METdistSIGNAL.pdf");
-    latex1->SetTitle("#it{Private work (CMS simulation)}");
-    c->Modified();
-    c->Update();
-    c->SaveAs("TriggEff/METdistSIGNAL_bis.pdf");
+    c->SaveAs(Form("TriggEff/METdist%s.pdf", (sig) ? "_SIGNAL" : "_DATA"));
 }
 
 
@@ -6258,19 +6354,6 @@ void FpixelInSignalAndData() {
 }
 
 
-// ===================================================================
-//  PairTypeStages_SingleMass
-//  ------------------------------------------------------------------
-//  Pour un unique sample de masse (défaut gluino 2000), 5 histos
-//  superposés donnant la répartition des pairTypes (ch-ch / neut-ch /
-//  neut-neut) à différents stades, TOUS normalisés par l'intégrale de
-//  "Nosel_Gen__PairType" (bins 2,3,4) :
-//    h1 : Nosel_Gen__PairType                                  (raw)
-//    h2 : Nosel_Gen__PairType__if_ORtrigger                    (post OR trig)
-//    h3 : Nosel_GenHSCPmatching__PairType__0HSCP_if_ORtrigger  (0 HSCP match)
-//    h4 : Nosel_GenHSCPmatching__PairType__1HSCP_if_ORtrigger  (1 HSCP match)
-//    h5 : Nosel_GenHSCPmatching__PairType__2HSCP_if_ORtrigger  (2 HSCP match)
-// ===================================================================
 void PairTypeStages_SingleMass(int mass = 2000,
                                const char *ofilename = "PairTypeStages") {
 
@@ -6409,17 +6492,6 @@ void PairTypeStages_SingleMass(int mass = 2000,
     return;
 }
 
-// ===================================================================
-//  PFType_ProportionAndTrigEff
-//  ------------------------------------------------------------------
-//  Pour tous les samples de masse (palette arc-en-ciel) :
-//    h1 (trait plein)  : GenHSCPmatching__PFType normalisé par sa
-//                        propre intégrale -> proportion des types de PF
-//    h2 (pointillé)    : GenHSCPmatching__PFType__if_ORtrigger,
-//                        chaque bin divisé par l'intégrale de
-//                        GenHSCPmatching__PFType (même masse)
-//  Axe x condensé sur 3 bins étiquetés : e / mu / pi
-// ===================================================================
 void PFType_ProportionAndTrigEff(const char *ofilename = "PFTypeProp") {
 
     gErrorIgnoreLevel = kError;
@@ -6804,7 +6876,7 @@ void ProfileVsRunNumber() {
     styleHist(hp_Ih_nosel,   kAzure+2, "#LT I_{h}#GT per run [MeV/cm]");
     styleHist(hp_Ih_sel,     kRed+1,  "#LT I_{h}#GT per run [MeV/cm]");
 
-    TLatex *tex = new TLatex(0.68, 0.91, "110 fb^{-1} (13.6 TeV)");
+    TLatex *tex = new TLatex(0.68, 0.91, "109 fb^{-1} (13.6 TeV)");
     tex->SetNDC();
     tex->SetTextFont(42);
     tex->SetTextSize(0.04);
@@ -6912,13 +6984,108 @@ void ProfileVsRunNumber() {
 }
 
 
+TCanvas* DrawWithCDF1(TH1* h,
+                      TCanvas* c1,
+                      std::string CanvasTitle,
+                      std::string XaxisTitle,
+                      std::string leg_h,
+                      float Xmin,
+                      float Xmax,
+                      int color, bool islogY=false) {
+
+    TCanvas* c_new = new TCanvas(CanvasTitle.c_str(), CanvasTitle.c_str(), 800, 600);
+
+    // Define pads
+    TPad* pad1 = new TPad("pad1", "pad1", 0.0, 0.3, 1.0, 1.0);
+    pad1->SetLeftMargin(0.16);
+    pad1->SetBottomMargin(0.02);
+    pad1->Draw();
+
+    TPad* pad2 = new TPad("pad2", "pad2", 0.0, 0.0, 1.0, 0.315);
+    pad2->SetLeftMargin(0.16); pad2->SetBottomMargin(0.33);
+    pad2->Draw();
+
+    // Draw upper plot (the pre-drawn distribution)
+    pad1->cd();
+    c1->DrawClonePad();
+    if (islogY) gPad->SetLogy();
+
+    // Clone histogram
+    TH1D* hc = (TH1D*)h->Clone(TString(h->GetName()) + "_" + CanvasTitle.c_str() + "_c");
+
+    // Normalize clone before computing CDF (so CDF goes from 0 to 1)
+    if (hc->Integral() > 0) hc->Scale(1.0 / hc->Integral());
+
+    // Build CDF by cumulative sum
+    TH1* hCDF = hc->GetCumulative();
+    hCDF->SetName(TString("hCDF_") + CanvasTitle.c_str());
+
+    // Style CDF
+    hCDF->SetLineColor(color);
+    hCDF->SetMarkerColor(color);
+    hCDF->SetMarkerStyle(20);
+
+    // Draw CDF in lower pad
+    pad2->cd();
+    gStyle->SetOptStat(0);
+    gPad->SetTickx(0);
+
+    hCDF->SetTitle("");
+    hCDF->GetYaxis()->SetTitle("CDF");
+    hCDF->GetXaxis()->SetTitle(XaxisTitle.c_str());
+    hCDF->GetYaxis()->SetRangeUser(0, 1);
+    hCDF->GetYaxis()->SetNdivisions(505);
+    hCDF->GetYaxis()->SetTitleFont(43);
+    hCDF->GetXaxis()->SetTitleFont(43);
+    hCDF->GetYaxis()->SetLabelFont(43);
+    hCDF->GetXaxis()->SetLabelFont(43);
+    hCDF->GetYaxis()->SetTitleSize(24);
+    hCDF->GetXaxis()->SetTitleSize(24);
+    hCDF->GetYaxis()->SetLabelSize(20);
+    hCDF->GetXaxis()->SetLabelSize(20);
+    hCDF->GetYaxis()->SetTitleOffset(1.3);
+    hCDF->GetXaxis()->SetTitleOffset(1.0);
+    hCDF->LabelsOption("v", "X");
+    hCDF->GetXaxis()->SetRangeUser(Xmin, Xmax);
+
+    // draw horizontal dashed line at y=0.5
+    TLine* line = new TLine(Xmin, 0.5, Xmax, 0.5);
+    line->SetLineColor(kBlack);
+    line->SetLineStyle(2);
+
+    hCDF->Draw("hist P");
+    line->Draw("same");
+
+    c_new->Update();
+    cout << "Canvas " << CanvasTitle << " drawn with CDF of: "
+         << h->GetName() << endl;
+
+    return c_new;
+}
+
+TCanvas* MakeTopCanvas(TH1D *h, const char *cname, const char *legLabel,
+                       TLatex *tex, TLatex *latex1, float Xmax, int color) {
+    TCanvas *c = new TCanvas(cname, cname, 800, 600);
+    c->SetLeftMargin(0.16); c->SetBottomMargin(0.16);
+
+    h->Draw("HIST");
+    h->GetYaxis()->SetRangeUser(0.1, 1.3 * h->GetMaximum());
+    h->GetXaxis()->SetRangeUser(0, Xmax);
+    h->SetLineColor(color);
+
+    tex->Draw();
+    latex1->Draw();
+    c->Modified(); c->Update();
+    return c;
+}
+
 void CompareIhWithCDF() {
 
-    TFile *ifileData   = new TFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/output/JetMET2024_V12/JetMET2024_V12p31.root", "READ");
-    TFile *ifileSignal = new TFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p7.root", "READ");
+    TFile *ifileData   = new TFile("../output/JetMET2024_V12/JetMET2024_V12p31.root", "READ");
+    TFile *ifileSignal = new TFile("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p7.root", "READ");
 
     TH1D *IhSignal   = (TH1D*)ifileSignal->Get("METanalysis_TestPUppiMETCut_Eta2p4_Ih");
-    TH1D *IhDataRaw  = (TH1D*)ifileData->Get("METanalysis_TestPUppiMETCut_Eta2p4_Ih");
+    TH1D *IhDataRaw  = (TH1D*)ifileData->Get("Nm1_Ih_StripOnly");
 
     // --- Rebin data (200 bins, 0-10) onto signal binning (600 bins, 0-30) ---
     TH1D *IhData = (TH1D*)IhSignal->Clone("IhData");
@@ -6931,10 +7098,6 @@ void CompareIhWithCDF() {
     for (int j = 1; j <= IhData->GetNbinsX(); ++j)
         IhData->SetBinError(j, TMath::Sqrt(IhData->GetBinContent(j)));
 
-    // --- Normalize to unit area for shape comparison ---
-    if (IhData->Integral()   > 0) IhData->Scale(1.0 / IhData->Integral());
-    if (IhSignal->Integral() > 0) IhSignal->Scale(1.0 / IhSignal->Integral());
-
     // --- Styling ---
     auto styleHist = [](TH1D *h, int color, int marker) {
         h->SetTitle("");
@@ -6943,7 +7106,7 @@ void CompareIhWithCDF() {
         h->GetYaxis()->SetTitleSize(0.06);
         h->GetXaxis()->SetTitleSize(0.06);
         h->GetXaxis()->SetTitleOffset(0.9);
-        h->GetYaxis()->SetTitleOffset(0.9);
+        h->GetYaxis()->SetTitleOffset(1.0);
         h->GetXaxis()->SetLabelSize(0.05);
         h->GetYaxis()->SetLabelSize(0.05);
         h->SetLineColor(color);
@@ -6953,65 +7116,1198 @@ void CompareIhWithCDF() {
         h->SetLineWidth(2);
     };
 
-    styleHist(IhData,   kBlue, 20);
+    styleHist(IhData,   kAzure+2, 20);
     styleHist(IhSignal, kRed+1,   21);
 
-    TLatex *tex = new TLatex(0.75, 0.91, "110 fb^{-1} (13.6 TeV)");
+    TLatex *tex = new TLatex(0.68, 0.91, "109 fb^{-1} (13.6 TeV)");
     tex->SetNDC();
     tex->SetTextFont(42);
     tex->SetTextSize(0.04);
 
-    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{Private work (CMS data)}");
     latex1->SetNDC();
     latex1->SetTextFont(42);
     latex1->SetTextSize(0.04);
 
     gStyle->SetOptStat(0);
 
-    // --- Build the top canvas (distributions) that DrawWithCDF2 will clone ---
-    TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
-    c1->SetLeftMargin(0.16); c1->SetBottomMargin(0.16);
+    // ================= Canvas 1: Data + its CDF =================
+    TCanvas *cTopData = MakeTopCanvas(IhData, "cTopData", "Data", tex, latex1, 7., 602);
+    TCanvas *cData = DrawWithCDF1(IhData, cTopData,
+                                  "Ih_Data_CDF",
+                                  "I_{h} [MeV/cm]",
+                                  "Data",
+                                  0.0, 7.,
+                                  602, true);
+    cData->SaveAs("PlayWithHistos/Ih_Data_CDF.pdf");
 
-    IhSignal->Rebin(4);
-    IhData->Rebin(4);
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    tex->SetTitle("");
 
-    IhSignal->Draw("HIST");
-    double ymax = TMath::Max(IhData->GetMaximum(), IhSignal->GetMaximum());
-    IhSignal->GetYaxis()->SetRangeUser(1, 1.3 * ymax);
-    IhSignal->GetXaxis()->SetRangeUser(0, 30);
-    IhData->Draw("hist SAME");
-    c1->SetLogy();
+    // ================= Canvas 2: Signal + its CDF =================
+    TCanvas *cTopSignal = MakeTopCanvas(IhSignal, "cTopSignal", "Gluino 2000 GeV", tex, latex1, 30, kRed+1);
+    TCanvas *cSignal = DrawWithCDF1(IhSignal, cTopSignal,
+                                    "Ih_Signal_CDF",
+                                    "I_{h} [MeV/cm]",
+                                    "Gluino 2000 GeV",
+                                    0.0, 30.0,
+                                    kRed+1, true);
+    cSignal->SaveAs("PlayWithHistos/Ih_Signal_CDF.pdf");
 
-    TLegend *leg1 = new TLegend(0.60, 0.72, 0.89, 0.89);
-    leg1->SetBorderSize(0);
-    leg1->SetTextFont(42);
-    leg1->AddEntry(IhData,   "Data", "lep");
-    leg1->AddEntry(IhSignal, "Gluino 2000 GeV", "lep");
-    leg1->Draw();
+    return;
+}
 
-    tex->Draw();
+void PUppiVSPF(std::string ifileName, bool ifData) {
+
+    TFile *ifile = new TFile(Form("%s", ifileName.c_str()), "READ");
+
+    TH2F *h = (TH2F*)ifile->Get("Nosel_PUppiMET_VS_PseudoMET");
+
+    h->GetYaxis()->SetTitle("Pseudo MET [GeV]");
+    h->GetXaxis()->SetTitle("PUppi MET [GeV]");
+    h->GetZaxis()->SetTitle("Entries");
+    h->SetTitle("");
+
+    h->GetYaxis()->SetTitleSize(0.06);
+    h->GetXaxis()->SetTitleSize(0.06);
+    h->GetXaxis()->SetTitleOffset(0.9);
+    h->GetYaxis()->SetTitleOffset(1.1);
+    h->GetXaxis()->SetLabelSize(0.05);
+    h->GetYaxis()->SetLabelSize(0.05);
+    h->GetZaxis()->SetTitleSize(0.06);
+    h->GetZaxis()->SetTitleOffset(0.9);
+    h->GetZaxis()->SetLabelSize(0.05);
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
+    if (ifData) latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    TLatex *latex2 = new TLatex(0.75, 0.91, "#scale[1.3]{#bf{m_{#tilde{g}}=2000}}");
+    if (ifData) latex2->SetTitle("109 fb^{-1} (13.6 TeV)");
+    if (ifData) latex2->SetX(0.68);
+    latex2->SetNDC();
+    latex2->SetTextFont(42);
+    latex2->SetTextSize(0.04);
+
+    TCanvas *c6 = new TCanvas("c6","c6",800,600);
+    c6->cd();
+    c6->SetRightMargin(0.15);
+    c6->SetLeftMargin(0.16); c6->SetBottomMargin(0.16); c6->SetRightMargin(0.16);
+    
+    gStyle->SetOptStat(0);
+    gStyle->SetPalette(kViridis);
+    h->Draw("COLZ");
+    c6->SetLogz();
     latex1->Draw();
-    c1->Modified(); c1->Update();
+    latex2->Draw();
+    c6->SaveAs(Form("PlayWithHistos/PUppiVSPF_%s.pdf", (ifData ? "Data" : "MC")));
+    latex1->SetTitle("#it{Private work (CMS simulation)}");
+    if (ifData) latex1->SetTitle("#it{Private work (CMS data)}");
+    c6->Modified();
+    c6->Update();
+    c6->SaveAs(Form("PlayWithHistos/PUppiVSPF_%s_bis.pdf", (ifData ? "Data" : "MC")));
 
-    // --- Build the combined canvas with the CDF ratio pad ---
-    TCanvas *cCDF = DrawWithCDF2(IhData, IhSignal, c1,
-                                 "CompareIh_CDF",
-                                 "I_{h} [MeV/cm]",
-                                 "Data", "Gluino 2000 GeV",
-                                 0.0, 30.0,
-                                 kBlue, kRed+1);
+    return;
+}
 
-    cCDF->SaveAs("PlayWithHistos/CompareIh_CDF.pdf");
-    latex1->SetTitle("#it{Private work (CMS data)}");
-    // rebuild top pad label for the "bis" version
-    c1->cd(); c1->Modified(); c1->Update();
-    TCanvas *cCDF_bis = DrawWithCDF2(IhData, IhSignal, c1,
-                                     "CompareIh_CDF_bis",
-                                     "I_{h} [MeV/cm]",
-                                     "Data", "Gluino 2000 GeV",
-                                     0.0, 30.0,
-                                     kBlue, kRed+1);
-    cCDF_bis->SaveAs("PlayWithHistos/CompareIh_CDF_bis.pdf");
+
+TCanvas* DrawWithCDF(TH1F* data, TH1F* mc, TH1F* sig, TCanvas* cMain,
+                     TString cname, TString xlabel, double xmin, double xmax) {
+
+    TCanvas* c = new TCanvas(cname, cname, 800, 600);
+
+    // --- pad du haut : on clone le plot déjà construit ---
+    TPad* pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1.0);
+    pad1->SetLeftMargin(0.16);
+    pad1->Draw();
+    pad1->cd();
+    cMain->SetBottomMargin(0.13);
+    cMain->Modified();
+    cMain->DrawClonePad();
+
+    // FORCE le range X sur tous les TH1 clonés (frame inclus)
+    TIter next(pad1->GetListOfPrimitives());
+    TObject* obj;
+    while ((obj = next())) {
+        if (obj->InheritsFrom(TH1::Class()))
+            ((TH1*)obj)->GetXaxis()->SetRangeUser(xmin, xmax);
+    }
+    pad1->Modified();
+    pad1->Update();
+
+
+    // --- pad du bas : CDF ---
+    c->cd();
+    TPad* pad2 = new TPad("pad2", "pad2", 0, 0.0, 1, 0.3);
+    pad2->SetLeftMargin(0.16);
+    pad2->SetTopMargin(0);
+    pad2->SetBottomMargin(0.33);
+    pad2->SetTickx(1);
+    pad2->SetTicky(1);
+    pad2->Draw();
+    pad2->cd();
+
+    // CDF = cumulative normalisée à 1
+    TH1F* cdfData = (TH1F*)data->GetCumulative();
+    TH1F* cdfMC   = (TH1F*)mc->GetCumulative();
+    TH1F* cdfSig  = (TH1F*)sig->GetCumulative();
+
+    double iData = data->Integral(1, data->GetNbinsX());
+    double iMC   = mc->Integral(1, mc->GetNbinsX());
+    double iSig  = sig->Integral(1, sig->GetNbinsX());
+    if (iData > 0) cdfData->Scale(1.0/iData);
+    if (iMC   > 0) cdfMC->Scale(1.0/iMC);
+    if (iSig  > 0) cdfSig->Scale(1.0/iSig);
+
+    // style
+    cdfMC->SetLineColor(kBlue-7);
+    cdfMC->SetLineWidth(2);
+    cdfMC->SetMarkerStyle(21);
+    cdfMC->SetMarkerColor(kBlue-7);
+
+    cdfSig->SetLineColor(kViolet-1);
+    cdfSig->SetLineWidth(2);
+    cdfSig->SetMarkerStyle(22);
+    cdfSig->SetMarkerColor(kViolet-1);
+
+    cdfData->SetLineColor(kBlack);
+    cdfData->SetLineWidth(2);
+    cdfData->SetMarkerStyle(20);
+    cdfData->SetMarkerColor(kBlack);
+
+    cdfMC->SetTitle("");
+    cdfMC->SetMinimum(0.0);
+    cdfMC->SetMaximum(1.1);
+    cdfMC->GetXaxis()->SetRangeUser(xmin, xmax);
+    cdfData->GetXaxis()->SetRangeUser(xmin, xmax);
+    cdfSig->GetXaxis()->SetRangeUser(xmin, xmax);
+    cdfMC->GetXaxis()->SetTitle(xlabel);
+    cdfMC->GetYaxis()->SetTitle("CDF");
+    cdfMC->GetYaxis()->SetNdivisions(505);
+    cdfMC->GetXaxis()->SetTitleSize(0.15);
+    cdfMC->GetXaxis()->SetTitleOffset(0.9);
+    cdfMC->GetXaxis()->SetLabelSize(0.12);
+    cdfMC->GetYaxis()->SetTitleSize(0.14);
+    cdfMC->GetYaxis()->SetTitleOffset(0.3);
+    cdfMC->GetYaxis()->SetLabelSize(0.12);
+
+    cdfMC->Draw("E0");
+    cdfSig->Draw("E0 same");
+    cdfData->Draw("E0 same");
+
+    TLine* line = new TLine(xmin, 0.5, xmax, 0.5);
+    line->SetLineColor(kBlack);
+    line->SetLineStyle(2);
+    line->Draw("same");
+
+    pad2->RedrawAxis();
+    c->cd();
+    c->Update();
+    return c;
+}
+
+
+void Nm1Eff (bool isRescaled,
+             std::string TTbar,
+             std::string Wjets,
+             std::string QCD,
+             std::string JetMETdata,
+             std::string Gluino) {
+
+    gErrorIgnoreLevel = kWarning;
+
+    TFile *ifile_TTbar = new TFile(TTbar.c_str(), "READ");
+    TFile *ifile_Wjets = new TFile(Wjets.c_str(), "READ");
+    TFile *ifile_QCD = new TFile(QCD.c_str(), "READ");
+    TFile *ifile_JetMETdata = new TFile(JetMETdata.c_str(), "READ");
+    TFile *ifile_Gluino = new TFile(Gluino.c_str(), "READ");
+
+    std::vector<TH1F*> hNM1_TTbar, hNM1_Wjets, hNM1_QCD, hNM1_MC, hNM1_JetMETdata, hNM1_Gluino;
+
+    std::vector<string> cutNames = {"trigger", "METfilters", "PUppiMET", "Ptpseudo", "eta", "NOPH", "FOVH", "NOM", "HighPurity",
+    "Chi2", "dZ", "dXY", "PFMiniIso", "TrkIso", "EoverP", "PtErr_over_PtPt", "Fpix", "PtErr_over_Pt", "Ih_StripOnly", "Ih_StripOnly_rescaled"};
+
+    std::vector<string> Xlabel = {"or MET trigger", "MET filters", "PUppi MET", "p_{T} [GeV]", "#eta", "Nb pixel hits", "frac. valid hits", "Nb dE/dx", "HighPurity",
+    "#chi^{2}/NDOF", "d_{z} [cm]", "d_{xy} [cm]", "I_{PF}^{rel}", "I_{dr03}^{trk}", "E/p", "#sigma_{p_{T}}/p_{T}^{2}", "F_{pixel}", "#sigma_{p_{T}}/p_{T}", "I_{h} [MeV/cm]", "I_{h} rescaled [MeV/cm]"};
+
+    // Step 1: retrieve the Nm1 hists
+    for (size_t i = 0; i < cutNames.size(); i++) {
+
+        if (cutNames[i] == "Ih_StripOnly_rescaled") {
+            hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i-1].c_str())));
+            hNM1_TTbar.push_back((TH1F*)ifile_TTbar->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+            hNM1_Wjets.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+            hNM1_QCD.push_back((TH1F*)ifile_QCD->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+            hNM1_Gluino.push_back((TH1F*)ifile_Gluino->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+            hNM1_MC.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        }
+
+        hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_TTbar.push_back((TH1F*)ifile_TTbar->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_Wjets.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_QCD.push_back((TH1F*)ifile_QCD->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_Gluino.push_back((TH1F*)ifile_Gluino->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_MC.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+    }
+
+    // Step 2: style + build MC sum
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        cout << "Cut: " << cutNames[i] << endl;
+        hNM1_MC[i]->Add(hNM1_TTbar[i]);
+        hNM1_MC[i]->Add(hNM1_QCD[i]);
+
+        if (i==2 || i==3 || i==13 || i==14 || i==15 || i==17) {
+            hNM1_TTbar[i]->Rebin(4);
+            hNM1_Wjets[i]->Rebin(4);
+            hNM1_QCD[i]->Rebin(4);
+            hNM1_Gluino[i]->Rebin(4);
+            hNM1_JetMETdata[i]->Rebin(4);
+        }
+        if (i==12) {
+            hNM1_TTbar[i]->Rebin(8);
+            hNM1_Wjets[i]->Rebin(8);
+            hNM1_QCD[i]->Rebin(8);
+            hNM1_Gluino[i]->Rebin(8);
+            hNM1_JetMETdata[i]->Rebin(8);
+        }
+
+
+        hNM1_TTbar[i]->SetLineColor(kRed);
+        hNM1_TTbar[i]->SetFillColorAlpha(kRed, 0.5);
+        hNM1_Wjets[i]->SetLineColor(kBlue-7);
+        hNM1_Wjets[i]->SetFillColorAlpha(kBlue-7, 0.5);
+        hNM1_QCD[i]->SetLineColor(kGreen);
+        hNM1_QCD[i]->SetFillColorAlpha(kGreen, 0.5);
+        hNM1_Gluino[i]->SetLineColor(kViolet-1);
+        hNM1_Gluino[i]->SetMarkerStyle(22);
+        hNM1_Gluino[i]->SetMarkerColor(kViolet-1);
+        hNM1_JetMETdata[i]->SetLineColor(kBlack);
+        hNM1_JetMETdata[i]->SetMarkerColor(kBlack);
+        hNM1_JetMETdata[i]->SetMarkerStyle(20);
+    }
+
+    // Step 2 bis: if rescaled, scale MC to data
+    if (isRescaled) {
+        for (size_t i = 0; i < cutNames.size(); i++) {
+            float intTot = hNM1_TTbar[i]->Integral() + hNM1_Wjets[i]->Integral() + hNM1_QCD[i]->Integral();
+            hNM1_TTbar[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+            hNM1_Wjets[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+            hNM1_QCD[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+            hNM1_Gluino[i]->Scale(hNM1_JetMETdata[i]->Integral()/hNM1_Gluino[i]->Integral());
+        }
+    }
+
+    struct CutInfo {
+        double threshold;
+        bool keepRight;
+        bool isSymmetric;
+    };
+
+    std::vector<CutInfo> cutInfos = {
+        {0.5,      true,  false},  // trigger
+        {0.5,      true,  false},  // METfilters
+        {150,    true,  false},  // PUppiMET > 150
+        {50,     true,  false},  // Pt_pseudo     > 50
+        {2.4,    false, true },  // |eta|         < 2.4
+        {2,      true,  false},  // NOPH          >= 2
+        {0.8,    true,  false},  // FOVH          > 0.8
+        {10,     true,  false},  // NOM           >= 10
+        {0.5,      true,  false},  // HighPurity
+        {5.0,    false, false},  // Chi2          < 5
+        {0.1,    false, true },  // |dZ|          < 0.1
+        {0.02,   false, true },  // |dXY|         < 0.02
+        {0.02,   false, false},  // PFMiniIso     < 0.02
+        {15,     false, false},  // TrkIso        < 15
+        {0.3,    false, false},  // EoverP        < 0.3
+        {0.0008, false, false},  // PtErr/PtPt    < 0.0008
+        {0.3,    true,  false},  // Fpix          > 0.3
+        {1,      false, false},  // PtErr/Pt      < 1
+        {2.9784, true,  false},  // Ih_StripOnly
+        {2.9784, true,  false},  // Ih_StripOnly rescaled
+    };
+
+    TLatex *tex = new TLatex(0.75, 0.91, "109 fb^{-1} (13.6 TeV)");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#it{Private work (CMS simulation/data)}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    auto addOverflow = [](TH1F* h) {
+        int n = h->GetNbinsX();
+        h->SetBinContent(n, h->GetBinContent(n) + h->GetBinContent(n+1));
+        h->SetBinError(n, std::sqrt(std::pow(h->GetBinError(n),2) + std::pow(h->GetBinError(n+1),2)));
+        h->SetBinContent(n+1, 0);   // évite le double comptage
+        h->SetBinError(n+1, 0);
+    };
+
+    // Step 3: Canvas for each hists
+    std::vector<TCanvas*> canvases;
+    for (size_t i = 0; i < cutNames.size(); i++) {
+
+        TCanvas *c = new TCanvas(Form("c_Nm1_%s", cutNames[i].c_str()), Form("c_Nm1_%s", cutNames[i].c_str()), 800, 600);
+        c->SetLeftMargin(0.16); c->SetBottomMargin(0.16);
+
+        addOverflow(hNM1_QCD[i]);
+        addOverflow(hNM1_TTbar[i]);
+        addOverflow(hNM1_Wjets[i]);
+        addOverflow(hNM1_JetMETdata[i]);
+        addOverflow(hNM1_Gluino[i]);
+
+        THStack *hs = new THStack(Form("hs_%s", cutNames[i].c_str()), "");
+        hs->Add(hNM1_QCD[i]);
+        hs->Add(hNM1_TTbar[i]);
+        hs->Add(hNM1_Wjets[i]);
+
+        double ymin = 0.01;
+        double ymax = 6e6;
+        double xmin = hNM1_TTbar[i]->GetBinLowEdge(1);
+        double xmax = hNM1_TTbar[i]->GetBinLowEdge(hNM1_TTbar[i]->GetNbinsX()+1);
+
+        if (i==6) xmin = 0.75;
+        
+        c->cd();
+        TH1F *frame = (TH1F*)hNM1_TTbar[i]->Clone(Form("frame_%s", cutNames[i].c_str()));
+        gStyle->SetOptStat(0);
+        frame->Reset();
+        frame->SetMinimum(ymin);
+        frame->SetMaximum(ymax);
+        frame->GetXaxis()->SetTitle(Xlabel[i].c_str());
+        frame->GetYaxis()->SetTitle("Number of events");
+        frame->GetYaxis()->SetTitleSize(0.06);
+        frame->GetXaxis()->SetTitleSize(0.06);
+        frame->GetXaxis()->SetTitleOffset(0.9);
+        frame->GetYaxis()->SetTitleOffset(0.8);
+        frame->GetXaxis()->SetLabelSize(0.05);
+        frame->GetYaxis()->SetLabelSize(0.05);
+        frame->GetXaxis()->SetRangeUser(xmin, xmax);
+
+        frame->Draw("HIST");
+        hs->Draw("HIST same");
+        hNM1_JetMETdata[i]->Draw("E1 same");
+        hNM1_Gluino[i]->Draw("E1 same");
+
+
+        // ligne verticale à la valeur de la coupure
+        double xcut = cutInfos[i].threshold;
+        TLine *line = new TLine(xcut, ymin, xcut, ymax);
+        line->SetLineColor(kBlack);
+        line->SetLineStyle(2);
+        line->SetLineWidth(2);
+        line->Draw("same");
+
+        // pour les coupures symétriques |var| < seuil, tracer aussi la ligne à -seuil
+        if (cutInfos[i].isSymmetric) {
+            TLine *lineNeg = new TLine(-xcut, ymin, -xcut, ymax);
+            lineNeg->SetLineColor(kBlack);
+            lineNeg->SetLineStyle(2);
+            lineNeg->SetLineWidth(2);
+            lineNeg->Draw("same");
+        }
+
+        tex->Draw();
+        latex1->Draw();
+
+
+        TLegend *legend = new TLegend(0.7, 0.6, 0.89, 0.89);
+        if (i==0 || i==1 || i==6 || i==4 || i==8 || i==16) legend = new TLegend(0.67, 0.16, 0.89, 0.45);
+        legend->AddEntry(hNM1_TTbar[i],     "TTbar",     "f");
+        legend->AddEntry(hNM1_Wjets[i],     "W(#rightarrow#mu#nu)+jets",    "f");
+        legend->AddEntry(hNM1_QCD[i],       "QCD (#mu enriched)",       "f");
+        legend->AddEntry(hNM1_JetMETdata[i],"MET data","lep");
+        legend->AddEntry(hNM1_Gluino[i],     "#tilde{g} (m=2000 GeV)", "lep");
+        legend->SetBorderSize(0);
+
+        TH1F *htemp = (TH1F*)hNM1_Wjets[i]->Clone("htemp");
+        htemp->Add(hNM1_TTbar[i]);
+        htemp->Add(hNM1_QCD[i]);
+
+        htemp->SetMinimum(ymin);
+        htemp->SetMaximum(ymax);
+        hNM1_JetMETdata[i]->SetMinimum(ymin);
+        hNM1_JetMETdata[i]->SetMaximum(ymax);
+
+        c->cd();
+        gPad->RedrawAxis();
+        c->SetLogy();
+        c->SetTickx(1);
+        c->SetTicky(1);
+        hs->SetMinimum(ymin);
+        hs->SetMaximum(ymax);
+        c->Modified();
+        legend->Draw();
+        c->Update();
+
+        TCanvas *cRatio = DrawWithCDF(hNM1_JetMETdata[i], htemp, hNM1_Gluino[i], c,
+                                      Form("cCDF_%s", cutNames[i].c_str()), Xlabel[i], xmin, xmax);
+
+        canvases.push_back(cRatio);
+        delete htemp;
+    }
+
+    // Step 4: compute the efficiency for each cut
+    auto computeEff = [](TH1F* h, double threshold, bool keepRight, bool isSymmetric = false) -> double {
+        if (!h) return -1.0;
+        int totalBins = h->GetNbinsX();
+        double total  = h->Integral(1, totalBins);
+        if (total == 0) return 0.0;
+        if (isSymmetric) {
+            int binLow  = h->FindBin(-threshold);
+            int binHigh = h->FindBin(threshold);
+            return h->Integral(binLow, binHigh) / total;
+        }
+        int cutBin = h->FindBin(threshold);
+        double signal = keepRight ? h->Integral(cutBin, totalBins)
+                                  : h->Integral(1, cutBin - 1);
+        return signal / total;
+    };
+
+    // Print efficiencies
+    std::cout << std::left
+            << std::setw(25) << "Cut"
+            << std::setw(12) << "TTbar"
+            << std::setw(12) << "W+jets"
+            << std::setw(12) << "QCD"
+            << std::setw(12) << "ALL MC"
+            << std::setw(12) << "Data"
+            << std::endl;
+    std::cout << std::string(60, '-') << std::endl;
+
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        double eff_TTbar = computeEff(hNM1_TTbar[i],      cutInfos[i].threshold, cutInfos[i].keepRight);
+        double eff_Wjets = computeEff(hNM1_Wjets[i],      cutInfos[i].threshold, cutInfos[i].keepRight);
+        double eff_QCD   = computeEff(hNM1_QCD[i],        cutInfos[i].threshold, cutInfos[i].keepRight);
+        double eff_MC    = computeEff(hNM1_MC[i],         cutInfos[i].threshold, cutInfos[i].keepRight);
+        double eff_Data  = computeEff(hNM1_JetMETdata[i], cutInfos[i].threshold, cutInfos[i].keepRight);
+
+        std::cout << std::left  << std::setw(25) << cutNames[i]
+                << std::fixed << std::setprecision(4)
+                << std::setw(12) << eff_TTbar
+                << std::setw(12) << eff_Wjets
+                << std::setw(12) << eff_QCD
+                << std::setw(12) << eff_MC
+                << std::setw(12) << eff_Data
+                << std::endl;
+    }
+
+    // Step 5: save
+    TString pdfName = Form("PlayWithHistos/Nm1plots/Nm1Eff%s_ALL.pdf", isRescaled ? "_rescaled" : "");
+    for (size_t i = 0; i < canvases.size(); i++) {
+        if      (i == 0)                    canvases[i]->Print(pdfName + "(");
+        else if (i == canvases.size() - 1)  canvases[i]->Print(pdfName + ")");
+        else                                canvases[i]->Print(pdfName);
+    }
+
+    return;
+}
+
+void NoselEff (bool isRescaled,
+               std::string TTbar,
+               std::string Wjets,
+               std::string QCD,
+               std::string JetMETdata,
+               std::string Gluino) {
+
+    gErrorIgnoreLevel = kWarning;
+
+    TFile *ifile_TTbar = new TFile(TTbar.c_str(), "READ");
+    TFile *ifile_Wjets = new TFile(Wjets.c_str(), "READ");
+    TFile *ifile_QCD = new TFile(QCD.c_str(), "READ");
+    TFile *ifile_JetMETdata = new TFile(JetMETdata.c_str(), "READ");
+    TFile *ifile_Gluino = new TFile(Gluino.c_str(), "READ");
+
+    std::vector<TH1F*> hNosel_TTbar, hNosel_Wjets, hNosel_QCD, hNosel_MC, hNosel_JetMETdata, hNosel_Gluino;
+
+    std::vector<string> cutNames = {"Ptpseudo", "eta", "PFMiniIso", "TrkIso", "EoverP",
+    "PtErr_over_Pt", "PtErr_over_PtPt", "Fpix", "Ih", "PUppiMET"};
+
+    std::vector<string> Xlabel = {"p_{T} [GeV]", "#eta", "I_{PF}^{rel}", "I_{dr03}^{trk}", "E/p",
+    "#sigma_{p_{T}}/p_{T}", "#sigma_{p_{T}}/p_{T}^{2}", "F_{pixel}", "I_{h} [MeV/cm]", "PUppi MET"};
+
+    // Step 1: retrieve the Nosel hists
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        hNosel_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nosel_%s", cutNames[i].c_str())));
+        hNosel_TTbar.push_back((TH1F*)ifile_TTbar->Get(Form("Nosel_%s", cutNames[i].c_str())));
+        hNosel_Wjets.push_back((TH1F*)ifile_Wjets->Get(Form("Nosel_%s", cutNames[i].c_str())));
+        hNosel_QCD.push_back((TH1F*)ifile_QCD->Get(Form("Nosel_%s", cutNames[i].c_str())));
+        hNosel_Gluino.push_back((TH1F*)ifile_Gluino->Get(Form("Nosel_%s", cutNames[i].c_str())));
+        hNosel_MC.push_back((TH1F*)ifile_Wjets->Get(Form("Nosel_%s", cutNames[i].c_str())));
+    }
+
+    // Step 2: style + build MC sum
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        cout << "Cut: " << cutNames[i] << endl;
+        hNosel_MC[i]->Add(hNosel_TTbar[i]);
+        hNosel_MC[i]->Add(hNosel_QCD[i]);
+
+        // Ptpseudo, TrkIso, EoverP, PtErr_over_Pt, PtErr_over_PtPt, PUppiMET
+        if (i==0 || i==3 || i==4 || i==5 || i==6 || i==9) {
+            hNosel_TTbar[i]->Rebin(4);
+            hNosel_Wjets[i]->Rebin(4);
+            hNosel_QCD[i]->Rebin(4);
+            hNosel_Gluino[i]->Rebin(4);
+            hNosel_JetMETdata[i]->Rebin(4);
+        }
+        // PFMiniIso
+        if (i==2) {
+            hNosel_TTbar[i]->Rebin(8);
+            hNosel_Wjets[i]->Rebin(8);
+            hNosel_QCD[i]->Rebin(8);
+            hNosel_Gluino[i]->Rebin(8);
+            hNosel_JetMETdata[i]->Rebin(8);
+        }
+
+        hNosel_TTbar[i]->SetLineColor(kRed);
+        hNosel_TTbar[i]->SetFillColorAlpha(kRed, 0.5);
+        hNosel_Wjets[i]->SetLineColor(kBlue-7);
+        hNosel_Wjets[i]->SetFillColorAlpha(kBlue-7, 0.5);
+        hNosel_QCD[i]->SetLineColor(kGreen);
+        hNosel_QCD[i]->SetFillColorAlpha(kGreen, 0.5);
+        hNosel_Gluino[i]->SetLineColor(kViolet-1);
+        hNosel_Gluino[i]->SetMarkerStyle(22);
+        hNosel_Gluino[i]->SetMarkerColor(kViolet-1);
+        hNosel_JetMETdata[i]->SetLineColor(kBlack);
+        hNosel_JetMETdata[i]->SetMarkerColor(kBlack);
+        hNosel_JetMETdata[i]->SetMarkerStyle(20);
+    }
+
+    // Step 2 bis: if rescaled, scale MC to data
+    if (isRescaled) {
+        for (size_t i = 0; i < cutNames.size(); i++) {
+            float intTot = hNosel_TTbar[i]->Integral() + hNosel_Wjets[i]->Integral() + hNosel_QCD[i]->Integral();
+            hNosel_TTbar[i]->Scale(hNosel_JetMETdata[i]->Integral()/intTot);
+            hNosel_Wjets[i]->Scale(hNosel_JetMETdata[i]->Integral()/intTot);
+            hNosel_QCD[i]->Scale(hNosel_JetMETdata[i]->Integral()/intTot);
+            hNosel_Gluino[i]->Scale(hNosel_JetMETdata[i]->Integral()/hNosel_Gluino[i]->Integral());
+        }
+    }
+
+    struct CutInfo {
+        double threshold;
+        bool keepRight;
+        bool isSymmetric;
+    };
+
+    std::vector<CutInfo> cutInfos = {
+        {50,     true,  false},  // Pt_pseudo     > 50
+        {2.4,    false, true },  // |eta|         < 2.4
+        {0.02,   false, false},  // PFMiniIso     < 0.02
+        {15,     false, false},  // TrkIso        < 15
+        {0.3,    false, false},  // EoverP        < 0.3
+        {1,      false, false},  // PtErr/Pt      < 1
+        {0.0008, false, false},  // PtErr/PtPt    < 0.0008
+        {0.3,    true,  false},  // Fpix          > 0.3
+        {2.9784, true,  false},  // Ih
+        {150,    true,  false},  // PUppiMET      > 150
+    };
+
+    TLatex *tex = new TLatex(0.75, 0.91, "109 fb^{-1} (13.6 TeV)");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#it{Private work (CMS simulation/data)}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    auto addOverflow = [](TH1F* h) {
+        int n = h->GetNbinsX();
+        h->SetBinContent(n, h->GetBinContent(n) + h->GetBinContent(n+1));
+        h->SetBinError(n, std::sqrt(std::pow(h->GetBinError(n),2) + std::pow(h->GetBinError(n+1),2)));
+        h->SetBinContent(n+1, 0);   // évite le double comptage
+        h->SetBinError(n+1, 0);
+    };
+
+    // Step 3: Canvas for each hists
+    std::vector<TCanvas*> canvases;
+    for (size_t i = 0; i < cutNames.size(); i++) {
+
+        TCanvas *c = new TCanvas(Form("c_Nosel_%s", cutNames[i].c_str()), Form("c_Nosel_%s", cutNames[i].c_str()), 800, 600);
+        c->SetLeftMargin(0.16); c->SetBottomMargin(0.16);
+
+        addOverflow(hNosel_QCD[i]);
+        addOverflow(hNosel_TTbar[i]);
+        addOverflow(hNosel_Wjets[i]);
+        addOverflow(hNosel_JetMETdata[i]);
+        addOverflow(hNosel_Gluino[i]);
+
+        THStack *hs = new THStack(Form("hs_%s", cutNames[i].c_str()), "");
+        hs->Add(hNosel_TTbar[i]);
+        hs->Add(hNosel_QCD[i]);
+        hs->Add(hNosel_Wjets[i]);
+
+        double ymin = 0.001;
+        double ymax = 1e10;
+        double xmin = hNosel_TTbar[i]->GetBinLowEdge(1);
+        double xmax = hNosel_TTbar[i]->GetBinLowEdge(hNosel_TTbar[i]->GetNbinsX()+1);
+
+        if (i==8) xmax = 10;
+
+        if (i==8) {
+            hNosel_TTbar[i]->GetXaxis()->SetRangeUser(xmin, xmax);
+            hNosel_Wjets[i]->GetXaxis()->SetRangeUser(xmin, xmax);
+            hNosel_QCD[i]->GetXaxis()->SetRangeUser(xmin, xmax);
+            hNosel_JetMETdata[i]->GetXaxis()->SetRangeUser(xmin, xmax);
+            hNosel_Gluino[i]->GetXaxis()->SetRangeUser(xmin, xmax);
+        }
+
+        c->cd();
+        TH1F *frame = (TH1F*)hNosel_TTbar[i]->Clone(Form("frame_%s", cutNames[i].c_str()));
+        gStyle->SetOptStat(0);
+        frame->Reset();
+        frame->SetMinimum(ymin);
+        frame->SetMaximum(ymax);
+        frame->GetXaxis()->SetTitle(Xlabel[i].c_str());
+        frame->GetYaxis()->SetTitle("Number of events");
+        frame->GetYaxis()->SetTitleSize(0.06);
+        frame->GetXaxis()->SetTitleSize(0.06);
+        frame->GetXaxis()->SetTitleOffset(0.9);
+        frame->GetYaxis()->SetTitleOffset(0.8);
+        frame->GetXaxis()->SetLabelSize(0.05);
+        frame->GetYaxis()->SetLabelSize(0.05);
+        frame->GetXaxis()->SetRangeUser(xmin, xmax);
+
+        frame->Draw("HIST");
+        hs->Draw("HIST same");
+        hNosel_JetMETdata[i]->Draw("E1 same");
+        hNosel_Gluino[i]->Draw("E1 same");
+
+        // ligne verticale à la valeur de la coupure
+        double xcut = cutInfos[i].threshold;
+        TLine *line = new TLine(xcut, ymin, xcut, ymax);
+        line->SetLineColor(kBlack);
+        line->SetLineStyle(2);
+        line->SetLineWidth(2);
+        line->Draw("same");
+
+        // pour les coupures symétriques |var| < seuil, tracer aussi la ligne à -seuil
+        if (cutInfos[i].isSymmetric) {
+            TLine *lineNeg = new TLine(-xcut, ymin, -xcut, ymax);
+            lineNeg->SetLineColor(kBlack);
+            lineNeg->SetLineStyle(2);
+            lineNeg->SetLineWidth(2);
+            lineNeg->Draw("same");
+        }
+
+        tex->Draw();
+        latex1->Draw();
+
+        TLegend *legend = new TLegend(0.7, 0.6, 0.89, 0.89);
+        if (i==1 || i==7) legend = new TLegend(0.67, 0.16, 0.89, 0.45);  // eta, Fpix
+        legend->AddEntry(hNosel_TTbar[i],     "TTbar",     "f");
+        legend->AddEntry(hNosel_Wjets[i],     "W(#rightarrow#mu#nu)+jets",    "f");
+        legend->AddEntry(hNosel_QCD[i],       "QCD (#mu enriched)",       "f");
+        legend->AddEntry(hNosel_JetMETdata[i],"MET data","lep");
+        legend->AddEntry(hNosel_Gluino[i],     "#tilde{g} (m=2000 GeV)", "lep");
+        legend->SetBorderSize(0);
+
+        TH1F *htemp = (TH1F*)hNosel_Wjets[i]->Clone("htemp");
+        htemp->Add(hNosel_TTbar[i]);
+        htemp->Add(hNosel_QCD[i]);
+
+        htemp->SetMinimum(ymin);
+        htemp->SetMaximum(ymax);
+        hNosel_JetMETdata[i]->SetMinimum(ymin);
+        hNosel_JetMETdata[i]->SetMaximum(ymax);
+
+        c->cd();
+        gPad->RedrawAxis();
+        c->SetLogy();
+        c->SetTickx(1);
+        c->SetTicky(1);
+        hs->SetMinimum(ymin);
+        hs->SetMaximum(ymax);
+        c->Modified();
+        legend->Draw();
+        c->Update();
+
+        TCanvas *cRatio = DrawWithCDF(hNosel_JetMETdata[i], htemp, hNosel_Gluino[i], c,
+                                      Form("cCDF_%s", cutNames[i].c_str()), Xlabel[i], xmin, xmax);
+
+        canvases.push_back(cRatio);
+        delete htemp;
+    }
+
+    // Step 4: compute the efficiency for each cut
+    auto computeEff = [](TH1F* h, double threshold, bool keepRight, bool isSymmetric = false) -> double {
+        if (!h) return -1.0;
+        int totalBins = h->GetNbinsX();
+        double total  = h->Integral(1, totalBins);
+        if (total == 0) return 0.0;
+        if (isSymmetric) {
+            int binLow  = h->FindBin(-threshold);
+            int binHigh = h->FindBin(threshold);
+            return h->Integral(binLow, binHigh) / total;
+        }
+        int cutBin = h->FindBin(threshold);
+        double signal = keepRight ? h->Integral(cutBin, totalBins)
+                                  : h->Integral(1, cutBin - 1);
+        return signal / total;
+    };
+
+    // Print efficiencies
+    std::cout << std::left
+            << std::setw(25) << "Cut"
+            << std::setw(12) << "TTbar"
+            << std::setw(12) << "W+jets"
+            << std::setw(12) << "QCD"
+            << std::setw(12) << "ALL MC"
+            << std::setw(12) << "Data"
+            << std::endl;
+    std::cout << std::string(60, '-') << std::endl;
+
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        double eff_TTbar = computeEff(hNosel_TTbar[i],      cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        double eff_Wjets = computeEff(hNosel_Wjets[i],      cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        double eff_QCD   = computeEff(hNosel_QCD[i],        cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        double eff_MC    = computeEff(hNosel_MC[i],         cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        double eff_Data  = computeEff(hNosel_JetMETdata[i], cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+
+        std::cout << std::left  << std::setw(25) << cutNames[i]
+                << std::fixed << std::setprecision(4)
+                << std::setw(12) << eff_TTbar
+                << std::setw(12) << eff_Wjets
+                << std::setw(12) << eff_QCD
+                << std::setw(12) << eff_MC
+                << std::setw(12) << eff_Data
+                << std::endl;
+    }
+
+    // Step 5: save
+    TString pdfName = Form("PlayWithHistos/Nm1plots/NoselEff%s_ALL.pdf", isRescaled ? "_rescaled" : "");
+    for (size_t i = 0; i < canvases.size(); i++) {
+        if      (i == 0)                    canvases[i]->Print(pdfName + "(");
+        else if (i == canvases.size() - 1)  canvases[i]->Print(pdfName + ")");
+        else                                canvases[i]->Print(pdfName);
+    }
+
+    return;
+}
+
+
+void Nm1EffCutZeroed (bool isRescaled,
+                      std::string TTbar,
+                      std::string Wjets,
+                      std::string QCD,
+                      std::string JetMETdata,
+                      std::string Gluino) {
+
+    gErrorIgnoreLevel = kWarning;
+
+    TFile *ifile_TTbar = new TFile(TTbar.c_str(), "READ");
+    TFile *ifile_Wjets = new TFile(Wjets.c_str(), "READ");
+    TFile *ifile_QCD = new TFile(QCD.c_str(), "READ");
+    TFile *ifile_JetMETdata = new TFile(JetMETdata.c_str(), "READ");
+    TFile *ifile_Gluino = new TFile(Gluino.c_str(), "READ");
+
+    std::vector<TH1F*> hNM1_TTbar, hNM1_Wjets, hNM1_QCD, hNM1_MC, hNM1_JetMETdata, hNM1_Gluino;
+
+    std::vector<string> cutNames = {"trigger", "METfilters", "PUppiMET", "Ptpseudo", "eta", "NOPH", "FOVH", "NOM", "HighPurity",
+    "Chi2", "dZ", "dXY", "PFMiniIso", "TrkIso", "EoverP", "PtErr_over_PtPt", "Fpix", "PtErr_over_Pt", "Ih_StripOnly", "Ih_StripOnly_rescaled"};
+
+    std::vector<string> Xlabel = {"or MET trigger", "MET filters", "PUppi MET", "p_{T} [GeV]", "#eta", "Nb pixel hits", "frac. valid hits", "Nb dE/dx", "HighPurity",
+    "#chi^{2}/NDOF", "d_{z} [cm]", "d_{xy} [cm]", "I_{PF}^{rel}", "I_{dr03}^{trk}", "E/p", "#sigma_{p_{T}}/p_{T}^{2}", "F_{pixel}", "#sigma_{p_{T}}/p_{T}", "I_{h} [MeV/cm]", "I_{h} rescaled [MeV/cm]"};
+
+    // Step 1: retrieve the Nm1 hists
+    for (size_t i = 0; i < cutNames.size(); i++) {
+
+        if (cutNames[i] == "Ih_StripOnly_rescaled") {
+            hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i-1].c_str())));
+            hNM1_TTbar.push_back((TH1F*)ifile_TTbar->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+            hNM1_Wjets.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+            hNM1_QCD.push_back((TH1F*)ifile_QCD->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+            hNM1_Gluino.push_back((TH1F*)ifile_Gluino->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+            hNM1_MC.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        }
+
+        hNM1_JetMETdata.push_back((TH1F*)ifile_JetMETdata->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_TTbar.push_back((TH1F*)ifile_TTbar->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_Wjets.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_QCD.push_back((TH1F*)ifile_QCD->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_Gluino.push_back((TH1F*)ifile_Gluino->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+        hNM1_MC.push_back((TH1F*)ifile_Wjets->Get(Form("Nm1_event_%s", cutNames[i].c_str())));
+    }
+
+    // Step 2: style + build MC sum
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        cout << "Cut: " << cutNames[i] << endl;
+        hNM1_MC[i]->Add(hNM1_TTbar[i]);
+        hNM1_MC[i]->Add(hNM1_QCD[i]);
+
+        if (i==2 || i==3 || i==13 || i==14 || i==15 || i==17) {
+            hNM1_TTbar[i]->Rebin(4);
+            hNM1_Wjets[i]->Rebin(4);
+            hNM1_QCD[i]->Rebin(4);
+            hNM1_Gluino[i]->Rebin(4);
+            hNM1_JetMETdata[i]->Rebin(4);
+        }
+        if (i==12) {
+            hNM1_TTbar[i]->Rebin(8);
+            hNM1_Wjets[i]->Rebin(8);
+            hNM1_QCD[i]->Rebin(8);
+            hNM1_Gluino[i]->Rebin(8);
+            hNM1_JetMETdata[i]->Rebin(8);
+        }
+
+
+        hNM1_TTbar[i]->SetLineColor(kRed);
+        hNM1_TTbar[i]->SetFillColorAlpha(kRed, 0.5);
+        hNM1_Wjets[i]->SetLineColor(kBlue-7);
+        hNM1_Wjets[i]->SetFillColorAlpha(kBlue-7, 0.5);
+        hNM1_QCD[i]->SetLineColor(kGreen);
+        hNM1_QCD[i]->SetFillColorAlpha(kGreen, 0.5);
+        hNM1_Gluino[i]->SetLineColor(kViolet-1);
+        hNM1_Gluino[i]->SetMarkerStyle(22);
+        hNM1_Gluino[i]->SetMarkerColor(kViolet-1);
+        hNM1_JetMETdata[i]->SetLineColor(kBlack);
+        hNM1_JetMETdata[i]->SetMarkerColor(kBlack);
+        hNM1_JetMETdata[i]->SetMarkerStyle(20);
+    }
+
+    // Step 2 bis: if rescaled, scale MC to data
+    if (isRescaled) {
+        for (size_t i = 0; i < cutNames.size(); i++) {
+            float intTot = hNM1_TTbar[i]->Integral() + hNM1_Wjets[i]->Integral() + hNM1_QCD[i]->Integral();
+            hNM1_TTbar[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+            hNM1_Wjets[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+            hNM1_QCD[i]->Scale(hNM1_JetMETdata[i]->Integral()/intTot);
+            hNM1_Gluino[i]->Scale(hNM1_JetMETdata[i]->Integral()/hNM1_Gluino[i]->Integral());
+        }
+    }
+
+    struct CutInfo {
+        double threshold;
+        bool keepRight;
+        bool isSymmetric;
+    };
+
+    // Détail des coupures (cf. table cutflow) :
+    // MET trigger (OR), MET filters, PUppiMET > 150 GeV, pT > 50 GeV, |eta| < 2.4,
+    // N_pixel hits >= 2, f_valid hits > 0.8, N_dE/dx >= 10, HighPurity,
+    // chi2/Ndof < 5, |dz| < 0.1 cm, |dxy| < 0.02 cm, I_PF^rel < 0.02, I_trk < 15 GeV,
+    // E/p < 0.3, sigma_pT/pT^2 < 0.0008, F_pixel > 0.3, sigma_pT/pT < 1, Ih > C_mass
+    std::vector<CutInfo> cutInfos = {
+        {0.5,      true,  false},  // trigger
+        {0.5,      true,  false},  // METfilters
+        {150,    true,  false},  // PUppiMET > 150
+        {50,     true,  false},  // Pt_pseudo     > 50
+        {2.4,    false, true },  // |eta|         < 2.4
+        {2,      true,  false},  // NOPH          >= 2
+        {0.8,    true,  false},  // FOVH          > 0.8
+        {10,     true,  false},  // NOM           >= 10
+        {0.5,      true,  false},  // HighPurity
+        {5.0,    false, false},  // Chi2          < 5
+        {0.1,    false, true },  // |dZ|          < 0.1
+        {0.02,   false, true },  // |dXY|         < 0.02
+        {0.02,   false, false},  // PFMiniIso     < 0.02
+        {15,     false, false},  // TrkIso        < 15
+        {0.3,    false, false},  // EoverP        < 0.3
+        {0.0008, false, false},  // PtErr/PtPt    < 0.0008
+        {0.3,    true,  false},  // Fpix          > 0.3
+        {1,      false, false},  // PtErr/Pt      < 1
+        {2.9784, true,  false},  // Ih_StripOnly  > C_mass
+        {2.9784, true,  false},  // Ih_StripOnly rescaled > C_mass
+    };
+
+    TLatex *tex = new TLatex(0.75, 0.91, "109 fb^{-1} (13.6 TeV)");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#it{Private work (CMS simulation/data)}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+
+    auto addOverflow = [](TH1F* h) {
+        int n = h->GetNbinsX();
+        h->SetBinContent(n, h->GetBinContent(n) + h->GetBinContent(n+1));
+        h->SetBinError(n, std::sqrt(std::pow(h->GetBinError(n),2) + std::pow(h->GetBinError(n+1),2)));
+        h->SetBinContent(n+1, 0);   // évite le double comptage
+        h->SetBinError(n+1, 0);
+    };
+
+    // Met à zéro tous les bins en dehors de la région acceptée par la coupure.
+    // Conventions identiques à computeEff : keepRight garde [FindBin(thr), n],
+    // keepLeft garde [1, FindBin(thr)-1], symétrique garde [FindBin(-thr), FindBin(thr)].
+    auto zeroOutsideCut = [](TH1F* h, double threshold, bool keepRight, bool isSymmetric) {
+        if (!h) return;
+        int n = h->GetNbinsX();
+        if (isSymmetric) {
+            int binLow  = h->FindBin(-threshold);
+            int binHigh = h->FindBin(threshold);
+            for (int b = 0; b <= n+1; b++) {
+                if (b < binLow || b > binHigh) {
+                    h->SetBinContent(b, 0);
+                    h->SetBinError(b, 0);
+                }
+            }
+            return;
+        }
+        int cutBin = h->FindBin(threshold);
+        for (int b = 0; b <= n+1; b++) {
+            bool keep = keepRight ? (b >= cutBin) : (b <= cutBin - 1);
+            if (!keep) {
+                h->SetBinContent(b, 0);
+                h->SetBinError(b, 0);
+            }
+        }
+    };
+
+    // Step 3 (déplacé avant les canvas) : compute the efficiency for each cut
+    // NB : doit être fait AVANT la mise à zéro des bins hors coupure,
+    // sinon toutes les efficacités valent trivialement 1.
+    auto computeEff = [](TH1F* h, double threshold, bool keepRight, bool isSymmetric = false) -> double {
+        if (!h) return -1.0;
+        int totalBins = h->GetNbinsX();
+        double total  = h->Integral(1, totalBins);
+        if (total == 0) return 0.0;
+        if (isSymmetric) {
+            int binLow  = h->FindBin(-threshold);
+            int binHigh = h->FindBin(threshold);
+            return h->Integral(binLow, binHigh) / total;
+        }
+        int cutBin = h->FindBin(threshold);
+        double signal = keepRight ? h->Integral(cutBin, totalBins)
+                                  : h->Integral(1, cutBin - 1);
+        return signal / total;
+    };
+
+    // Print efficiencies
+    std::cout << std::left
+            << std::setw(25) << "Cut"
+            << std::setw(12) << "TTbar"
+            << std::setw(12) << "W+jets"
+            << std::setw(12) << "QCD"
+            << std::setw(12) << "ALL MC"
+            << std::setw(12) << "Data"
+            << std::endl;
+    std::cout << std::string(60, '-') << std::endl;
+
+    for (size_t i = 0; i < cutNames.size(); i++) {
+        double eff_TTbar = computeEff(hNM1_TTbar[i],      cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        double eff_Wjets = computeEff(hNM1_Wjets[i],      cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        double eff_QCD   = computeEff(hNM1_QCD[i],        cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        double eff_MC    = computeEff(hNM1_MC[i],         cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        double eff_Data  = computeEff(hNM1_JetMETdata[i], cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+
+        std::cout << std::left  << std::setw(25) << cutNames[i]
+                << std::fixed << std::setprecision(4)
+                << std::setw(12) << eff_TTbar
+                << std::setw(12) << eff_Wjets
+                << std::setw(12) << eff_QCD
+                << std::setw(12) << eff_MC
+                << std::setw(12) << eff_Data
+                << std::endl;
+    }
+
+    // Step 4: Canvas for each hists (bins hors coupure mis à zéro)
+    std::vector<TCanvas*> canvases;
+    for (size_t i = 0; i < cutNames.size(); i++) {
+
+        TCanvas *c = new TCanvas(Form("c_Nm1_%s", cutNames[i].c_str()), Form("c_Nm1_%s", cutNames[i].c_str()), 800, 600);
+        c->SetLeftMargin(0.16); c->SetBottomMargin(0.16);
+
+        addOverflow(hNM1_QCD[i]);
+        addOverflow(hNM1_TTbar[i]);
+        addOverflow(hNM1_Wjets[i]);
+        addOverflow(hNM1_JetMETdata[i]);
+        addOverflow(hNM1_Gluino[i]);
+
+        // ----- subtilité : on met à zéro les bins qui ne passent pas la coupure -----
+        zeroOutsideCut(hNM1_QCD[i],        cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        zeroOutsideCut(hNM1_TTbar[i],      cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        zeroOutsideCut(hNM1_Wjets[i],      cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        zeroOutsideCut(hNM1_JetMETdata[i], cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        zeroOutsideCut(hNM1_Gluino[i],     cutInfos[i].threshold, cutInfos[i].keepRight, cutInfos[i].isSymmetric);
+        // -----------------------------------------------------------------------------
+
+        THStack *hs = new THStack(Form("hs_%s", cutNames[i].c_str()), "");
+        hs->Add(hNM1_QCD[i]);
+        hs->Add(hNM1_TTbar[i]);
+        hs->Add(hNM1_Wjets[i]);
+
+        double ymin = 0.01;
+        double ymax = 6e6;
+        double xmin = hNM1_TTbar[i]->GetBinLowEdge(1);
+        double xmax = hNM1_TTbar[i]->GetBinLowEdge(hNM1_TTbar[i]->GetNbinsX()+1);
+
+        if (i==6) xmin = 0.75;
+
+        c->cd();
+        TH1F *frame = (TH1F*)hNM1_TTbar[i]->Clone(Form("frame_%s", cutNames[i].c_str()));
+        gStyle->SetOptStat(0);
+        frame->Reset();
+        frame->SetMinimum(ymin);
+        frame->SetMaximum(ymax);
+        frame->GetXaxis()->SetTitle(Xlabel[i].c_str());
+        frame->GetYaxis()->SetTitle("Number of events");
+        frame->GetYaxis()->SetTitleSize(0.06);
+        frame->GetXaxis()->SetTitleSize(0.06);
+        frame->GetXaxis()->SetTitleOffset(0.9);
+        frame->GetYaxis()->SetTitleOffset(0.8);
+        frame->GetXaxis()->SetLabelSize(0.05);
+        frame->GetYaxis()->SetLabelSize(0.05);
+        frame->GetXaxis()->SetRangeUser(xmin, xmax);
+
+        frame->Draw("HIST");
+        hs->Draw("HIST same");
+        hNM1_JetMETdata[i]->Draw("E1 same");
+        hNM1_Gluino[i]->Draw("E1 same");
+
+
+        // ligne verticale à la valeur de la coupure
+        double xcut = cutInfos[i].threshold;
+        TLine *line = new TLine(xcut, ymin, xcut, ymax);
+        line->SetLineColor(kBlack);
+        line->SetLineStyle(2);
+        line->SetLineWidth(2);
+        line->Draw("same");
+
+        // pour les coupures symétriques |var| < seuil, tracer aussi la ligne à -seuil
+        if (cutInfos[i].isSymmetric) {
+            TLine *lineNeg = new TLine(-xcut, ymin, -xcut, ymax);
+            lineNeg->SetLineColor(kBlack);
+            lineNeg->SetLineStyle(2);
+            lineNeg->SetLineWidth(2);
+            lineNeg->Draw("same");
+        }
+
+        tex->Draw();
+        latex1->Draw();
+
+
+        TLegend *legend = new TLegend(0.7, 0.6, 0.89, 0.89);
+        if (i==0 || i==1 || i==6 || i==4 || i==8 || i==16) legend = new TLegend(0.67, 0.16, 0.89, 0.45);
+        legend->AddEntry(hNM1_TTbar[i],     "TTbar",     "f");
+        legend->AddEntry(hNM1_Wjets[i],     "W(#rightarrow#mu#nu)+jets",    "f");
+        legend->AddEntry(hNM1_QCD[i],       "QCD (#mu enriched)",       "f");
+        legend->AddEntry(hNM1_JetMETdata[i],"MET data","lep");
+        legend->AddEntry(hNM1_Gluino[i],     "#tilde{g} (m=2000 GeV)", "lep");
+        legend->SetBorderSize(0);
+
+        TH1F *htemp = (TH1F*)hNM1_Wjets[i]->Clone("htemp");
+        htemp->Add(hNM1_TTbar[i]);
+        htemp->Add(hNM1_QCD[i]);
+
+        htemp->SetMinimum(ymin);
+        htemp->SetMaximum(ymax);
+        hNM1_JetMETdata[i]->SetMinimum(ymin);
+        hNM1_JetMETdata[i]->SetMaximum(ymax);
+
+        c->cd();
+        gPad->RedrawAxis();
+        c->SetLogy();
+        c->SetTickx(1);
+        c->SetTicky(1);
+        hs->SetMinimum(ymin);
+        hs->SetMaximum(ymax);
+        c->Modified();
+        legend->Draw();
+        c->Update();
+
+        TCanvas *cRatio = DrawWithCDF(hNM1_JetMETdata[i], htemp, hNM1_Gluino[i], c,
+                                      Form("cCDF_%s", cutNames[i].c_str()), Xlabel[i], xmin, xmax);
+
+        canvases.push_back(cRatio);
+        delete htemp;
+    }
+
+    // Step 5: save
+    TString pdfName = Form("PlayWithHistos/Nm1plots/Nm1EffCutZeroed%s_ALL.pdf", isRescaled ? "_rescaled" : "");
+    for (size_t i = 0; i < canvases.size(); i++) {
+        if      (i == 0)                    canvases[i]->Print(pdfName + "(");
+        else if (i == canvases.size() - 1)  canvases[i]->Print(pdfName + ")");
+        else                                canvases[i]->Print(pdfName);
+    }
+
+    return;
+}
+
+void PlotPthatQCD(std::string sampleW  = "../output/QCD2024_V16/QCD2024_mu_V16p2_weighted.root",
+                  std::string sampleNW = "../output/QCD2024_V16/QCD2024_mu_V16p2.root") {
+
+    gErrorIgnoreLevel = kWarning;
+    gStyle->SetOptStat(0);
+
+    TFile *ifileW  = new TFile(sampleW.c_str(),  "READ");
+    TFile *ifileNW = new TFile(sampleNW.c_str(), "READ");
+    if (!ifileW || ifileW->IsZombie()) {
+        std::cerr << "Cannot open file: " << sampleW << std::endl;
+        return;
+    }
+    if (!ifileNW || ifileNW->IsZombie()) {
+        std::cerr << "Cannot open file: " << sampleNW << std::endl;
+        return;
+    }
+
+    TH1F *hW  = (TH1F*)ifileW->Get("Nosel_PthatQCD");
+    TH1F *hNW = (TH1F*)ifileNW->Get("Nosel_PthatQCD");
+    if (!hW) {
+        std::cerr << "Histogram Nosel_PthatQCD not found in " << sampleW << std::endl;
+        return;
+    }
+    if (!hNW) {
+        std::cerr << "Histogram Nosel_PthatQCD not found in " << sampleNW << std::endl;
+        return;
+    }
+
+    TCanvas *c = new TCanvas("c_PthatQCD", "c_PthatQCD", 800, 600);
+    c->SetLeftMargin(0.16);
+    c->SetBottomMargin(0.16);
+    c->SetLogy();
+    c->SetTickx(1);
+    c->SetTicky(1);
+
+    hNW->SetLineColor(kBlack);
+    hNW->SetLineWidth(2);
+
+    hW->SetLineColor(kGreen+2);
+    hW->SetLineWidth(2);
+    hW->GetXaxis()->SetTitle("#hat{p}_{T} [GeV]");
+    hW->GetYaxis()->SetTitle("Number of events");
+    hW->GetXaxis()->SetTitleSize(0.06);
+    hW->GetYaxis()->SetTitleSize(0.06);
+    hW->GetXaxis()->SetTitleOffset(0.9);
+    hW->GetYaxis()->SetTitleOffset(0.8);
+    hW->GetXaxis()->SetLabelSize(0.05);
+    hW->GetYaxis()->SetLabelSize(0.05);
+
+    double ymax = std::max(hW->GetMaximum(), hNW->GetMaximum()) * 10;
+    hW->SetMaximum(ymax);
+    hW->SetMinimum(0.1);
+
+    hW->Draw("HIST");
+    hNW->Draw("HIST same");
+
+    TLatex *tex = new TLatex(0.68, 0.91, "109 fb^{-1} (13.6 TeV)");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    tex->SetTextSize(0.04);
+    tex->Draw();
+
+    TLatex *latex1 = new TLatex(0.16, 0.91, "#it{Private work (CMS simulation)}");
+    latex1->SetNDC();
+    latex1->SetTextFont(42);
+    latex1->SetTextSize(0.04);
+    latex1->Draw();
+
+    TLegend *legend = new TLegend(0.6, 0.7, 0.89, 0.89);
+    legend->AddEntry(hW,  "QCD weighted",     "l");
+    legend->AddEntry(hNW, "QCD non-weighted", "l");
+    legend->SetBorderSize(0);
+    legend->Draw();
+
+    gPad->RedrawAxis();
+    c->Update();
+
+    c->Print("PlayWithHistos/Nosel_PthatQCD.pdf");
 
     return;
 }
@@ -7039,7 +8335,7 @@ void CombineHistos()
     // BKGdependency_preliminary("../output/TTbar2024_V15/TTbar2024_V15p5_weighted.root", "TTbar");
     // BKGdependency_preliminary("../output/Wjets2024_V14/Wjets2024_V14p6_weighted.root", "Wjets");
     // BKGdependency_preliminary("../output/QCD2024_V16/QCD2024_mu_V16p1_weighted.root", "QCD");
-    // BKGdependency();
+    BKGdependency();
 
     //GluinoP_mass(true, true);
     //GluinoP_mass(false, true);
@@ -7092,7 +8388,7 @@ void CombineHistos()
     //------------------------------------------------------------------
 
     // TriggerEffCalib__Signal("TriggerEffCalib__Signal",
-    //                         "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p4.root", 
+    //                         "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p8.root", 
     //                         "Gluino2000");
 
     //TriggerEffCalib__Signal__2D("TriggerEffCalib__Signal", "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p4.root", "Gluino2000");
@@ -7106,7 +8402,8 @@ void CombineHistos()
     //                     "TriggerEffCalib");
 
     //SignalEffVsMass();
-    //DisplayTriggerEff();
+    // DisplayTriggerEff("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p8.root", true);
+    // DisplayTriggerEff("../output/Mu2024_V18/Mu2024_V18p1.root", false);
 
     // ExtractSF("TriggEff/SF_PseudoMET.txt",
     //         "TriggEff/SF_PseudoMET_tex.txt",
@@ -7134,7 +8431,43 @@ void CombineHistos()
 
     //ProfileVsRunNumber();
 
-    CompareIhWithCDF();
+    //CompareIhWithCDF();
+
+    // PUppiVSPF("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p7.root", false);
+    // PUppiVSPF("../output/JetMET2024_V12/JetMET2024_V12p31.root", true);
+
+    // Nm1Eff(false,
+    //        "../output/TTbar2024_V15/TTbar2024_V15p9_weighted.root",
+    //        "../output/Wjets2024_V14/WjetMuNu2024_V14p13_weighted.root",
+    //        "../output/QCD2024_V16/QCD2024_mu_V16p2_weighted.root",
+    //        "../output/JetMET2024_V12/JetMET2024_V12p32.root",
+    //        "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p8_weighted.root");
+
+    // Nm1EffCutZeroed(
+    //     false,
+    //     "../output/TTbar2024_V15/TTbar2024_V15p9_weighted.root",
+    //     "../output/Wjets2024_V14/WjetMuNu2024_V14p13_weighted.root",
+    //     "../output/QCD2024_V16/QCD2024_mu_V16p2_weighted.root",
+    //     "../output/JetMET2024_V12/JetMET2024_V12p32.root",
+    //     "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p8_weighted.root"
+    // );
+
+    // NoselEff(false,
+    //           "../output/TTbar2024_V15/TTbar2024_V15p9_weighted.root",
+    //           "../output/Wjets2024_V14/WjetMuNu2024_V14p13_weighted.root",
+    //           "../output/QCD2024_V16/QCD2024_mu_V16p2_weighted.root",
+    //           "../output/JetMET2024_V12/JetMET2024_V12p32.root",
+    //           "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p8_weighted.root");
+
+    // Cutflows("../output/QCD2024_V16/QCD2024_mu_V16p2_weighted.root",
+    //          "../output/TTbar2024_V15/TTbar2024_V15p9_weighted.root",
+    //          "../output/Wjets2024_V14/WjetMuNu2024_V14p13_weighted.root",
+    //          "../output/JetMET2024_V12/JetMET2024_V12p32.root", 
+    //          "../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p8_weighted.root");
+
+
+    //PlotPthatQCD();
+
 
     return;
 }
