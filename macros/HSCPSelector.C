@@ -140,16 +140,7 @@ void HSCPSelector::Begin(TTree *tree) {
     // Options
     UseFpixel = true;
 
-    // Fill the SF;
-    SFisUp = false; SFisDown = false;
-    loadSF("PlayWithHistos/SF_TriggerEff_Mu2024_WMuNu_PseudoMETrescaled.txt", SFisUp, SFisDown, SF_PseudoMETvalue, SF_triggerEff);
-    loadSF("PlayWithHistos/SF_TriggerEff_Mu2024_WMuNu_PseudoMET.txt", SFisUp, SFisDown, SF_PseudoMETvalue_NOTrescaled, SF_triggerEff_NOTrescaled);
-
-    SFisUp = true; SFisDown = false;
-    loadSF("PlayWithHistos/SF_TriggerEff_Mu2024_WMuNu_PseudoMETrescaled.txt", SFisUp, SFisDown, SF_PseudoMETvalue_Up, SF_triggerEff_Up);
-    SFisUp = false; SFisDown = true;
-    loadSF("PlayWithHistos/SF_TriggerEff_Mu2024_WMuNu_PseudoMETrescaled.txt", SFisUp, SFisDown, SF_PseudoMETvalue_Down, SF_triggerEff_Down);
-    
+    // Fill the SF;    
     loadSF2D("TriggEff/SF_orMETtrg_PUppiMET_VS_PseudoMET__TriggerEffCalib_table_plain.txt", SF2D_PseudoMETlovalue, SF2D_PseudoMEThivalue, SF2D_PUppiMETlovalue, SF2D_PUppiMEThivalue, SF2D_Down, SF2D, SF2D_Up);
     loadSF1D("TriggEff/SF_PseudoMET.txt", SF1D_PseudoMETvalue, SF1Dpseudo_Down, SF1Dpseudo, SF1Dpseudo_Up);
     loadSF1D("TriggEff/SF_PUppiMET.txt", SF1D_PUppiMETvalue, SF1Dpuppi_Down, SF1Dpuppi, SF1Dpuppi_Up);
@@ -843,7 +834,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
 
 
     plots.AddHisto2F("dEdX0stripVsP", 100, 0, 4000, 50, 0., 50.);
-    plots.AddHisto2F("dEdX0stripVsP_eta1", 100, 0, 4000, 50, 0., 50.);
+    plots.AddHisto2F("dEdX0stripVsP__large", 1000, 0, 4000, 500, 0.,50.);
 
     plots.AddHisto2F("Nosel_PUppiMET_VS_PseudoMET", 100, 0, 2500, 100, 0, 2500);
 

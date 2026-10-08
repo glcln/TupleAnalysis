@@ -78,13 +78,6 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    bool isMiniAOD = false;
 
    // DATA-MC SF for the signal (derived from the trigg. eff.)
-   std::vector <float> SF_triggerEff, SF_triggerEff_Up, SF_triggerEff_Down;
-   std::vector <float> SF_PseudoMETvalue, SF_PseudoMETvalue_Up, SF_PseudoMETvalue_Down;
-   bool SFisUp;
-   bool SFisDown;
-   std::vector <float> SF_triggerEff_NOTrescaled;
-   std::vector <float> SF_PseudoMETvalue_NOTrescaled;
-
    std::vector <float> SF2D_PseudoMETlovalue, SF2D_PseudoMEThivalue, SF2D_PUppiMETlovalue, SF2D_PUppiMEThivalue, SF2D_Down, SF2D, SF2D_Up;
    std::vector <float> SF1D_PseudoMETvalue, SF1Dpseudo_Down, SF1Dpseudo, SF1Dpseudo_Up;
    std::vector <float> SF1D_PUppiMETvalue, SF1Dpuppi_Down, SF1Dpuppi, SF1Dpuppi_Up;
