@@ -889,7 +889,7 @@ void PlotNormalized(const char *labelH1, const char *labelH2,
     c->SetLogy();
 
 
-    c->SaveAs(Form("PlayWithHistos/c_PlotNormalized__%s.pdf", ofilename));
+    c->SaveAs(Form("../outputDisplay/c_PlotNormalized__%s.pdf", ofilename));
 
     return;
 }
@@ -944,8 +944,8 @@ TH2D* RebinTH2( const TH2* hIn,
 void MET_trg_eff(const char* label, const char *ifileName, bool isAOD = false) {
 
     TFile *ofile;
-    if (isAOD) ofile = new TFile("PlayWithHistos/MET_trg_eff_AOD.root", "RECREATE");
-    else ofile = new TFile("PlayWithHistos/MET_trg_eff_miniAOD.root", "RECREATE");
+    if (isAOD) ofile = new TFile("../outputDisplay/MET_trg_eff_AOD.root", "RECREATE");
+    else ofile = new TFile("../outputDisplay/MET_trg_eff_miniAOD.root", "RECREATE");
 
     TFile *ifile = new TFile(Form("%s", ifileName), "READ");
 
@@ -1152,7 +1152,7 @@ void MET_trg_eff(const char* label, const char *ifileName, bool isAOD = false) {
 
 void PFMET_Cut(bool isAOD=false) {
 
-    TFile *ofile = new TFile("PlayWithHistos/PFMET_Cut_v2.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/PFMET_Cut_v2.root", "RECREATE");
 
     TFile *ifile_AOD;
     if (isAOD) ifile_AOD = new TFile("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", "READ");
@@ -1298,7 +1298,7 @@ void PFMET_Cut(bool isAOD=false) {
 
 void TrigEff_AODvsMiniAOD() {
 
-    TFile *ofile = new TFile("PlayWithHistos/TrigEff_AODvsMiniAOD.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/TrigEff_AODvsMiniAOD.root", "RECREATE");
 
     //TFile *ifile_AOD = new TFile("../output/Gluino2000_Run2_METtrgEff_AOD_V11p15_Eta2p4.root", "READ");
     //TFile *ifile_miniAOD = new TFile("../output/Gluino2000_Run2_METtrgEff_V11p15_Eta2p4.root", "READ");
@@ -1411,7 +1411,7 @@ void Cutflows(std::string QCD,
               std::string JetMETdata,
               std::string Gluino2000) {
 
-    TFile *ofile = new TFile("PlayWithHistos/EventCutflow.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/EventCutflow.root", "RECREATE");
 
     TFile *ifile_QCD = new TFile(QCD.c_str(), "READ");
     TFile *ifile_TTbar = new TFile(TTbar.c_str(), "READ");
@@ -1561,7 +1561,7 @@ void Cutflows(std::string QCD,
     // --- Saving
     ofile->cd();
     c->Write();
-    c->SaveAs("PlayWithHistos/Nm1plots/EventCutflow.pdf");
+    c->SaveAs("../outputDisplay/Nm1plots/EventCutflow.pdf");
     ofile->Close();
 }
 
@@ -1577,7 +1577,7 @@ void MET_trg_eff(const char *labelData,
 
     gErrorIgnoreLevel = kError;
 
-    TFile *ofile = new TFile(Form("PlayWithHistos/%s.root", ofilename), "RECREATE");
+    TFile *ofile = new TFile(Form("../outputDisplay/%s.root", ofilename), "RECREATE");
 
     TFile *ifileDATA = new TFile(Form("%s", inputfileDATA), "READ");
     TFile *ifileMC = new TFile(Form("%s", inputfileMC), "READ");
@@ -1814,33 +1814,33 @@ void MET_trg_eff(const char *labelData,
     
     latex1->SetTitle("#it{Private work (CMS simulation/data)}");
 
-    cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET->SaveAs(Form("PlayWithHistos/cRatio_HLT_PFMET120_PFMHT120_IDTight_%s.pdf", ofilename));
-    cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET->SaveAs(Form("PlayWithHistos/cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight_%s.pdf", ofilename));
-    cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET->SaveAs(Form("PlayWithHistos/cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_%s.pdf", ofilename));
-    cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET->SaveAs(Form("PlayWithHistos/cRatio_HLT_MET105_IsoTrk50_%s.pdf", ofilename));
-    cRatio_orMETtrg___PseudoCaloMET->SaveAs(Form("PlayWithHistos/cRatio_orMETtrg_%s.pdf", ofilename));
+    cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET->SaveAs(Form("../outputDisplay/cRatio_HLT_PFMET120_PFMHT120_IDTight_%s.pdf", ofilename));
+    cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET->SaveAs(Form("../outputDisplay/cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight_%s.pdf", ofilename));
+    cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET->SaveAs(Form("../outputDisplay/cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_%s.pdf", ofilename));
+    cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET->SaveAs(Form("../outputDisplay/cRatio_HLT_MET105_IsoTrk50_%s.pdf", ofilename));
+    cRatio_orMETtrg___PseudoCaloMET->SaveAs(Form("../outputDisplay/cRatio_orMETtrg_%s.pdf", ofilename));
 
 
     cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET->Modified();
     cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET->Update();
     TCanvas *cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_bis = DrawWithRatio(eff_HLT_PFMET120_PseudoCaloMET_DATA, eff_HLT_PFMET120_PseudoCaloMET_MC, c_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET, "HLT_PFMET120_PFMHT120_IDTight_pseudoCaloMET", "DATA/MC", "Pseudo MET [GeV]", 0, 1200);
-    cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_bis->SaveAs(Form("PlayWithHistos/cRatio_HLT_PFMET120_PFMHT120_IDTight_%s_bis.pdf", ofilename));
+    cRatio_HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET_bis->SaveAs(Form("../outputDisplay/cRatio_HLT_PFMET120_PFMHT120_IDTight_%s_bis.pdf", ofilename));
     cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET->Modified();
     cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET->Update();
     TCanvas *cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_bis = DrawWithRatio(eff_HLT_PFHT500_PseudoCaloMET_DATA, eff_HLT_PFHT500_PseudoCaloMET_MC, c_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET, "HLT_PFHT500_PFMET100_PFMHT100_IDTight_pseudoCaloMET", "DATA/MC", "Pseudo MET [GeV]", 0, 1200);
-    cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_bis->SaveAs(Form("PlayWithHistos/cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight_%s_bis.pdf", ofilename));
+    cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET_bis->SaveAs(Form("../outputDisplay/cRatio_HLT_PFHT500_PFMET100_PFMHT100_IDTight_%s_bis.pdf", ofilename));
     cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET->Modified();
     cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET->Update();
     TCanvas *cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET_bis = DrawWithRatio(eff_HLT_PFMETNoMu120_PseudoCaloMET_DATA, eff_HLT_PFMETNoMu120_PseudoCaloMET_MC, c_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET, "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_pseudoCaloMET", "DATA/MC", "Pseudo MET [GeV]", 0, 1200);
-    cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET_bis->SaveAs(Form("PlayWithHistos/cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_%s_bis.pdf", ofilename));
+    cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET_bis->SaveAs(Form("../outputDisplay/cRatio_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_%s_bis.pdf", ofilename));
     cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET->Modified();
     cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET->Update();
     TCanvas *cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET_bis = DrawWithRatio(eff_HLT_MET105_PseudoCaloMET_DATA, eff_HLT_MET105_PseudoCaloMET_MC, c_HLT_MET105_IsoTrk50___PseudoCaloMET, "HLT_MET105_IsoTrk50_pseudoCaloMET", "DATA/MC", "Pseudo MET [GeV]", 0, 1200);
-    cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET_bis->SaveAs(Form("PlayWithHistos/cRatio_HLT_MET105_IsoTrk50_%s_bis.pdf", ofilename));
+    cRatio_HLT_MET105_IsoTrk50___PseudoCaloMET_bis->SaveAs(Form("../outputDisplay/cRatio_HLT_MET105_IsoTrk50_%s_bis.pdf", ofilename));
     cRatio_orMETtrg___PseudoCaloMET->Modified();
     cRatio_orMETtrg___PseudoCaloMET->Update();
     TCanvas *cRatio_orMETtrg___PseudoCaloMET_bis = DrawWithRatio(eff_orMETtrg_PseudoCaloMET_DATA, eff_orMETtrg_PseudoCaloMET_MC, c_orMETtrg___PseudoCaloMET, "orMETtrg_pseudoCaloMET", "DATA/MC", "Pseudo MET [GeV]", 0, 1200);
-    cRatio_orMETtrg___PseudoCaloMET_bis->SaveAs(Form("PlayWithHistos/cRatio_orMETtrg_%s_bis.pdf", ofilename));
+    cRatio_orMETtrg___PseudoCaloMET_bis->SaveAs(Form("../outputDisplay/cRatio_orMETtrg_%s_bis.pdf", ofilename));
 
 
 
@@ -1897,7 +1897,7 @@ void MET_trg_eff(const char *labelData,
 
 void Comp_muonEG(const char *inputfileDATA, const char *inputfileMC) {
 
-    TFile *ofile = new TFile("PlayWithHistos/Comp_muonEG.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/Comp_muonEG.root", "RECREATE");
 
     TFile *ifileDATA = new TFile(Form("%s", inputfileDATA), "READ");
     TFile *ifileMC = new TFile(Form("%s", inputfileMC), "READ");
@@ -2040,7 +2040,7 @@ void Comp_muonEG(const char *inputfileDATA, const char *inputfileMC) {
 
 void Old_vs_New_fits(const char *inputfile) {
 
-    TFile *ofile = new TFile("PlayWithHistos/Old_vs_New_fits.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/Old_vs_New_fits.root", "RECREATE");
     TFile *ifile = new TFile(Form("%s", inputfile), "READ");
 
     // histograms
@@ -2184,11 +2184,11 @@ void Ihand1oP_fits() {
         st->SetY2NDC(0.5);  // new y end position
     }
     st->SetTextSize(0.035);
-    c1->SaveAs("PlayWithHistos/Ih_newfit.pdf");
+    c1->SaveAs("../outputDisplay/Ih_newfit.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c1->Modified();
     c1->Update();
-    c1->SaveAs("PlayWithHistos/Ih_newfit_bis.pdf");
+    c1->SaveAs("../outputDisplay/Ih_newfit_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
 
@@ -2213,11 +2213,11 @@ void Ihand1oP_fits() {
         st2->SetY2NDC(0.5);  // new y end position
     }
     st2->SetTextSize(0.035);
-    c2->SaveAs("PlayWithHistos/oP_newfit.pdf");
+    c2->SaveAs("../outputDisplay/oP_newfit.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c2->Modified();
     c2->Update();
-    c2->SaveAs("PlayWithHistos/oP_newfit_bis.pdf");
+    c2->SaveAs("../outputDisplay/oP_newfit_bis.pdf");
 
 
     return;
@@ -2225,7 +2225,7 @@ void Ihand1oP_fits() {
 
 void BKGdependency_preliminary (const char *inputname, const char *ofilename) {
 
-    TFile *ofile = new TFile(Form("PlayWithHistos/BKGdependency_preliminary_%s.root", ofilename), "RECREATE");
+    TFile *ofile = new TFile(Form("../outputDisplay/BKGdependency_preliminary_%s.root", ofilename), "RECREATE");
     TFile *ifile = new TFile(Form("%s", inputname), "READ");
 
     TH2F *pT_vs_fpix = (TH2F*)ifile->Get("METanalysis_Eta2p4_pT_vs_Fpixel");
@@ -2290,9 +2290,9 @@ void BKGdependency_preliminary (const char *inputname, const char *ofilename) {
 
 void BKGdependency () {
 
-    TFile *ifile_TTbar = new TFile("PlayWithHistos/BKGdependency_preliminary_TTbar.root", "READ");
-    TFile *ifile_QCD = new TFile("PlayWithHistos/BKGdependency_preliminary_QCD.root", "READ");
-    TFile *ifile_Wjets = new TFile("PlayWithHistos/BKGdependency_preliminary_Wjets.root", "READ");
+    TFile *ifile_TTbar = new TFile("../outputDisplay/BKGdependency_preliminary_TTbar.root", "READ");
+    TFile *ifile_QCD = new TFile("../outputDisplay/BKGdependency_preliminary_QCD.root", "READ");
+    TFile *ifile_Wjets = new TFile("../outputDisplay/BKGdependency_preliminary_Wjets.root", "READ");
 
     TH2F *ih_vs_eta__TTbar = (TH2F*)ifile_TTbar->Get("ih_vs_eta");
     TH2F *fpix_vs_ih__TTbar = (TH2F*)ifile_TTbar->Get("fpix_vs_ih");
@@ -2385,19 +2385,19 @@ void BKGdependency () {
     c_fpix_vs_ih->SetLogz();
     gStyle->SetOptStat(0);
     latex1->Draw();
-    c_fpix_vs_ih->SaveAs("PlayWithHistos/Correlation_fpix_ih.pdf");
+    c_fpix_vs_ih->SaveAs("../outputDisplay/Correlation_fpix_ih.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_fpix_vs_ih->Modified();
     c_fpix_vs_ih->Update();
-    c_fpix_vs_ih->SaveAs("PlayWithHistos/Correlation_fpix_ih_bis.pdf");
+    c_fpix_vs_ih->SaveAs("../outputDisplay/Correlation_fpix_ih_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     fpix_vs_ih->GetYaxis()->SetRangeUser(3.29, 3.31);
     c_fpix_vs_ih->Update();
-    c_fpix_vs_ih->SaveAs("PlayWithHistos/Correlation_fpix_ih__ZOOM.pdf");
+    c_fpix_vs_ih->SaveAs("../outputDisplay/Correlation_fpix_ih__ZOOM.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_fpix_vs_ih->Modified();
     c_fpix_vs_ih->Update();
-    c_fpix_vs_ih->SaveAs("PlayWithHistos/Correlation_fpix_ih__ZOOM_bis.pdf");
+    c_fpix_vs_ih->SaveAs("../outputDisplay/Correlation_fpix_ih__ZOOM_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
 
     TCanvas *c_fpix_vs_oP = new TCanvas("c_fpix_vs_oP", "c_fpix_vs_oP", 800, 600);
@@ -2410,19 +2410,19 @@ void BKGdependency () {
     c_fpix_vs_oP->SetLogz();
     gStyle->SetOptStat(0);
     latex1->Draw();
-    c_fpix_vs_oP->SaveAs("PlayWithHistos/Correlation_fpix_1oP.pdf");
+    c_fpix_vs_oP->SaveAs("../outputDisplay/Correlation_fpix_1oP.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_fpix_vs_oP->Modified();
     c_fpix_vs_oP->Update();
-    c_fpix_vs_oP->SaveAs("PlayWithHistos/Correlation_fpix_1oP_bis.pdf");
+    c_fpix_vs_oP->SaveAs("../outputDisplay/Correlation_fpix_1oP_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     fpix_vs_oP->GetYaxis()->SetRangeUser(40, 60);
     c_fpix_vs_oP->Update();
-    c_fpix_vs_oP->SaveAs("PlayWithHistos/Correlation_fpix_1oP__ZOOM.pdf");
+    c_fpix_vs_oP->SaveAs("../outputDisplay/Correlation_fpix_1oP__ZOOM.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_fpix_vs_oP->Modified();
     c_fpix_vs_oP->Update();
-    c_fpix_vs_oP->SaveAs("PlayWithHistos/Correlation_fpix_1oP__ZOOM_bis.pdf");
+    c_fpix_vs_oP->SaveAs("../outputDisplay/Correlation_fpix_1oP__ZOOM_bis.pdf");
 
 
     // Ih ratio in C and D
@@ -2507,18 +2507,18 @@ void BKGdependency () {
     //fit hRatio with a linear function:
     hRatio->Fit("pol1", "R", "", 2.5, 5);
 
-    c1->SaveAs("PlayWithHistos/IhRatio.pdf");
+    c1->SaveAs("../outputDisplay/IhRatio.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c1->Modified();
     c1->Update();
-    c1->SaveAs("PlayWithHistos/IhRatio_bis.pdf");
+    c1->SaveAs("../outputDisplay/IhRatio_bis.pdf");
 
     return;
 }
 
 void GluinoP_mass(bool isPythia, bool isWeighted) {
 
-    TFile *ofile = new TFile(Form("PlayWithHistos/GluinoP_mass_%s_%s.root", isPythia ? "pythia" : "madgraph", isWeighted ? "weighted" : ""), "RECREATE");
+    TFile *ofile = new TFile(Form("../outputDisplay/GluinoP_mass_%s_%s.root", isPythia ? "pythia" : "madgraph", isWeighted ? "weighted" : ""), "RECREATE");
 
     // create a std::vector of ifile where to retrieve the pT vs Fpixel histograms in each:
     std::vector<TFile*> ifiles;
@@ -2650,7 +2650,7 @@ void GluinoP_mass(bool isPythia, bool isWeighted) {
 
 void CompareMaping() {
 
-    TFile *ofile = new TFile("PlayWithHistos/CompareMapping.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/CompareMapping.root", "RECREATE");
 
     TFile *ifileTTbar2024 = new TFile("../output/TTbar2024_V15/TTbar2024_V15p9_weighted.root", "READ");
     TFile *ifileWjets2024 = new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p13_weighted.root", "READ");
@@ -2812,7 +2812,7 @@ void CompareMaping() {
         cout << "Number of entries with Fpixel <= " << fpix_cut << ": " << nEntries_bkg << " (bkg), " << nEntries_gluino << " (gluino)" << "    (" << 100.0*nEntries_gluino/nEntries_bkg << " %)" << endl;
     }
     gStyle->SetOptStat(0);
-    c_bkg_gluino->SaveAs("PlayWithHistos/CompareMaping_prout.pdf");
+    c_bkg_gluino->SaveAs("../outputDisplay/CompareMaping_prout.pdf");
 
 
     ofile->cd();
@@ -2826,7 +2826,7 @@ void CompareMaping() {
 
 void FpixelPlot() {
 
-    TFile *ofile = new TFile("PlayWithHistos/Nm1_plots.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/Nm1_plots.root", "RECREATE");
 
     TFile *fileWjets = new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p11_weighted.root", "READ");
     TFile *ifile_JetMETdata = new TFile("../output/JetMET2024_V12/JetMET2024_V12p24.root", "READ");
@@ -2901,7 +2901,7 @@ void FpixelPlot() {
     latex1->Draw();
     //latex1->SetTitle("#it{Private work (CMS simulation)}");
 
-    c_fpix->SaveAs("PlayWithHistos/Fpixel_plot.pdf");
+    c_fpix->SaveAs("../outputDisplay/Fpixel_plot.pdf");
 }
 
 
@@ -2930,8 +2930,8 @@ void PseudoMET_vs_PFMET () {
     c_gluino->SetLogz();
     gStyle->SetOptStat(0);
 
-    c_data->SaveAs("PlayWithHistos/PseudoMET_vs_PFMET_data.pdf");
-    c_gluino->SaveAs("PlayWithHistos/PseudoMET_vs_PFMET_gluino.pdf");
+    c_data->SaveAs("../outputDisplay/PseudoMET_vs_PFMET_data.pdf");
+    c_gluino->SaveAs("../outputDisplay/PseudoMET_vs_PFMET_gluino.pdf");
 
     return;
 }
@@ -3094,9 +3094,9 @@ void DrawPseudoMET(bool OTHERrescale = false) {
     TCanvas *cRatio_Rescaled = DrawWithRatio(Nm1Rescaled_event_PseudoMET_MET2024, Nm1Rescaled_event_PseudoMET_WjetMuNu,
                        cRescaled_PseudoCaloMET, "PseudoMET N-1 selections rescaled", "data/MC",  "Pseudo MET [GeV]", 10, 1000);
 
-    cRatio_nosel->SaveAs("PlayWithHistos/PseudoCaloMET_nosel_FIT.pdf");
-    cRatio_Nm1->SaveAs("PlayWithHistos/PseudoCaloMET_Nm1_FIT.pdf");
-    cRatio_Rescaled->SaveAs(Form("PlayWithHistos/PseudoCaloMET_Nm1_%srescaled.pdf", OTHERrescale ? "OTHER" : ""));
+    cRatio_nosel->SaveAs("../outputDisplay/PseudoCaloMET_nosel_FIT.pdf");
+    cRatio_Nm1->SaveAs("../outputDisplay/PseudoCaloMET_Nm1_FIT.pdf");
+    cRatio_Rescaled->SaveAs(Form("../outputDisplay/PseudoCaloMET_Nm1_%srescaled.pdf", OTHERrescale ? "OTHER" : ""));
 
 
     latex1->SetTitle("#it{Private work (CMS simulation/data)}");
@@ -3105,19 +3105,19 @@ void DrawPseudoMET(bool OTHERrescale = false) {
     c_PseudoCaloMET_nosel->Update();
     TCanvas *cRatio_nosel_bis = DrawWithRatio(Nosel_PseudoCaloMET_MET2024, Nosel_PseudoCaloMET_WjetMuNu,
                        c_PseudoCaloMET_nosel, "PseudoMET wo selections", "data/MC",  "Pseudo MET [GeV]", 10, 1000);
-    cRatio_nosel_bis->SaveAs("PlayWithHistos/IhRatio_bis.pdf");
+    cRatio_nosel_bis->SaveAs("../outputDisplay/IhRatio_bis.pdf");
 
     c_PseudoCaloMET->Modified();
     c_PseudoCaloMET->Update();
     TCanvas *cRatio_Nm1_bis = DrawWithRatio(Nm1_event_PseudoMET_MET2024, Nm1_event_PseudoMET_WjetMuNu,
                        c_PseudoCaloMET, "PseudoMET N-1 selections", "data/MC",  "Pseudo MET [GeV]", 10, 1000);
-    cRatio_Nm1_bis->SaveAs("PlayWithHistos/PseudoCaloMET_Nm1_FIT_bis.pdf");
+    cRatio_Nm1_bis->SaveAs("../outputDisplay/PseudoCaloMET_Nm1_FIT_bis.pdf");
 
     cRescaled_PseudoCaloMET->Modified();
     cRescaled_PseudoCaloMET->Update();
     TCanvas *cRatio_Rescaled_bis = DrawWithRatio(Nm1Rescaled_event_PseudoMET_MET2024, Nm1Rescaled_event_PseudoMET_WjetMuNu,
                        cRescaled_PseudoCaloMET, "PseudoMET N-1 selections rescaled", "data/MC",  "Pseudo MET [GeV]", 10, 1000);
-    cRatio_Rescaled_bis->SaveAs(Form("PlayWithHistos/PseudoCaloMET_Nm1_%srescaled_bis.pdf", OTHERrescale ? "OTHER" : ""));
+    cRatio_Rescaled_bis->SaveAs(Form("../outputDisplay/PseudoCaloMET_Nm1_%srescaled_bis.pdf", OTHERrescale ? "OTHER" : ""));
 
     return;
 }
@@ -3174,7 +3174,7 @@ void nHSCP() {
 
     c_nHSCP->SetLogy();
 
-    c_nHSCP->SaveAs("PlayWithHistos/nHSCP_nosel.pdf");
+    c_nHSCP->SaveAs("../outputDisplay/nHSCP_nosel.pdf");
 
     // same for the selected events
     TCanvas *c_Sel_nHSCP = new TCanvas("c_Sel_nHSCP", "c_Sel_nHSCP", 800, 600);
@@ -3200,7 +3200,7 @@ void nHSCP() {
 
     legend->Draw();
     c_Sel_nHSCP->SetLogy();
-    c_Sel_nHSCP->SaveAs("PlayWithHistos/nHSCP_sel.pdf");
+    c_Sel_nHSCP->SaveAs("../outputDisplay/nHSCP_sel.pdf");
 
 
     return;
@@ -3258,7 +3258,7 @@ void nPV() {
 
     c_nPV->SetLogy();
 
-    c_nPV->SaveAs("PlayWithHistos/nPV_nosel.pdf");
+    c_nPV->SaveAs("../outputDisplay/nPV_nosel.pdf");
 
     // same for the selected events
     TCanvas *c_Sel_nPV = new TCanvas("c_Sel_nPV", "c_Sel_nPV", 800, 600);
@@ -3284,7 +3284,7 @@ void nPV() {
 
     legend->Draw();
     c_Sel_nPV->SetLogy();
-    c_Sel_nPV->SaveAs("PlayWithHistos/nPV_sel.pdf");
+    c_Sel_nPV->SaveAs("../outputDisplay/nPV_sel.pdf");
 
 
     return;
@@ -3343,7 +3343,7 @@ void PostTriggerPseudoMET() {
                                         20,
                                         1000);
 
-    cRatio_Nm1->SaveAs("PlayWithHistos/PostTriggerLOG_PseudoCaloMET_SF_rescaled_vs_NOTrescaled.pdf");
+    cRatio_Nm1->SaveAs("../outputDisplay/PostTriggerLOG_PseudoCaloMET_SF_rescaled_vs_NOTrescaled.pdf");
 
     TCanvas *c_PseudoCaloMET_b = new TCanvas("c_PseudoCaloMET_b", "c_PseudoCaloMET_b", 800, 600);
     c_PseudoCaloMET_b->cd();
@@ -3367,7 +3367,7 @@ void PostTriggerPseudoMET() {
                                         20,
                                         1000);
 
-    cRatio_Nm1_b->SaveAs("PlayWithHistos/PostTrigger_PseudoCaloMET_SF_rescaled_vs_NOTrescaled.pdf");
+    cRatio_Nm1_b->SaveAs("../outputDisplay/PostTrigger_PseudoCaloMET_SF_rescaled_vs_NOTrescaled.pdf");
 
     return;
 }
@@ -3422,11 +3422,11 @@ void MyClusters() {
     h_clusters->GetXaxis()->SetRangeUser(101, 107);
     h_clusters->Draw("HIST");
     latex1->Draw("same");
-    c_clusters1->SaveAs("PlayWithHistos/Cluster_centered.pdf");
+    c_clusters1->SaveAs("../outputDisplay/Cluster_centered.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_clusters1->Modified();
     c_clusters1->Update();
-    c_clusters1->SaveAs("PlayWithHistos/Cluster_centered_bis.pdf");
+    c_clusters1->SaveAs("../outputDisplay/Cluster_centered_bis.pdf");
 
     TCanvas *c_clusters2 = new TCanvas("c_clusters2", "c_clusters2", 800, 800);
     c_clusters2->cd();
@@ -3435,11 +3435,11 @@ void MyClusters() {
     h_clusters_clone->Draw("HIST");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     latex1->Draw("same");
-    c_clusters2->SaveAs("PlayWithHistos/Cluster_tilted.pdf");
+    c_clusters2->SaveAs("../outputDisplay/Cluster_tilted.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_clusters2->Modified();
     c_clusters2->Update();
-    c_clusters2->SaveAs("PlayWithHistos/Cluster_tilted_bis.pdf");
+    c_clusters2->SaveAs("../outputDisplay/Cluster_tilted_bis.pdf");
 
 
     TH1F *hsat = new TH1F("", "", 512, -0.5, 511.5);
@@ -3493,11 +3493,11 @@ void MyClusters() {
     legend->Draw();
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     latex1->Draw("same");
-    c_sat->SaveAs("PlayWithHistos/Cluster_saturation.pdf");
+    c_sat->SaveAs("../outputDisplay/Cluster_saturation.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_sat->Modified();
     c_sat->Update();
-    c_sat->SaveAs("PlayWithHistos/Cluster_saturation_bis.pdf");
+    c_sat->SaveAs("../outputDisplay/Cluster_saturation_bis.pdf");
 
 
     TH1F *h_LR1 = new TH1F("", "", 512, -0.5, 511.5);
@@ -3615,11 +3615,11 @@ void MyClusters() {
     legend2->Draw();
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     latex1->Draw("same");
-    c_1->SaveAs("PlayWithHistos/LR_overcorrected_1.pdf");
+    c_1->SaveAs("../outputDisplay/LR_overcorrected_1.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_1->Modified();
     c_1->Update();
-    c_1->SaveAs("PlayWithHistos/LR_overcorrected_1_bis.pdf");
+    c_1->SaveAs("../outputDisplay/LR_overcorrected_1_bis.pdf");
 
     TCanvas *c_2 = new TCanvas("c_2", "c_2", 800, 800);
     c_2->cd();
@@ -3633,11 +3633,11 @@ void MyClusters() {
     legend2->Draw();
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     latex1->Draw("same");
-    c_2->SaveAs("PlayWithHistos/LR_overcorrected_2.pdf");
+    c_2->SaveAs("../outputDisplay/LR_overcorrected_2.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_2->Modified();
     c_2->Update();
-    c_2->SaveAs("PlayWithHistos/LR_overcorrected_2_bis.pdf");
+    c_2->SaveAs("../outputDisplay/LR_overcorrected_2_bis.pdf");
 
     TCanvas *c_3 = new TCanvas("c_3", "c_3", 800, 800);
     c_3->cd();
@@ -3651,11 +3651,11 @@ void MyClusters() {
     legend2->Draw();
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     latex1->Draw("same");
-    c_3->SaveAs("PlayWithHistos/LR_overcorrected_3.pdf");
+    c_3->SaveAs("../outputDisplay/LR_overcorrected_3.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c_3->Modified();
     c_3->Update();
-    c_3->SaveAs("PlayWithHistos/LR_overcorrected_3_bis.pdf");
+    c_3->SaveAs("../outputDisplay/LR_overcorrected_3_bis.pdf");
 
 
     return;
@@ -3701,7 +3701,7 @@ void Run2_vs_Run3_gluino__TriggerEff() {
     legend->SetFillStyle(0);
     legend->Draw();
 
-    c1->SaveAs("PlayWithHistos/Run2_vs_Run3_gluino__TriggerEff.pdf");
+    c1->SaveAs("../outputDisplay/Run2_vs_Run3_gluino__TriggerEff.pdf");
 
     return;
 }
@@ -3741,7 +3741,7 @@ void ComparePseudoMET(bool isRescaled = true) {
     legend->SetFillStyle(0);
     legend->Draw();
     c1->SetLogy();
-    c1->SaveAs(Form("PlayWithHistos/Compare_PseudoMET%s.pdf", isRescaled ? "_rescaled" : "_NOTrescaled"));
+    c1->SaveAs(Form("../outputDisplay/Compare_PseudoMET%s.pdf", isRescaled ? "_rescaled" : "_NOTrescaled"));
 
     return;
 }
@@ -3851,16 +3851,16 @@ void YieldAfterSF(bool isRescaled = true, bool isMuSelection = false, bool isMET
     legend->SetFillStyle(0);
     legend->Draw();
     c1->SetLogy();
-    if (isMETSelection) c1->SaveAs(Form("PlayWithHistos/YieldAfterSF_HLTmet_%s.pdf", isRescaled ? "_rescaled" : "_NOTrescaled"));
-    else if (isMuSelection) c1->SaveAs(Form("PlayWithHistos/YieldAfterSF_HLTmu_%s.pdf", isRescaled ? "_rescaled" : "_NOTrescaled"));
-    else if (isTTbarSelection) c1->SaveAs(Form("PlayWithHistos/YieldAfterSF_HLTMuonEG_%s.pdf", isRescaled ? "_rescaled" : "_NOTrescaled"));
+    if (isMETSelection) c1->SaveAs(Form("../outputDisplay/YieldAfterSF_HLTmet_%s.pdf", isRescaled ? "_rescaled" : "_NOTrescaled"));
+    else if (isMuSelection) c1->SaveAs(Form("../outputDisplay/YieldAfterSF_HLTmu_%s.pdf", isRescaled ? "_rescaled" : "_NOTrescaled"));
+    else if (isTTbarSelection) c1->SaveAs(Form("../outputDisplay/YieldAfterSF_HLTMuonEG_%s.pdf", isRescaled ? "_rescaled" : "_NOTrescaled"));
 
 
     return;
 }
 
-void PlotSF(const std::string& fileWmunu = "PlayWithHistos/SF_TriggerEff_Mu2024_WMuNu_PseudoMETrescaled.txt",
-           const std::string& fileTTbar  = "PlayWithHistos/SF_TriggerEff_MuonEG2024_TTbar_PseudoMETrescaled.txt") {
+void PlotSF(const std::string& fileWmunu = "../outputDisplay/SF_TriggerEff_Mu2024_WMuNu_PseudoMETrescaled.txt",
+           const std::string& fileTTbar  = "../outputDisplay/SF_TriggerEff_MuonEG2024_TTbar_PseudoMETrescaled.txt") {
 
   auto parse = [&](const std::string& fname,
                     const std::string& name,
@@ -3908,7 +3908,7 @@ void PlotSF(const std::string& fileWmunu = "PlayWithHistos/SF_TriggerEff_Mu2024_
   leg->AddEntry(hT, "SF MuonEG/TTbar", "lep");
   leg->SetBorderSize(0); leg->Draw();
 
-  c->SaveAs("PlayWithHistos/Plot_SF___MuonWmunu_vs_MuonEGttbar.pdf");
+  c->SaveAs("../outputDisplay/Plot_SF___MuonWmunu_vs_MuonEGttbar.pdf");
 }
 
 
@@ -4062,11 +4062,11 @@ void CompareKinematics() {
     tex->Draw();
     c1->SetLogz();
     latex1->Draw();
-    c1->SaveAs("PlayWithHistos/CompareKinematics_PT.pdf");
+    c1->SaveAs("../outputDisplay/CompareKinematics_PT.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c1->Modified();
     c1->Update();
-    c1->SaveAs("PlayWithHistos/CompareKinematics_PT_bis.pdf");
+    c1->SaveAs("../outputDisplay/CompareKinematics_PT_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
 
@@ -4079,11 +4079,11 @@ void CompareKinematics() {
     tex->Draw();
     c2->SetLogz();
     latex1->Draw();
-    c2->SaveAs("PlayWithHistos/CompareKinematics_ETA.pdf");
+    c2->SaveAs("../outputDisplay/CompareKinematics_ETA.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c2->Modified();
     c2->Update();
-    c2->SaveAs("PlayWithHistos/CompareKinematics_ETA_bis.pdf");
+    c2->SaveAs("../outputDisplay/CompareKinematics_ETA_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
     TCanvas *c3 = new TCanvas("c3", "c3", 800, 600);
@@ -4095,11 +4095,11 @@ void CompareKinematics() {
     tex->Draw();
     c3->SetLogz();
     latex1->Draw();
-    c3->SaveAs("PlayWithHistos/CompareKinematics_PHI.pdf");
+    c3->SaveAs("../outputDisplay/CompareKinematics_PHI.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c3->Modified();
     c3->Update();
-    c3->SaveAs("PlayWithHistos/CompareKinematics_PHI_bis.pdf");
+    c3->SaveAs("../outputDisplay/CompareKinematics_PHI_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
 
@@ -4113,11 +4113,11 @@ void CompareKinematics() {
     c4->SetLogz();
     latex1->Draw();
     latexPF->Draw();
-    c4->SaveAs("PlayWithHistos/CompareKinematics_PT_PFmuon.pdf");
+    c4->SaveAs("../outputDisplay/CompareKinematics_PT_PFmuon.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c4->Modified();
     c4->Update();
-    c4->SaveAs("PlayWithHistos/CompareKinematics_PT_PFmuon_bis.pdf");
+    c4->SaveAs("../outputDisplay/CompareKinematics_PT_PFmuon_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
 
@@ -4132,11 +4132,11 @@ void CompareKinematics() {
     latex1->Draw();
     latexPF->SetTitle("#bf{PF pions}");
     latexPF->Draw();
-    c5->SaveAs("PlayWithHistos/CompareKinematics_PT_PFpion.pdf");
+    c5->SaveAs("../outputDisplay/CompareKinematics_PT_PFpion.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c5->Modified();
     c5->Update();
-    c5->SaveAs("PlayWithHistos/CompareKinematics_PT_PFpion_bis.pdf");
+    c5->SaveAs("../outputDisplay/CompareKinematics_PT_PFpion_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
 
@@ -4152,11 +4152,11 @@ void CompareKinematics() {
     latexglu->SetTitle("#bf{HSCP matched (m#scale[0.7]{#tilde{g}}=1400 GeV)}");
     latexglu->SetX(0.53);
     latexglu->Draw();
-    c6->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_1400.pdf");
+    c6->SaveAs("../outputDisplay/CompareKinematics_PT_HSCPmatched_1400.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c6->Modified();
     c6->Update();
-    c6->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_1400_bis.pdf");
+    c6->SaveAs("../outputDisplay/CompareKinematics_PT_HSCPmatched_1400_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
 
 
@@ -4171,11 +4171,11 @@ void CompareKinematics() {
     latex1->Draw();
     latexglu->SetTitle("#bf{HSCP matched (m#scale[0.7]{#tilde{g}}=2000 GeV)}");
     latexglu->Draw();
-    c7->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_2000.pdf");
+    c7->SaveAs("../outputDisplay/CompareKinematics_PT_HSCPmatched_2000.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c7->Modified();
     c7->Update();
-    c7->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_2000_bis.pdf");
+    c7->SaveAs("../outputDisplay/CompareKinematics_PT_HSCPmatched_2000_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
 
 
@@ -4190,11 +4190,11 @@ void CompareKinematics() {
     latex1->Draw();
     latexglu->SetTitle("#bf{HSCP matched (m#scale[0.7]{#tilde{g}}=2600 GeV)}");
     latexglu->Draw();
-    c8->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_2600.pdf");
+    c8->SaveAs("../outputDisplay/CompareKinematics_PT_HSCPmatched_2600.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c8->Modified();
     c8->Update();
-    c8->SaveAs("PlayWithHistos/CompareKinematics_PT_HSCPmatched_2600_bis.pdf");
+    c8->SaveAs("../outputDisplay/CompareKinematics_PT_HSCPmatched_2600_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
 
 
@@ -4203,7 +4203,7 @@ void CompareKinematics() {
 
 void LangausFitOnIh() {
 
-    TFile *ofile = new TFile("PlayWithHistos/LangausFitOnIh.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/LangausFitOnIh.root", "RECREATE");
 
     TFile *ifileWjets = new TFile("../output/Wjets2024_V14/WjetMuNu2024_V14p10_weighted.root", "READ");
     TFile *ifileJetMET = new TFile("../output/JetMET2024_V12/JetMET2024_V12p24.root", "READ");
@@ -4284,7 +4284,7 @@ void LangausFitOnIh() {
     c1->Write();
     ofile->Close();
 
-    c1->SaveAs("PlayWithHistos/LangausFitOnIh.pdf");
+    c1->SaveAs("../outputDisplay/LangausFitOnIh.pdf");
 
 
     return;
@@ -4363,7 +4363,7 @@ void ShowSignalEfficiency() {
     legend->AddEntry(pEffs[2], "|#eta| < 2.4", "lep");
     legend->Draw();
 
-    c1->SaveAs("PlayWithHistos/SignalEfficiency_vs_GluinoMass.pdf");
+    c1->SaveAs("../outputDisplay/SignalEfficiency_vs_GluinoMass.pdf");
 
 
     return;
@@ -4458,7 +4458,7 @@ void DefineIhCut() {
     line2->Draw("same");
     c1->SetLogy();
 
-    c1->SaveAs("PlayWithHistos/DefineIhCut.pdf");
+    c1->SaveAs("../outputDisplay/DefineIhCut.pdf");
 
     // check
 
@@ -4483,7 +4483,7 @@ void SignalAcceptance_EtaSlice(bool isHSCPcharged = false) {
     const char *nameSel   = isHSCPcharged ? "HSCPsel_GenHSCPcharged_Eta"
                                           : "METanalysis_TestPUppiMETCut_Eta2p4_eta";
 
-    TFile *ofile = new TFile("PlayWithHistos/SignalAcceptance_EtaSlice.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/SignalAcceptance_EtaSlice.root", "RECREATE");
 
     // --- lambda : construit l'histo d'acceptance a partir d'un fichier ---
     auto makeAcc = [&](TFile *f, const char *hname) -> TH1D* {
@@ -4605,7 +4605,7 @@ void SignalAcceptance_EtaSlice(bool isHSCPcharged = false) {
     latex2->SetTextSize(0.04);
     latex2->Draw();
 
-    c->SaveAs((isHSCPcharged)? "PlayWithHistos/SignalAcceptance_EtaSlice_HSCPcharged.pdf" : "PlayWithHistos/SignalAcceptance_EtaSlice.pdf");
+    c->SaveAs((isHSCPcharged)? "../outputDisplay/SignalAcceptance_EtaSlice_HSCPcharged.pdf" : "../outputDisplay/SignalAcceptance_EtaSlice.pdf");
 
     ofile->cd();
     c->Write();
@@ -4613,7 +4613,7 @@ void SignalAcceptance_EtaSlice(bool isHSCPcharged = false) {
     latex1->SetTitle("#it{Private work (CMS simulation/data)}");
     c->Modified();
     c->Update();
-    c->SaveAs((isHSCPcharged)? "PlayWithHistos/SignalAcceptance_EtaSlice_HSCPcharged_bis.pdf" : "PlayWithHistos/SignalAcceptance_EtaSlice_bis.pdf");
+    c->SaveAs((isHSCPcharged)? "../outputDisplay/SignalAcceptance_EtaSlice_HSCPcharged_bis.pdf" : "../outputDisplay/SignalAcceptance_EtaSlice_bis.pdf");
 
     ofile->Close();
 
@@ -4695,11 +4695,11 @@ void Corr_Ih_1oP(std::string eta) {
     p_nsel->Draw("same");
     latex1->Draw();
     tex->Draw();
-    c_nosel->SaveAs(Form("PlayWithHistos/Corr_Ih_1oP__%s_nosel.pdf", eta.c_str()));
+    c_nosel->SaveAs(Form("../outputDisplay/Corr_Ih_1oP__%s_nosel.pdf", eta.c_str()));
     latex1->SetTitle("#it{Private work (CMS data)}");
     c_nosel->Modified();
     c_nosel->Update();
-    c_nosel->SaveAs(Form("PlayWithHistos/Corr_Ih_1oP__%s_nosel_bis.pdf", eta.c_str()));
+    c_nosel->SaveAs(Form("../outputDisplay/Corr_Ih_1oP__%s_nosel_bis.pdf", eta.c_str()));
 
     TCanvas *c_sel = new TCanvas("c_sel", "c_sel", 800, 600);
     c_sel->SetGrid();
@@ -4711,11 +4711,11 @@ void Corr_Ih_1oP(std::string eta) {
     p_sel->Draw("same");
     latex1->Draw();
     tex->Draw();
-    c_sel->SaveAs(Form("PlayWithHistos/Corr_Ih_1oP__%s_sel.pdf", eta.c_str()));
+    c_sel->SaveAs(Form("../outputDisplay/Corr_Ih_1oP__%s_sel.pdf", eta.c_str()));
     latex1->SetTitle("#it{Private work (CMS data)}");
     c_sel->Modified();
     c_sel->Update();
-    c_sel->SaveAs(Form("PlayWithHistos/Corr_Ih_1oP__%s_sel_bis.pdf", eta.c_str()));
+    c_sel->SaveAs(Form("../outputDisplay/Corr_Ih_1oP__%s_sel_bis.pdf", eta.c_str()));
 
     return;
 }
@@ -4740,7 +4740,7 @@ void Acceptance_EtaSlice_DataMC() {
 
     std::vector<TH1D*> h_accs;
 
-    TFile *ofile = new TFile("PlayWithHistos/Acceptance_EtaSlice_DataMC.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/Acceptance_EtaSlice_DataMC.root", "RECREATE");
 
     const int nSlices = 24;  // |eta| de 0.1 à 2.4 par pas de 0.1
 
@@ -4831,7 +4831,7 @@ void Acceptance_EtaSlice_DataMC() {
     latex1->SetTextSize(0.04);
     latex1->Draw();
 
-    c->SaveAs("PlayWithHistos/Acceptance_EtaSlice_DataMC.pdf");
+    c->SaveAs("../outputDisplay/Acceptance_EtaSlice_DataMC.pdf");
 
     ofile->cd();
     c->Write();
@@ -4840,8 +4840,8 @@ void Acceptance_EtaSlice_DataMC() {
     latex1->SetText(0.16, 0.91, "#it{Private work (CMS data)}");
     c->Modified();
     c->Update();
-    c->SaveAs("PlayWithHistos/Acceptance_EtaSlice_DataMC_bis.pdf");
-    c->SaveAs("PlayWithHistos/Acceptance_EtaSlice_DataMC_bis.C");
+    c->SaveAs("../outputDisplay/Acceptance_EtaSlice_DataMC_bis.pdf");
+    c->SaveAs("../outputDisplay/Acceptance_EtaSlice_DataMC_bis.C");
 
     ofile->Close();
 
@@ -6128,10 +6128,10 @@ void FpixelInSignalAndData() {
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     latex1->Draw();
     p1->Modified(); p1->Update();
-    cSignalCDF->SaveAs("PlayWithHistos/FpixelInSignal.pdf");
+    cSignalCDF->SaveAs("../outputDisplay/FpixelInSignal.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     p1->Modified(); p1->Update();
-    cSignalCDF->SaveAs("PlayWithHistos/FpixelInSignal_bis.pdf");
+    cSignalCDF->SaveAs("../outputDisplay/FpixelInSignal_bis.pdf");
 
 
     TCanvas *cData = DrawCanvas(FpixData, "", "F_{pixel}", "Entries", "E1", 0.06, 0, 1, 602, 1, 3000, true);
@@ -6142,10 +6142,10 @@ void FpixelInSignalAndData() {
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     latex1->Draw();
     p2->Modified(); p2->Update();
-    cDataCDF->SaveAs("PlayWithHistos/FpixelInData.pdf");
+    cDataCDF->SaveAs("../outputDisplay/FpixelInData.pdf");
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     p2->Modified(); p2->Update();
-    cDataCDF->SaveAs("PlayWithHistos/FpixelInData_bis.pdf");
+    cDataCDF->SaveAs("../outputDisplay/FpixelInData_bis.pdf");
 
 
     return;
@@ -6982,10 +6982,10 @@ void ProfileVsRunNumber() {
 
     tex->Draw();
     latex1->Draw();
-    c1->SaveAs("PlayWithHistos/ProfileVsRunNumber_Fpix.pdf");
+    c1->SaveAs("../outputDisplay/ProfileVsRunNumber_Fpix.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c1->Modified(); c1->Update();
-    c1->SaveAs("PlayWithHistos/ProfileVsRunNumber_Fpix_bis.pdf");
+    c1->SaveAs("../outputDisplay/ProfileVsRunNumber_Fpix_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
     // ================= Canvas 2: Ih with and without selection =================
@@ -7006,10 +7006,10 @@ void ProfileVsRunNumber() {
 
     tex->Draw();
     latex1->Draw();
-    c2->SaveAs("PlayWithHistos/ProfileVsRunNumber_Ih.pdf");
+    c2->SaveAs("../outputDisplay/ProfileVsRunNumber_Ih.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c2->Modified(); c2->Update();
-    c2->SaveAs("PlayWithHistos/ProfileVsRunNumber_Ih_bis.pdf");
+    c2->SaveAs("../outputDisplay/ProfileVsRunNumber_Ih_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
     // ============ Canvas 3: distribution of per-run Fpix profile means ============
@@ -7030,10 +7030,10 @@ void ProfileVsRunNumber() {
 
     tex->Draw();
     latex1->Draw();
-    c3->SaveAs("PlayWithHistos/ProfileVsRunNumber_Fpix_hist.pdf");
+    c3->SaveAs("../outputDisplay/ProfileVsRunNumber_Fpix_hist.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c3->Modified(); c3->Update();
-    c3->SaveAs("PlayWithHistos/ProfileVsRunNumber_Fpix_hist_bis.pdf");
+    c3->SaveAs("../outputDisplay/ProfileVsRunNumber_Fpix_hist_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
     // ============ Canvas 4: distribution of per-run Ih profile means ============
@@ -7054,10 +7054,10 @@ void ProfileVsRunNumber() {
 
     tex->Draw();
     latex1->Draw();
-    c4->SaveAs("PlayWithHistos/ProfileVsRunNumber_Ih_hist.pdf");
+    c4->SaveAs("../outputDisplay/ProfileVsRunNumber_Ih_hist.pdf");
     latex1->SetTitle("#it{Private work (CMS data)}");
     c4->Modified(); c4->Update();
-    c4->SaveAs("PlayWithHistos/ProfileVsRunNumber_Ih_hist_bis.pdf");
+    c4->SaveAs("../outputDisplay/ProfileVsRunNumber_Ih_hist_bis.pdf");
     latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Work in progress}");
 
     return;
@@ -7219,7 +7219,7 @@ void CompareIhWithCDF() {
                                   "Data",
                                   0.0, 7.,
                                   602, true);
-    cData->SaveAs("PlayWithHistos/Ih_Data_CDF.pdf");
+    cData->SaveAs("../outputDisplay/Ih_Data_CDF.pdf");
 
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     tex->SetTitle("");
@@ -7232,7 +7232,7 @@ void CompareIhWithCDF() {
                                     "Gluino 2000 GeV",
                                     0.0, 30.0,
                                     kRed+1, true);
-    cSignal->SaveAs("PlayWithHistos/Ih_Signal_CDF.pdf");
+    cSignal->SaveAs("../outputDisplay/Ih_Signal_CDF.pdf");
 
     return;
 }
@@ -7305,12 +7305,12 @@ void PUppiVSPF(std::string ifileName, bool ifData) {
         c6->SetLogz();
         latex1->Draw();
         latex2->Draw();
-        c6->SaveAs(Form("PlayWithHistos/PUppiVSPF_%s_%s.pdf", (ifData ? "Data" : "MC"), tag));
+        c6->SaveAs(Form("../outputDisplay/PUppiVSPF_%s_%s.pdf", (ifData ? "Data" : "MC"), tag));
 
         TString saved = latex1->GetTitle();
         latex1->SetTitle((ifData) ? "#it{Private work (CMS data)}" : "#it{Private work (CMS simulation)}");
         c6->Modified(); c6->Update();
-        c6->SaveAs(Form("PlayWithHistos/PUppiVSPF_%s_%s_bis.pdf", (ifData ? "Data" : "MC"), tag));
+        c6->SaveAs(Form("../outputDisplay/PUppiVSPF_%s_%s_bis.pdf", (ifData ? "Data" : "MC"), tag));
         latex1->SetTitle(saved);
     }
 
@@ -7448,11 +7448,11 @@ void PUppiVSPF(std::string ifileName, bool ifData) {
     // ================= Sauvegardes =================
     c7->cd();
     c7->Modified(); c7->Update();
-    c7->SaveAs(Form("PlayWithHistos/PUppiPseudoProj_%s.pdf", (ifData ? "Data" : "MC")));
+    c7->SaveAs(Form("../outputDisplay/PUppiPseudoProj_%s.pdf", (ifData ? "Data" : "MC")));
 
     latex1->SetTitle((ifData) ? "#it{Private work (CMS data)}" : "#it{Private work (CMS simulation)}");
     c7->Modified(); c7->Update();
-    c7->SaveAs(Form("PlayWithHistos/PUppiPseudoProj_%s_bis.pdf", (ifData ? "Data" : "MC")));
+    c7->SaveAs(Form("../outputDisplay/PUppiPseudoProj_%s_bis.pdf", (ifData ? "Data" : "MC")));
 
     return;
 }
@@ -7854,7 +7854,7 @@ void Nm1Eff (bool isRescaled,
     }
 
     // Step 5: save
-    TString pdfName = Form("PlayWithHistos/Nm1plots/Nm1Eff%s_ALL.pdf", isRescaled ? "_rescaled" : "");
+    TString pdfName = Form("../outputDisplay/Nm1plots/Nm1Eff%s_ALL.pdf", isRescaled ? "_rescaled" : "");
     for (size_t i = 0; i < canvases.size(); i++) {
         if      (i == 0)                    canvases[i]->Print(pdfName + "(");
         else if (i == canvases.size() - 1)  canvases[i]->Print(pdfName + ")");
@@ -8154,7 +8154,7 @@ void NoselEff (bool isRescaled,
     }
 
     // Step 5: save
-    TString pdfName = Form("PlayWithHistos/Nm1plots/NoselEff%s_ALL.pdf", isRescaled ? "_rescaled" : "");
+    TString pdfName = Form("../outputDisplay/Nm1plots/NoselEff%s_ALL.pdf", isRescaled ? "_rescaled" : "");
     for (size_t i = 0; i < canvases.size(); i++) {
         if      (i == 0)                    canvases[i]->Print(pdfName + "(");
         else if (i == canvases.size() - 1)  canvases[i]->Print(pdfName + ")");
@@ -8494,7 +8494,7 @@ void Nm1EffCutZeroed (bool isRescaled,
     }
 
     // Step 5: save
-    TString pdfName = Form("PlayWithHistos/Nm1plots/Nm1EffCutZeroed%s_ALL.pdf", isRescaled ? "_rescaled" : "");
+    TString pdfName = Form("../outputDisplay/Nm1plots/Nm1EffCutZeroed%s_ALL.pdf", isRescaled ? "_rescaled" : "");
     for (size_t i = 0; i < canvases.size(); i++) {
         if      (i == 0)                    canvases[i]->Print(pdfName + "(");
         else if (i == canvases.size() - 1)  canvases[i]->Print(pdfName + ")");
@@ -8581,7 +8581,7 @@ void PlotPthatQCD(std::string sampleW  = "../output/QCD2024_V16/QCD2024_mu_V16p2
     gPad->RedrawAxis();
     c->Update();
 
-    c->Print("PlayWithHistos/Nosel_PthatQCD.pdf");
+    c->Print("../outputDisplay/Nosel_PthatQCD.pdf");
 
     return;
 }
@@ -8840,7 +8840,7 @@ void Ihand1oP_fits_bkg() {
     const double opDrawMax = 90.;  // x-axis display range for 1/p
     const double opDrawFitMax = 40;// range over which the 1/p fit is drawn
 
-    const TString outDir = "PlayWithHistos";
+    const TString outDir = "../outputDisplay";
 
     // ---------------------------------------------------------------------
     // Input
@@ -9015,7 +9015,7 @@ const TString etaLabel[nSlices] = { "0.00 #leq #eta < 0.24",
                                     "2.16 #leq #eta < 2.40" };
 const int sliceColor[nSlices]  = { kBlack, kRed, kBlue+1 };
 const int sliceMarker[nSlices] = { 20, 21, 22 };
-const TString outDir = "PlayWithHistos";
+const TString outDir = "../outputDisplay";
 
 bool loadEtaSlices (TFile *ifile,
                    const TString histName[nSlices],
@@ -9172,7 +9172,7 @@ void SignalMassResolution() {
     const char *nameMass    = "METanalysis_TestPUppiMETCut_Eta2p4_9fp10_SignalMass_nominal";
     const char *nameMassATLAS = "METanalysis_TestPUppiMETCut_Eta2p4_9fp10_SignalMass_ATLASbkg";
 
-    TFile *ofile = new TFile("PlayWithHistos/SignalMassResolution.root", "RECREATE");
+    TFile *ofile = new TFile("../outputDisplay/SignalMassResolution.root", "RECREATE");
 
     // ================= Signal mass points =================
     std::vector<int> masses = {1100, 1400, 1600, 1800, 2000, 2200, 2400, 2600};
@@ -9301,7 +9301,7 @@ void SignalMassResolution() {
     latex2->SetTextSize(0.04);
     //latex2->Draw();
 
-    c->SaveAs("PlayWithHistos/SignalMassResolution.pdf");
+    c->SaveAs("../outputDisplay/SignalMassResolution.pdf");
 
     ofile->cd();
     g->Write();
@@ -9311,7 +9311,7 @@ void SignalMassResolution() {
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c->Modified();
     c->Update();
-    c->SaveAs("PlayWithHistos/SignalMassResolution_bis.pdf");
+    c->SaveAs("../outputDisplay/SignalMassResolution_bis.pdf");
 
     ofile->Close();
 
@@ -10106,6 +10106,150 @@ std::map<std::string, LinFitResult> FitVRRatios(const std::string& filename,
     }
     
     return results;
+}
+
+// ---------------------------------------------------------------------------
+// Run a ROOT-generated .C macro (whose function name == the file stem) and
+// return the LAST canvas created. This avoids hard-coding the internal canvas
+// name, which differs between PseudoCaloMET / PUppiMET / ... files.
+// ---------------------------------------------------------------------------
+static TCanvas* RunAndGetLastCanvas(const char *macroPath) {
+    int nBefore = gROOT->GetListOfCanvases()->GetSize();
+    gROOT->ProcessLine(Form(".x %s", macroPath));
+    TList *cList = (TList*)gROOT->GetListOfCanvases();
+    if (cList->GetSize() <= nBefore) {
+        std::cerr << "Error: no new canvas created by " << macroPath << std::endl;
+        return nullptr;
+    }
+    return (TCanvas*)cList->Last();
+}
+
+// Find the first TH1 in a pad whose name contains 'needle'.
+static TH1* FindHistInPad(TPad *pad, const char *needle) {
+    if (!pad) return nullptr;
+    TIter next(pad->GetListOfPrimitives());
+    TObject *obj;
+    while ((obj = next())) {
+        if (obj->InheritsFrom(TH1::Class()) &&
+            TString(obj->GetName()).Contains(needle))
+            return (TH1*)obj;
+    }
+    return nullptr;
+}
+
+// Find the first TH1 in a canvas (single-pad signal file), scanning sub-pads too.
+static TH1* FindHistInCanvas(TCanvas *c, const char *needle) {
+    if (!c) return nullptr;
+    TH1 *h = FindHistInPad((TPad*)c, needle);
+    if (h) return h;
+    TIter next(c->GetListOfPrimitives());
+    TObject *obj;
+    while ((obj = next())) {
+        if (obj->InheritsFrom(TPad::Class())) {
+            h = FindHistInPad((TPad*)obj, needle);
+            if (h) return h;
+        }
+    }
+    return nullptr;
+}
+
+// Find the top pad: the TPad named "pad1", else the first TPad found.
+static TPad* FindTopPad(TCanvas *c) {
+    if (!c) return nullptr;
+    TPad *p = (TPad*)c->GetListOfPrimitives()->FindObject("pad1");
+    if (p) return p;
+    TIter next(c->GetListOfPrimitives());
+    TObject *obj;
+    while ((obj = next()))
+        if (obj->InheritsFrom(TPad::Class())) return (TPad*)obj;
+    return nullptr;
+}
+
+// Output stem from the ratio macro path (strip dir + ".C").
+static TString OutStem(const char *ratioMacro) {
+    TString s(ratioMacro);
+    Ssiz_t slash = s.Last('/');
+    if (slash != kNPOS) s.Remove(0, slash + 1);
+    if (s.EndsWith(".C")) s.Remove(s.Length() - 2);
+    return s;
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+void OverlaySignalOnRatio(const char *signalMacro,
+                          const char *ratioMacro,
+                          const char *signalLabel = "Signal",
+                          const char *outDir      = "TriggEff") {
+
+    gErrorIgnoreLevel = kWarning;
+
+    // 1) SIGNAL macro -> histogram whose name contains "SIGNAL"
+    TCanvas *cSig = RunAndGetLastCanvas(signalMacro);
+    if (!cSig) return;
+    TH1 *hSig = FindHistInCanvas(cSig, "SIGNAL");
+    if (!hSig) {
+        std::cerr << "Error: no 'SIGNAL' histogram in " << signalMacro << std::endl;
+        return;
+    }
+    TH1 *hSigClone = (TH1*)hSig->Clone("hSig_overlay");
+    hSigClone->SetDirectory(0);
+
+    // 2) RATIO macro -> canvas + top pad
+    TCanvas *cRatio = RunAndGetLastCanvas(ratioMacro);
+    if (!cRatio) return;
+    TPad *pad1 = FindTopPad(cRatio);
+    if (!pad1) {
+        std::cerr << "Error: top pad not found in ratio canvas." << std::endl;
+        return;
+    }
+
+    // sanity: warn if axes differ (PUppi vs PseudoCalo)
+    TH1 *hData = FindHistInPad(pad1, "DATA");
+    if (hData) {
+        TString sx = hSigClone->GetXaxis()->GetTitle();
+        TString dx = hData->GetXaxis()->GetTitle();
+        if (sx != dx)
+            std::cerr << "Note: signal x-axis '" << sx << "' != data x-axis '"
+                      << dx << "'. Overlaying anyway." << std::endl;
+    }
+
+    // 3) style + draw signal on top pad
+    hSigClone->SetLineColor(kGreen + 2);
+    hSigClone->SetMarkerColor(kGreen + 2);
+    hSigClone->SetMarkerStyle(21);
+    hSigClone->SetMarkerSize(0.6);
+    pad1->cd();
+    hSigClone->Draw("E1 same");
+
+    // 4) legend
+    TLegend *leg = nullptr;
+    {
+        TIter next(pad1->GetListOfPrimitives());
+        TObject *obj;
+        while ((obj = next()))
+            if (obj->InheritsFrom(TLegend::Class())) { leg = (TLegend*)obj; break; }
+    }
+    if (!leg) {
+        leg = new TLegend(0.4, 0.2, 0.6, 0.4, NULL, "brNDC");
+        leg->SetBorderSize(0);
+        leg->SetFillStyle(0);
+        leg->Draw();
+    }
+    leg->AddEntry(hSigClone, signalLabel, "lep");
+
+    pad1->Modified();
+    cRatio->cd();
+    cRatio->Modified();
+    cRatio->Update();
+
+    // 5) save
+    gSystem->mkdir(outDir, kTRUE);
+    TString stem = OutStem(ratioMacro);
+    cRatio->SaveAs(Form("%s/%s__withSignal.pdf", outDir, stem.Data()));
+    cRatio->SaveAs(Form("%s/%s__withSignal.C",   outDir, stem.Data()));
+
+    std::cout << "Done: " << signalLabel << " overlaid on " << stem << std::endl;
 }
 
 

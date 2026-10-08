@@ -1,3 +1,6 @@
 *.root
-output/
+output/*
+outputDisplay/*
 macros/HSCPSelector_C*
+macros/*.root
+libTools.so
