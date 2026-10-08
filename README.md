@@ -39,14 +39,14 @@ Before the first run, adapt the site-specific paths listed [below](#site-specifi
 | `cfg/configFile.txt` | dataset to process, binning and pT cut |
 | `cfg/HSCPpreSelections.csv` | candidate selections, one per row |
 | `src/`, `inc/` | helper library `libTools` (histogram containers, mass reconstruction, scale-factor readers); see [`doc/src_inc.md`](doc/src_inc.md) |
+| `inc/SF_*.txt` | the three trigger scale-factor tables read by the selector |
 | `compile.sh` | builds `libTools.so` |
 | `python/CreateSelector.py`, `python/Functions.py` | generate `macros/HSCPSelector.{h,C}` from the templates and the selection file |
 | `macros/HSCPTemplate.{h,C}` | the analysis code: templates of the selector. **Edit these**, not `HSCPSelector.{h,C}`, which are regenerated at each launch |
 | `macros/macro.cc` | driver: reads the configuration, builds the chain of ntuples, runs the selector |
-| `macros/TriggEff/` | the three trigger scale-factor tables read by the selector |
 | `launch*.sh` | run one dataset or a whole family of datasets |
 | `macros/CombineHistos.C` | plotting macro, reads `output/` and writes `outputDisplay/` |
-| `python/DeriveSF.py` | two-dimensional trigger scale factors |
+| `python/DeriveSF.py` | computes the trigger scale factors and writes the three tables |
 | `output/` | where the plotting macros expect the selector outputs (content not tracked) |
 | `outputDisplay/` | plots (content not tracked) |
 
@@ -58,7 +58,7 @@ macros/HSCPTemplate.{h,C} ─┴─ python/CreateSelector.py ─► macros/HSCPS
 
 cfg/configFile.txt ─► macros/macro.cc ─► TChain of ntuples ─► HSCPSelector ─► macros/<dataset>_<version>.root
                                                                   ▲
-                                             libTools.so, macros/TriggEff/SF_*.txt
+                                             libTools.so, inc/SF_*.txt
 ```
 
 For each event the selector evaluates the trigger and, for simulation, the weight (pile-up weight times trigger scale factor). For each selection it keeps the most ionising candidate, the one with the largest `Ih`, and fills the histograms and the regions with it.
@@ -142,21 +142,24 @@ The list and binning of the region histograms are documented in [`doc/src_inc.md
 
 ## Plots and scale factors
 
-- **`macros/CombineHistos.C`**, run from `macros/` with `root -l -b -q CombineHistos.C`. Its main function, at the end of the file, is a list of calls: enable a plot by uncommenting its call. Input files are read from `../output/<sample>_V<n>/`. Most functions write to `../outputDisplay/`; a few still write to `macros/TriggEff/` or to `macros/`.
-- **`python/DeriveSF.py`** computes the trigger scale factors in bins of (PUppi MET, pseudo MET). Its paths are relative to the directory it is started from: run it from `macros/` with `python3 ../python/DeriveSF.py`.
+- **`macros/CombineHistos.C`**, run from `macros/` with `root -l -b -q CombineHistos.C`. Its main function, at the end of the file, is a list of calls: enable a plot by uncommenting its call. Input files are read from `../output/<sample>_V<n>/`. Plots are written to `../outputDisplay/` and to its sub-directories `TriggEff/` and `Nm1plots/`, which must exist beforehand; a few functions take their output directory as an argument.
+- **`python/DeriveSF.py`** computes the trigger scale factors, in bins of pseudo MET, of PUppi MET, and of both. Its paths are relative to the repository, so it can be started from anywhere: `python3 python/DeriveSF.py`.
 
 Merging the selector outputs and weighting the simulated samples by cross-section (the `*_weighted.root` files read by `CombineHistos.C`) is done outside this repository.
 
 ### Trigger scale-factor tables
 
-The selector reads three tables at start-up and stops if one is missing:
+The selector reads three tables in `inc/` at start-up and stops if one is missing. All three are written by `python/DeriveSF.py`:
 
-| File in `macros/TriggEff/` | Produced by |
+| File in `inc/` | Content |
 |---|---|
-| `SF_PseudoMET.txt`, `SF_PUppiMET.txt` | `ExtractSF` in `CombineHistos.C` |
-| `SF_orMETtrg_PUppiMET_VS_PseudoMET__TriggerEffCalib_table_plain.txt` | `python/DeriveSF.py` |
+| `SF_PseudoMET.txt` | scale factors in bins of pseudo MET |
+| `SF_PUppiMET.txt` | scale factors in bins of PUppi MET |
+| `SF_orMETtrg_PUppiMET_VS_PseudoMET__TriggerEffCalib_table_plain.txt` | scale factors in bins of (pseudo MET, PUppi MET), on a non-grid binning |
 
-Their format is described in [`doc/src_inc.md`](doc/src_inc.md).
+The script reads the data and simulation files named at the top of its `CONFIG` block, produced with a selection labelled `TriggerEffCalib`. It also writes the LaTeX version of the tables and the maps of the two-dimensional scale factors in `outputDisplay/TriggEff/`.
+
+The format of the tables is described in [`doc/src_inc.md`](doc/src_inc.md).
 
 ## Site-specific paths
 
@@ -173,7 +176,3 @@ Their format is described in [`doc/src_inc.md`](doc/src_inc.md).
 - **New histogram**: book it with `AddHisto1F` / `AddHisto2F` in `SlaveBegin` and fill it with `FillHisto1F` / `FillHisto2F` in `Process`, both in `HSCPTemplate.C`. The two names must match exactly: a fill with an unknown name is silently ignored.
 - **New branch**: declare a `TTreeReaderValue` or `TTreeReaderArray` in `HSCPTemplate.h`.
 - Any change in `src/` or `inc/` requires `./compile.sh`.
-
-## ROOT documentation
-
-- [TSelector](https://root.cern/doc/master/classTSelector.html) and [TTreeReader](https://root.cern/doc/master/classTTreeReader.html)

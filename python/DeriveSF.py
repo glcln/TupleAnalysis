@@ -1,18 +1,34 @@
 #!/usr/bin/env python3
 """
-Trigger scale factors (DATA/MC) on a *non-grid* custom binning.
+Trigger scale factors (DATA/MC) applied to the simulation by the selector.
 
-The PUppiMET vs PseudoMET efficiency map cannot be stored in a ROOT TH2,
-because each PseudoMET (y) slice uses its own PUppiMET (x) binning. We read the
-fine-binned TH2s with uproot, aggregate raw counts into the custom "super-bins",
-compute eff_data, eff_MC and SF = eff_data / eff_MC per super-bin, then write a
-.txt table and a text-annotated 2D map (matplotlib) per trigger.
+The script produces the three tables read by HSCPSelector::Begin, in inc/:
+
+  SF_PseudoMET.txt, SF_PUppiMET.txt
+      one-dimensional scale factors, in bins of pseudo MET and of PUppi MET
+  SF_<trigger>_PUppiMET_VS_PseudoMET__<OFILENAME>_table_plain.txt
+      two-dimensional scale factors on a *non-grid* custom binning
+
+and, in outputDisplay/TriggEff/, their LaTeX versions and the maps of the
+two-dimensional scale factors.
+
+One-dimensional tables: the fine bins above SF1D_LAST_EDGE are merged into one,
+then SF = eff_data / eff_MC per bin, the errors being propagated as TH1::Divide
+does (numerator and denominator treated as uncorrelated).
+
+Two-dimensional table: the PUppiMET vs PseudoMET efficiency map cannot be stored
+in a ROOT TH2, because each PseudoMET (y) slice uses its own PUppiMET (x)
+binning. We read the fine-binned TH2s with uproot, aggregate raw counts into the
+custom "super-bins", compute eff_data, eff_MC and SF = eff_data / eff_MC per
+super-bin (binomial errors), then write the tables and a text-annotated 2D map
+(matplotlib) per trigger.
 
 The geometry is fully irregular: it starts from per-Y-slice X edges, then any
 single cell can be replaced by an arbitrary set of sub-rectangles via
 REPLACE_CELLS (so one cell can be split in Y/X without touching its neighbours).
 
-Just run:   python3 sf_custom_binning.py
+All paths are relative to the repository, so the script can be started from
+anywhere:   python3 python/DeriveSF.py
 """
 
 import math
@@ -45,17 +61,31 @@ plt.rcParams.update({
 # ======================================================================
 # CONFIG
 # ======================================================================
-INPUT_DATA = "../output/Mu2024_V18/Mu2024_V18p1.root"
-INPUT_MC   = "../output/Wjets2024_V14/WjetMuNu2024_V14p12.root"
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+INPUT_DATA = os.path.join(REPO, "output/Mu2024_V18/Mu2024_V18p1.root")
+INPUT_MC   = os.path.join(REPO, "output/Wjets2024_V14/WjetMuNu2024_V14p12.root")
 
 LABEL_DATA = "TriggerEffCalib"
 LABEL_MC   = "TriggerEffCalib"
 
 OFILENAME  = "TriggerEffCalib"
-OUTDIR     = "../outputDisplay/TriggEff"
+TABLEDIR   = os.path.join(REPO, "inc")                       # tables read by the selector
+OUTDIR     = os.path.join(REPO, "outputDisplay/TriggEff")    # LaTeX tables and plots
 
 OBS = "PUppiMET_VS_PseudoMET"
 TRIGGERS = ["orMETtrg"]
+
+# ----------------------------------------------------------------------
+# one-dimensional scale factors
+# each entry: (observable in the histogram names, name of the table)
+# ----------------------------------------------------------------------
+SF1D_TRIGGER = "orMETtrg"
+SF1D_TABLES = [
+    ("PseudoCaloMET", "SF_PseudoMET"),
+    ("PUppiMET",      "SF_PUppiMET"),
+]
+SF1D_LAST_EDGE = 400.0      # the bins above this value are merged into a single one
 
 # ----------------------------------------------------------------------
 # base custom binning  (rows: one X binning per Y slice)
@@ -93,6 +123,82 @@ YRANGE = (0, 1200)
 # ======================================================================
 
 
+# ----------------------------------------------------------------------
+# One-dimensional scale factors
+# ----------------------------------------------------------------------
+def load_th1(fname, label, suffix):
+    """Contents, squared errors and bin edges of a TH1, without under/overflow."""
+    key = f"{label}_{suffix}"
+    with uproot.open(fname) as f:
+        avail = [k.split(";")[0] for k in f.keys()]
+        if key not in avail:
+            raise KeyError(f"'{key}' not found in {fname}")
+        h = f[key]
+        return (np.asarray(h.values(), dtype=np.float64),
+                np.asarray(h.variances(), dtype=np.float64),
+                np.asarray(h.axis().edges(), dtype=np.float64))
+
+
+def as_th1f(x):
+    """Round to single precision, as the content of a TH1F is stored."""
+    return np.asarray(x, dtype=np.float32).astype(np.float64)
+
+
+def merge_tail(values, variances, edges, last_edge):
+    """Merge all the bins above last_edge into one (TH1::Rebin with variable bins)."""
+    n = int(np.searchsorted(edges, last_edge))
+    if n >= len(edges) - 1 or not math.isclose(edges[n], last_edge):
+        raise ValueError(f"{last_edge:g} is not an inner bin edge of the histogram")
+    new_values = as_th1f(np.append(values[:n], values[n:].sum()))
+    new_variances = np.append(variances[:n], variances[n:].sum())
+    new_edges = np.append(edges[:n + 1], edges[-1])
+    return new_values, new_variances, new_edges
+
+
+def divide(num, var_num, den, var_den):
+    """num / den with the error propagation of TH1::Divide; empty denominator -> 0."""
+    ok = den != 0
+    safe = np.where(ok, den, 1.0)
+    ratio = as_th1f(np.where(ok, num / safe, 0.0))
+    variance = np.where(ok, (var_num * safe**2 + var_den * num**2) / safe**4, 0.0)
+    return ratio, variance
+
+
+def process_sf1d(obs):
+    """Scale factor and its error per bin of obs. Returns (low edges, up edges, sf, error)."""
+    num_suffix = f"if___{SF1D_TRIGGER}___{obs}"
+    hists = {}
+    for tag, fname, label in (("d", INPUT_DATA, LABEL_DATA), ("m", INPUT_MC, LABEL_MC)):
+        for kind, suffix in (("num", num_suffix), ("den", obs)):
+            hists[kind + "_" + tag] = merge_tail(*load_th1(fname, label, suffix), SF1D_LAST_EDGE)
+
+    edges = hists["num_d"][2]
+    eff_d, var_d = divide(*hists["num_d"][:2], *hists["den_d"][:2])
+    eff_m, var_m = divide(*hists["num_m"][:2], *hists["den_m"][:2])
+    sf, var_sf = divide(eff_d, var_d, eff_m, var_m)
+    return edges[:-1], edges[1:], sf, np.sqrt(var_sf)
+
+
+def write_tables_1d(lows, ups, sf, err, plain_path, tex_path):
+    # table read by the selector: low edge of the bin, SF - error, SF, SF + error
+    with open(plain_path, "w") as t:
+        for lo, s, e in zip(lows, sf, err):
+            t.write("{:g} {:g} {:g} {:g}\n".format(lo, s - e, s, s + e))
+
+    with open(tex_path, "w") as t:
+        t.write("\\begin{table}[htbp]\n  \\centering\n")
+        t.write("  \\caption{Trigger scale factors (data/MC) for \\texttt{"
+                + SF1D_TRIGGER.replace("_", "\\_") + "} on the custom binning.}\n")
+        t.write("  \\begin{tabular}{cc}\n    \\hline\n")
+        t.write("    MET bin [GeV] & SF \\\\\n    \\hline\n")
+        for lo, up, s, e in zip(lows, ups, sf, err):
+            t.write("    $\\left[{:g}, {:g}\\right]$ & {:.4f} $\\pm$ {:.4f} \\\\\n".format(lo, up, s, e))
+        t.write("    \\hline\n  \\end{tabular}\n\\end{table}\n")
+
+
+# ----------------------------------------------------------------------
+# Two-dimensional scale factors
+# ----------------------------------------------------------------------
 def build_cells():
     """Expand the per-slice binning into rectangles, then apply REPLACE_CELLS."""
     cells = []
@@ -187,8 +293,8 @@ def process_trigger(trigger, fine, cells_geom):
     return rows, cells
 
 
-def write_tables(trigger, rows, base):
-    with open(base + "_table.txt", "w") as t:
+def write_tables(trigger, rows, plain_path, tex_path):
+    with open(tex_path, "w") as t:
         t.write("% Trigger scale factors (DATA/MC), custom non-grid binning\n")
         t.write(f"% trigger: {trigger}\n")
         t.write("\\begin{table}[htbp]\n  \\centering\n")
@@ -206,7 +312,8 @@ def write_tables(trigger, rows, base):
                     .format(ycell, xrange, r["sf"], r["sferr"]))
         t.write("    \\hline\n  \\end{tabular}\n\\end{table}\n")
 
-    with open(base + "_table_plain.txt", "w") as t:
+    # table read by the selector: PseudoMET low/up, PUppiMET low/up, SF - error, SF, SF + error
+    with open(plain_path, "w") as t:
         for r in rows:
             t.write("{:>8g} {:>8g} {:>8g} {:>8g} {:<8.4f} {:<8.4f} {:<8.4f}\n".format(
                 r['ylo'], r['yhi'], r['xlo'], r['xhi'],
@@ -299,6 +406,21 @@ def draw_overlay(trigger, fine, cells_geom, base):
 
 def main():
     os.makedirs(OUTDIR, exist_ok=True)
+    os.makedirs(TABLEDIR, exist_ok=True)
+
+    # ---- one-dimensional tables ----
+    for obs, name in SF1D_TABLES:
+        try:
+            lows, ups, sf, err = process_sf1d(obs)
+        except (KeyError, ValueError, FileNotFoundError, OSError) as e:
+            print(f"[skip] {name}: {e}", file=sys.stderr)
+            continue
+        plain = os.path.join(TABLEDIR, name + ".txt")
+        tex = os.path.join(OUTDIR, name + "_tex.txt")
+        write_tables_1d(lows, ups, sf, err, plain, tex)
+        print(f"[done] {SF1D_TRIGGER} vs {obs} -> {plain}")
+
+    # ---- two-dimensional table ----
     den_suffix = OBS
     cells_geom = build_cells()
 
@@ -316,11 +438,14 @@ def main():
             continue
 
         rows, cells = process_trigger(trigger, fine, cells_geom)
-        base = os.path.join(OUTDIR, f"SF_{trigger}_{OBS}__{OFILENAME}")
-        write_tables(trigger, rows, base)
+        name = f"SF_{trigger}_{OBS}__{OFILENAME}"
+        base = os.path.join(OUTDIR, name)
+        plain = os.path.join(TABLEDIR, name + "_table_plain.txt")
+        write_tables(trigger, rows, plain, base + "_table.txt")
         draw_map(trigger, cells, base)
         draw_overlay(trigger, fine, cells_geom, base)
-        print(f"[done] {trigger} -> {base}_table.txt / _map.pdf / _overlay.pdf")
+        print(f"[done] {trigger} -> {plain}")
+        print(f"       plots and LaTeX table: {base}_*")
 
 
 if __name__ == "__main__":
