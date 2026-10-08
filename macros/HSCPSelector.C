@@ -3,23 +3,13 @@
 #include "HSCPSelector.h"
 #include <TH2.h>
 #include <TH1.h>
-#include <TStyle.h>
 #include <functional>
 #include <cmath>
 
 
 //K and C values are set based on the config file dataset name (see below)
 float K(2.54), C(3.14); 
-
-float K_signal2017(2.48), C_signal2017(3.19); //MC signal 2017
-float K_signal2018(2.49), C_signal2018(3.18); //MC signal 2018
-
-float K_bckg2017(2.48), C_bckg2017(3.19); //MC background 2017
-float K_bckg2018(2.49), C_bckg2018(3.18); //MC background 2018
 float K_bckg2024(2.83894), C_bckg2024(3.01756); //MC background 2024
-
-float K_data2018(2.55), C_data2018(3.14); //Data 2018
-float K_data2017(2.54), C_data2017(3.14); //Data 2017
 float K_data2024(2.8202), C_data2024(2.9784); //Data 2024
 
 // glu pion:
@@ -137,9 +127,6 @@ void HSCPSelector::Begin(TTree *tree) {
     oFile_ += ".root";
 
 
-    // Options
-    UseFpixel = true;
-
     // Fill the SF;    
     loadSF2D("TriggEff/SF_orMETtrg_PUppiMET_VS_PseudoMET__TriggerEffCalib_table_plain.txt", SF2D_PseudoMETlovalue, SF2D_PseudoMEThivalue, SF2D_PUppiMETlovalue, SF2D_PUppiMEThivalue, SF2D_Down, SF2D, SF2D_Up);
     loadSF1D("TriggEff/SF_PseudoMET.txt", SF1D_PseudoMETvalue, SF1Dpseudo_Down, SF1Dpseudo, SF1Dpseudo_Up);
@@ -219,6 +206,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     }
     if (dataset_.find("Gluino") != std::string::npos ||
         dataset_.find("Stau") != std::string::npos ||
+        dataset_.find("Stop") != std::string::npos ||
         dataset_.find("QCD") != std::string::npos || 
         dataset_.find("Wjets") != std::string::npos ||
         dataset_.find("WjetMuNu") != std::string::npos ||
@@ -236,180 +224,174 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     //-------------------------------------
     for(unsigned int i=0; i<selLabels_.size();i++)
     {
-        if(UseFpixel) {
-            cout << "Initialisation of the regions for selection: " << selLabels_[i] << endl;
+        cout << "Initialisation of the regions for selection: " << selLabels_[i] << endl;
 
-            //Create names for each plot in each regions (slices in Fpixels)
-            std::string label_FpixAll = regFpixAll + "_" + selLabels_[i]; 
-            
-            std::string label_FpixA_3f4 = regFpixA_3f4 + "_" + selLabels_[i]; 
-            std::string label_FpixA_3f6 = regFpixA_3f6 + "_" + selLabels_[i]; 
-            std::string label_FpixA_3f8 = regFpixA_3f8 + "_" + selLabels_[i]; 
-            std::string label_FpixA_3f9 = regFpixA_3f9 + "_" + selLabels_[i]; 
-            std::string label_FpixA_4f5 = regFpixA_4f5 + "_" + selLabels_[i]; 
-            std::string label_FpixA_5f6 = regFpixA_5f6 + "_" + selLabels_[i]; 
-            std::string label_FpixA_6f7 = regFpixA_6f7 + "_" + selLabels_[i]; 
-            std::string label_FpixA_6f9 = regFpixA_6f9 + "_" + selLabels_[i];
-            std::string label_FpixA_7f8 = regFpixA_7f8 + "_" + selLabels_[i]; 
-            std::string label_FpixA_8f9 = regFpixA_8f9 + "_" + selLabels_[i]; 
-            std::string label_FpixA_9f10 = regFpixA_9f10 + "_" + selLabels_[i];
-            std::string label_FpixA_99f10 = regFpixA_99f10 + "_" + selLabels_[i];
-            std::string label_FpixA_999f10 = regFpixA_999f10 + "_" + selLabels_[i];
-
-            std::string label_FpixB_3f4 = regFpixB_3f4 + "_" + selLabels_[i]; 
-            std::string label_FpixB_3f6 = regFpixB_3f6 + "_" + selLabels_[i]; 
-            std::string label_FpixB_3f8 = regFpixB_3f8 + "_" + selLabels_[i]; 
-            std::string label_FpixB_3f9 = regFpixB_3f9 + "_" + selLabels_[i]; 
-            std::string label_FpixB_4f5 = regFpixB_4f5 + "_" + selLabels_[i]; 
-            std::string label_FpixB_5f6 = regFpixB_5f6 + "_" + selLabels_[i]; 
-            std::string label_FpixB_6f7 = regFpixB_6f7 + "_" + selLabels_[i]; 
-            std::string label_FpixB_6f9 = regFpixB_6f9 + "_" + selLabels_[i]; 
-            std::string label_FpixB_7f8 = regFpixB_7f8 + "_" + selLabels_[i]; 
-            std::string label_FpixB_8f9 = regFpixB_8f9 + "_" + selLabels_[i]; 
-            std::string label_FpixB_8f10 = regFpixB_8f10 + "_" + selLabels_[i];
-            std::string label_FpixB_9f10 = regFpixB_9f10 + "_" + selLabels_[i];
-            std::string label_FpixB_99f10 = regFpixB_99f10 + "_" + selLabels_[i];
-            std::string label_FpixB_999f10 = regFpixB_999f10 + "_" + selLabels_[i];
-
-            std::string label_FpixC_3f4 = regFpixC_3f4 + "_" + selLabels_[i]; 
-            std::string label_FpixC_3f6 = regFpixC_3f6 + "_" + selLabels_[i]; 
-            std::string label_FpixC_3f8 = regFpixC_3f8 + "_" + selLabels_[i]; 
-            std::string label_FpixC_3f9 = regFpixC_3f9 + "_" + selLabels_[i]; 
-            std::string label_FpixC_4f5 = regFpixC_4f5 + "_" + selLabels_[i]; 
-            std::string label_FpixC_5f6 = regFpixC_5f6 + "_" + selLabels_[i]; 
-            std::string label_FpixC_6f7 = regFpixC_6f7 + "_" + selLabels_[i]; 
-            std::string label_FpixC_6f9 = regFpixC_6f9 + "_" + selLabels_[i]; 
-            std::string label_FpixC_7f8 = regFpixC_7f8 + "_" + selLabels_[i]; 
-            std::string label_FpixC_8f9 = regFpixC_8f9 + "_" + selLabels_[i]; 
-
-            std::string label_FpixD_3f4 = regFpixD_3f4 + "_" + selLabels_[i];
-            std::string label_FpixD_3f8 = regFpixD_3f8 + "_" + selLabels_[i];
-            std::string label_FpixD_4f5 = regFpixD_4f5 + "_" + selLabels_[i]; 
-            std::string label_FpixD_5f6 = regFpixD_5f6 + "_" + selLabels_[i]; 
-            std::string label_FpixD_6f7 = regFpixD_6f7 + "_" + selLabels_[i]; 
-            std::string label_FpixD_6f9 = regFpixD_6f9 + "_" + selLabels_[i];
-            std::string label_FpixD_7f8 = regFpixD_7f8 + "_" + selLabels_[i]; 
-            std::string label_FpixD_8f9 = regFpixD_8f9 + "_" + selLabels_[i]; 
-            std::string label_FpixD_8f10 = regFpixD_8f10 + "_" + selLabels_[i];
-            std::string label_FpixD_9f10 = regFpixD_9f10 + "_" + selLabels_[i]; 
-            std::string label_FpixD_99f10 = regFpixD_99f10 + "_" + selLabels_[i]; 
-            std::string label_FpixD_999f10 = regFpixD_999f10 + "_" + selLabels_[i]; 
-
-
-            //Create objects RegionMassPlot using the names defined above 
-            RegionMassPlot regAll(label_FpixAll.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-
-            RegionMassPlot regA_3f4(label_FpixA_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
-            RegionMassPlot regA_3f6(label_FpixA_3f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regA_3f8(label_FpixA_3f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regA_3f9(label_FpixA_3f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regA_4f5(label_FpixA_4f5.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regA_5f6(label_FpixA_5f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regA_6f7(label_FpixA_6f7.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
-            RegionMassPlot regA_6f9(label_FpixA_6f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
-            RegionMassPlot regA_7f8(label_FpixA_7f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
-            RegionMassPlot regA_8f9(label_FpixA_8f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regA_9f10(label_FpixA_9f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regA_99f10(label_FpixA_99f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regA_999f10(label_FpixA_999f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-
-            RegionMassPlot regB_3f4(label_FpixB_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_3f6(label_FpixB_3f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_3f8(label_FpixB_3f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_3f9(label_FpixB_3f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_4f5(label_FpixB_4f5.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_5f6(label_FpixB_5f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_6f7(label_FpixB_6f7.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_6f9(label_FpixB_6f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_7f8(label_FpixB_7f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);     
-            RegionMassPlot regB_8f9(label_FpixB_8f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_8f10(label_FpixB_8f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_9f10(label_FpixB_9f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_99f10(label_FpixB_99f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regB_999f10(label_FpixB_999f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
-
-            RegionMassPlot regC_3f4(label_FpixC_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_3f6(label_FpixC_3f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_3f8(label_FpixC_3f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_3f9(label_FpixC_3f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_4f5(label_FpixC_4f5.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_5f6(label_FpixC_5f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_6f7(label_FpixC_6f7.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_6f9(label_FpixC_6f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_7f8(label_FpixC_7f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regC_8f9(label_FpixC_8f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-
-            RegionMassPlot regD_3f4(label_FpixD_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_3f8(label_FpixD_3f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_4f5(label_FpixD_4f5.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_5f6(label_FpixD_5f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_6f7(label_FpixD_6f7.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_6f9(label_FpixD_6f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_7f8(label_FpixD_7f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);     
-            RegionMassPlot regD_8f9(label_FpixD_8f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_8f10(label_FpixD_8f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_9f10(label_FpixD_9f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_99f10(label_FpixD_99f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
-            RegionMassPlot regD_999f10(label_FpixD_999f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        //Create names for each plot in each regions (slices in Fpixels)
         
+        std::string label_FpixA_3f4 = regFpixA_3f4 + "_" + selLabels_[i]; 
+        std::string label_FpixA_3f6 = regFpixA_3f6 + "_" + selLabels_[i]; 
+        std::string label_FpixA_3f8 = regFpixA_3f8 + "_" + selLabels_[i]; 
+        std::string label_FpixA_3f9 = regFpixA_3f9 + "_" + selLabels_[i]; 
+        std::string label_FpixA_4f5 = regFpixA_4f5 + "_" + selLabels_[i]; 
+        std::string label_FpixA_5f6 = regFpixA_5f6 + "_" + selLabels_[i]; 
+        std::string label_FpixA_6f7 = regFpixA_6f7 + "_" + selLabels_[i]; 
+        std::string label_FpixA_6f9 = regFpixA_6f9 + "_" + selLabels_[i];
+        std::string label_FpixA_7f8 = regFpixA_7f8 + "_" + selLabels_[i]; 
+        std::string label_FpixA_8f9 = regFpixA_8f9 + "_" + selLabels_[i]; 
+        std::string label_FpixA_9f10 = regFpixA_9f10 + "_" + selLabels_[i];
+        std::string label_FpixA_99f10 = regFpixA_99f10 + "_" + selLabels_[i];
+        std::string label_FpixA_999f10 = regFpixA_999f10 + "_" + selLabels_[i];
 
-            //push the RegionMassPlot objects created in vectors, because you have a set of different plot for each region, for each selection (defined in the configuration file) 
+        std::string label_FpixB_3f4 = regFpixB_3f4 + "_" + selLabels_[i]; 
+        std::string label_FpixB_3f6 = regFpixB_3f6 + "_" + selLabels_[i]; 
+        std::string label_FpixB_3f8 = regFpixB_3f8 + "_" + selLabels_[i]; 
+        std::string label_FpixB_3f9 = regFpixB_3f9 + "_" + selLabels_[i]; 
+        std::string label_FpixB_4f5 = regFpixB_4f5 + "_" + selLabels_[i]; 
+        std::string label_FpixB_5f6 = regFpixB_5f6 + "_" + selLabels_[i]; 
+        std::string label_FpixB_6f7 = regFpixB_6f7 + "_" + selLabels_[i]; 
+        std::string label_FpixB_6f9 = regFpixB_6f9 + "_" + selLabels_[i]; 
+        std::string label_FpixB_7f8 = regFpixB_7f8 + "_" + selLabels_[i]; 
+        std::string label_FpixB_8f9 = regFpixB_8f9 + "_" + selLabels_[i]; 
+        std::string label_FpixB_8f10 = regFpixB_8f10 + "_" + selLabels_[i];
+        std::string label_FpixB_9f10 = regFpixB_9f10 + "_" + selLabels_[i];
+        std::string label_FpixB_99f10 = regFpixB_99f10 + "_" + selLabels_[i];
+        std::string label_FpixB_999f10 = regFpixB_999f10 + "_" + selLabels_[i];
 
-            vmrp_regionFpix_all.push_back(std::move(regAll));
-            
-            vmrp_regionA_3f4.push_back(std::move(regA_3f4));
-            vmrp_regionA_3f6.push_back(std::move(regA_3f6));
-            vmrp_regionA_3f8.push_back(std::move(regA_3f8));
-            vmrp_regionA_3f9.push_back(std::move(regA_3f9));
-            vmrp_regionA_4f5.push_back(std::move(regA_4f5));
-            vmrp_regionA_5f6.push_back(std::move(regA_5f6));
-            vmrp_regionA_6f7.push_back(std::move(regA_6f7));
-            vmrp_regionA_6f9.push_back(std::move(regA_6f9));
-            vmrp_regionA_7f8.push_back(std::move(regA_7f8));
-            vmrp_regionA_8f9.push_back(std::move(regA_8f9));
-            vmrp_regionA_9f10.push_back(std::move(regA_9f10));
-            vmrp_regionA_99f10.push_back(std::move(regA_99f10));
-            vmrp_regionA_999f10.push_back(std::move(regA_999f10));
+        std::string label_FpixC_3f4 = regFpixC_3f4 + "_" + selLabels_[i]; 
+        std::string label_FpixC_3f6 = regFpixC_3f6 + "_" + selLabels_[i]; 
+        std::string label_FpixC_3f8 = regFpixC_3f8 + "_" + selLabels_[i]; 
+        std::string label_FpixC_3f9 = regFpixC_3f9 + "_" + selLabels_[i]; 
+        std::string label_FpixC_4f5 = regFpixC_4f5 + "_" + selLabels_[i]; 
+        std::string label_FpixC_5f6 = regFpixC_5f6 + "_" + selLabels_[i]; 
+        std::string label_FpixC_6f7 = regFpixC_6f7 + "_" + selLabels_[i]; 
+        std::string label_FpixC_6f9 = regFpixC_6f9 + "_" + selLabels_[i]; 
+        std::string label_FpixC_7f8 = regFpixC_7f8 + "_" + selLabels_[i]; 
+        std::string label_FpixC_8f9 = regFpixC_8f9 + "_" + selLabels_[i]; 
 
-            vmrp_regionB_3f4.push_back(std::move(regB_3f4));
-            vmrp_regionB_3f6.push_back(std::move(regB_3f6));
-            vmrp_regionB_3f8.push_back(std::move(regB_3f8));
-            vmrp_regionB_3f9.push_back(std::move(regB_3f9));
-            vmrp_regionB_4f5.push_back(std::move(regB_4f5));
-            vmrp_regionB_5f6.push_back(std::move(regB_5f6));
-            vmrp_regionB_6f7.push_back(std::move(regB_6f7));
-            vmrp_regionB_6f9.push_back(std::move(regB_6f9));
-            vmrp_regionB_7f8.push_back(std::move(regB_7f8));
-            vmrp_regionB_8f9.push_back(std::move(regB_8f9));
-            vmrp_regionB_8f10.push_back(std::move(regB_8f10));
-            vmrp_regionB_9f10.push_back(std::move(regB_9f10));
-            vmrp_regionB_99f10.push_back(std::move(regB_99f10));
-            vmrp_regionB_999f10.push_back(std::move(regB_999f10));
+        std::string label_FpixD_3f4 = regFpixD_3f4 + "_" + selLabels_[i];
+        std::string label_FpixD_3f8 = regFpixD_3f8 + "_" + selLabels_[i];
+        std::string label_FpixD_4f5 = regFpixD_4f5 + "_" + selLabels_[i]; 
+        std::string label_FpixD_5f6 = regFpixD_5f6 + "_" + selLabels_[i]; 
+        std::string label_FpixD_6f7 = regFpixD_6f7 + "_" + selLabels_[i]; 
+        std::string label_FpixD_6f9 = regFpixD_6f9 + "_" + selLabels_[i];
+        std::string label_FpixD_7f8 = regFpixD_7f8 + "_" + selLabels_[i]; 
+        std::string label_FpixD_8f9 = regFpixD_8f9 + "_" + selLabels_[i]; 
+        std::string label_FpixD_8f10 = regFpixD_8f10 + "_" + selLabels_[i];
+        std::string label_FpixD_9f10 = regFpixD_9f10 + "_" + selLabels_[i]; 
+        std::string label_FpixD_99f10 = regFpixD_99f10 + "_" + selLabels_[i]; 
+        std::string label_FpixD_999f10 = regFpixD_999f10 + "_" + selLabels_[i]; 
 
-            vmrp_regionC_3f4.push_back(std::move(regC_3f4));
-            vmrp_regionC_3f6.push_back(std::move(regC_3f6));
-            vmrp_regionC_3f8.push_back(std::move(regC_3f8));
-            vmrp_regionC_3f9.push_back(std::move(regC_3f9));    
-            vmrp_regionC_4f5.push_back(std::move(regC_4f5));
-            vmrp_regionC_5f6.push_back(std::move(regC_5f6));
-            vmrp_regionC_6f7.push_back(std::move(regC_6f7));
-            vmrp_regionC_6f9.push_back(std::move(regC_6f9));
-            vmrp_regionC_7f8.push_back(std::move(regC_7f8));
-            vmrp_regionC_8f9.push_back(std::move(regC_8f9));
 
-            vmrp_regionD_3f4.push_back(std::move(regD_3f4));
-            vmrp_regionD_3f8.push_back(std::move(regD_3f8));
-            vmrp_regionD_4f5.push_back(std::move(regD_4f5));
-            vmrp_regionD_5f6.push_back(std::move(regD_5f6));
-            vmrp_regionD_6f7.push_back(std::move(regD_6f7));
-            vmrp_regionD_6f9.push_back(std::move(regD_6f9));
-            vmrp_regionD_7f8.push_back(std::move(regD_7f8));
-            vmrp_regionD_8f9.push_back(std::move(regD_8f9));
-            vmrp_regionD_8f10.push_back(std::move(regD_8f10));
-            vmrp_regionD_9f10.push_back(std::move(regD_9f10));
-            vmrp_regionD_99f10.push_back(std::move(regD_99f10));
-            vmrp_regionD_999f10.push_back(std::move(regD_999f10));
-        }
+        //Create objects RegionMassPlot using the names defined above
+
+        RegionMassPlot regA_3f4(label_FpixA_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
+        RegionMassPlot regA_3f6(label_FpixA_3f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regA_3f8(label_FpixA_3f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regA_3f9(label_FpixA_3f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regA_4f5(label_FpixA_4f5.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regA_5f6(label_FpixA_5f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regA_6f7(label_FpixA_6f7.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
+        RegionMassPlot regA_6f9(label_FpixA_6f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
+        RegionMassPlot regA_7f8(label_FpixA_7f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
+        RegionMassPlot regA_8f9(label_FpixA_8f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regA_9f10(label_FpixA_9f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regA_99f10(label_FpixA_99f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regA_999f10(label_FpixA_999f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+
+        RegionMassPlot regB_3f4(label_FpixB_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_3f6(label_FpixB_3f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_3f8(label_FpixB_3f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_3f9(label_FpixB_3f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_4f5(label_FpixB_4f5.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_5f6(label_FpixB_5f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_6f7(label_FpixB_6f7.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_6f9(label_FpixB_6f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_7f8(label_FpixB_7f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);     
+        RegionMassPlot regB_8f9(label_FpixB_8f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_8f10(label_FpixB_8f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_9f10(label_FpixB_9f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_99f10(label_FpixB_99f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regB_999f10(label_FpixB_999f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
+
+        RegionMassPlot regC_3f4(label_FpixC_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_3f6(label_FpixC_3f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_3f8(label_FpixC_3f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_3f9(label_FpixC_3f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_4f5(label_FpixC_4f5.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_5f6(label_FpixC_5f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_6f7(label_FpixC_6f7.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_6f9(label_FpixC_6f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_7f8(label_FpixC_7f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regC_8f9(label_FpixC_8f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+
+        RegionMassPlot regD_3f4(label_FpixD_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_3f8(label_FpixD_3f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_4f5(label_FpixD_4f5.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_5f6(label_FpixD_5f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_6f7(label_FpixD_6f7.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_6f9(label_FpixD_6f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_7f8(label_FpixD_7f8.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);     
+        RegionMassPlot regD_8f9(label_FpixD_8f9.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_8f10(label_FpixD_8f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_9f10(label_FpixD_9f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_99f10(label_FpixD_99f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        RegionMassPlot regD_999f10(label_FpixD_999f10.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+    
+
+        //push the RegionMassPlot objects created in vectors, because you have a set of different plot for each region, for each selection (defined in the configuration file) 
+        
+        vmrp_regionA_3f4.push_back(std::move(regA_3f4));
+        vmrp_regionA_3f6.push_back(std::move(regA_3f6));
+        vmrp_regionA_3f8.push_back(std::move(regA_3f8));
+        vmrp_regionA_3f9.push_back(std::move(regA_3f9));
+        vmrp_regionA_4f5.push_back(std::move(regA_4f5));
+        vmrp_regionA_5f6.push_back(std::move(regA_5f6));
+        vmrp_regionA_6f7.push_back(std::move(regA_6f7));
+        vmrp_regionA_6f9.push_back(std::move(regA_6f9));
+        vmrp_regionA_7f8.push_back(std::move(regA_7f8));
+        vmrp_regionA_8f9.push_back(std::move(regA_8f9));
+        vmrp_regionA_9f10.push_back(std::move(regA_9f10));
+        vmrp_regionA_99f10.push_back(std::move(regA_99f10));
+        vmrp_regionA_999f10.push_back(std::move(regA_999f10));
+
+        vmrp_regionB_3f4.push_back(std::move(regB_3f4));
+        vmrp_regionB_3f6.push_back(std::move(regB_3f6));
+        vmrp_regionB_3f8.push_back(std::move(regB_3f8));
+        vmrp_regionB_3f9.push_back(std::move(regB_3f9));
+        vmrp_regionB_4f5.push_back(std::move(regB_4f5));
+        vmrp_regionB_5f6.push_back(std::move(regB_5f6));
+        vmrp_regionB_6f7.push_back(std::move(regB_6f7));
+        vmrp_regionB_6f9.push_back(std::move(regB_6f9));
+        vmrp_regionB_7f8.push_back(std::move(regB_7f8));
+        vmrp_regionB_8f9.push_back(std::move(regB_8f9));
+        vmrp_regionB_8f10.push_back(std::move(regB_8f10));
+        vmrp_regionB_9f10.push_back(std::move(regB_9f10));
+        vmrp_regionB_99f10.push_back(std::move(regB_99f10));
+        vmrp_regionB_999f10.push_back(std::move(regB_999f10));
+
+        vmrp_regionC_3f4.push_back(std::move(regC_3f4));
+        vmrp_regionC_3f6.push_back(std::move(regC_3f6));
+        vmrp_regionC_3f8.push_back(std::move(regC_3f8));
+        vmrp_regionC_3f9.push_back(std::move(regC_3f9));    
+        vmrp_regionC_4f5.push_back(std::move(regC_4f5));
+        vmrp_regionC_5f6.push_back(std::move(regC_5f6));
+        vmrp_regionC_6f7.push_back(std::move(regC_6f7));
+        vmrp_regionC_6f9.push_back(std::move(regC_6f9));
+        vmrp_regionC_7f8.push_back(std::move(regC_7f8));
+        vmrp_regionC_8f9.push_back(std::move(regC_8f9));
+
+        vmrp_regionD_3f4.push_back(std::move(regD_3f4));
+        vmrp_regionD_3f8.push_back(std::move(regD_3f8));
+        vmrp_regionD_4f5.push_back(std::move(regD_4f5));
+        vmrp_regionD_5f6.push_back(std::move(regD_5f6));
+        vmrp_regionD_6f7.push_back(std::move(regD_6f7));
+        vmrp_regionD_6f9.push_back(std::move(regD_6f9));
+        vmrp_regionD_7f8.push_back(std::move(regD_7f8));
+        vmrp_regionD_8f9.push_back(std::move(regD_8f9));
+        vmrp_regionD_8f10.push_back(std::move(regD_8f10));
+        vmrp_regionD_9f10.push_back(std::move(regD_9f10));
+        vmrp_regionD_99f10.push_back(std::move(regD_99f10));
+        vmrp_regionD_999f10.push_back(std::move(regD_999f10));
 
 
         CPlots plots;
@@ -484,8 +466,6 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto1F(selLabels_[i] + "_if___orMET3a4trg4___PUppiMETNoMu", 100, 0, 2500);
         
         plots.AddHisto1F(selLabels_[i] + "_PseudoCaloMET", 100, 0, 2500);
-        plots.AddHisto1F(selLabels_[i] + "_PseudoCaloMET_rescaled", 200, 0, 2000);
-        plots.AddHisto1F(selLabels_[i] + "_PseudoCaloMET_NOTrescaled", 200, 0, 2000);
         plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFMET120_PFMHT120_IDTight___PseudoCaloMET", 100, 0, 2500);
         plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PseudoCaloMET", 100, 0, 2500);
         plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PseudoCaloMET", 100, 0, 2500);
@@ -520,18 +500,9 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
         plots.AddHisto1F(selLabels_[i] + "_if___HLT_MET105_IsoTrk50___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
         plots.AddHisto1F(selLabels_[i] + "_if___orMETtrg___RecoPFMET__PseudoCaloMETCut", 100, 0, 2500); 
-
-        plots.AddHisto1F(selLabels_[i] + "_RecoCaloMET", 100, 0, 2500);
-        plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFMET120_PFMHT120_IDTight___RecoCaloMET", 100, 0, 2500);
-        plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___RecoCaloMET", 100, 0, 2500);
-        plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___RecoCaloMET", 100, 0, 2500);
-        plots.AddHisto1F(selLabels_[i] + "_if___HLT_MET105_IsoTrk50___RecoCaloMET", 100, 0, 2500);
-        plots.AddHisto1F(selLabels_[i] + "_if___orMETtrg___RecoCaloMET", 100, 0, 2500);
         
 
         // General plots
-        plots.AddHisto1F(selLabels_[i] + "_nHSCP", 10, 0, 10);
-        plots.AddHisto1F(selLabels_[i] + "_nPVgood", 150, 0, 150);
         plots.AddHisto1F(selLabels_[i] + "_ndEdx_StripOnly", 50, 0, 50);
         plots.AddHisto1F(selLabels_[i] + "_Ptpseudo", 300, 0, 3000);
         plots.AddHisto1F(selLabels_[i] + "_P", 200, 0, 8000);
@@ -575,8 +546,6 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_nominal", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_PUUp", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_PUDown", 400, 0, 4000);
-        plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_FpixUp", 400, 0, 4000);
-        plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_FpixDown", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_TriggerSFUp", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_TriggerSFDown", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_KUp", 400, 0, 4000);
@@ -593,8 +562,6 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto1F(selLabels_[i] + "_99fp10_SignalMass_nominal", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_99fp10_SignalMass_PUUp", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_99fp10_SignalMass_PUDown", 400, 0, 4000);
-        plots.AddHisto1F(selLabels_[i] + "_99fp10_SignalMass_FpixUp", 400, 0, 4000);
-        plots.AddHisto1F(selLabels_[i] + "_99fp10_SignalMass_FpixDown", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_99fp10_SignalMass_TriggerSFUp", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_99fp10_SignalMass_TriggerSFDown", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_99fp10_SignalMass_KUp", 400, 0, 4000);
@@ -611,8 +578,6 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto1F(selLabels_[i] + "_8fp9_SignalMass_nominal", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_8fp9_SignalMass_PUUp", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_8fp9_SignalMass_PUDown", 400, 0, 4000);
-        plots.AddHisto1F(selLabels_[i] + "_8fp9_SignalMass_FpixUp", 400, 0, 4000);
-        plots.AddHisto1F(selLabels_[i] + "_8fp9_SignalMass_FpixDown", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_8fp9_SignalMass_TriggerSFUp", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_8fp9_SignalMass_TriggerSFDown", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_8fp9_SignalMass_KUp", 400, 0, 4000);
@@ -686,12 +651,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nm1_event_Ih_StripOnly",      200,   0,    10);
     plots.AddHisto1F("Nm1_event_Ih_StripOnly_rescaled",      200,   0,    10);
 
-    plots.AddHisto1F("Pt_lastBin", 100, 0, 2000);
-    plots.AddHisto1F("HSCPtype_lastBin", 6, -0.5, 5.5);
-    plots.AddHisto1F("PFtype_lastBin", 250, 0, 250);
-
     plots.AddHisto1F("RecoPFMET", 400, 0, 2000);
-    plots.AddHisto1F("RecoPFMET___wCaloMETCut", 400, 0, 2000);
 
 
     plots.AddHisto2F("LastBinEventCutflow___GenPt_vs_trackPt", 100, 0, 2500, 100, 0, 2500);
@@ -706,8 +666,6 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
 
 
     // General plots
-    plots.AddHisto1F("Nosel_test", 200, 0, 2000);
-    plots.AddHisto1F("Nosel_test_2", 200, 0, 2000);
     plots.AddHisto1F("Nosel_PseudoCaloMET", 200, 0, 2000);
     plots.AddHisto1F("Nosel_PseudoCaloMET_rescaled", 200, 0, 2000);
     plots.AddHisto1F("Nosel_Ptpseudo", 300, 0, 3000);
@@ -744,6 +702,9 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("PostTriggerWsfdown_PUppiMETcut_P", 200, 0, 8000);
     plots.AddHisto1F("PostTriggerWsfdown_PseudoCaloMETcut_PUppiMETcut_P", 200, 0, 8000);
 
+    plots.AddHisto1F("PUppiMET__postTrigger", 100, 0, 2500);
+    plots.AddHisto1F("PUppiMET__postTrigger__SF", 100, 0, 2500);
+
     plots.AddHisto2F("Nosel_Fpix_vs_RunNumber", 5000, 378000, 388000, 20, 0, 1);
     plots.AddHisto2F("Nosel_Ih_vs_RunNumber", 5000, 378000, 388000, 200, 0, 10);
     plots.AddHisto2F("Nosel_Ih_oldCorr_vs_RunNumber", 5000, 378000, 388000, 200, 0, 10);
@@ -772,17 +733,9 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT", 100, 0, 2500, 100, 0, 2500);
     plots.AddHisto2F("trackETA_vs_trackPseudoTrackETA", 60, -3, +3, 60, -3, +3);
     plots.AddHisto2F("trackPHI_vs_trackPseudoTrackPHI", 64, -3.2, 3.2, 64, -3.2, 3.2);
-    plots.AddHisto2F("genPT_vs_trackPseudoTrackPT", 100, 0, 2500, 100, 0, 2500);
-    plots.AddHisto2F("genPT_vs_trackPT", 100, 0, 2500, 100, 0, 2500);
-    plots.AddHisto1F("PseudoTrack_m_gen_over_gen", 60, -3, +3);
-    plots.AddHisto2F("gen__vs__PseudoTrack_m_gen_over_gen", 100, 0, 2500, 60, -3, +3);
-    plots.AddHisto1F("Track_m_gen_over_gen", 60, -3, +3);
-    plots.AddHisto2F("gen__vs__Track_m_gen_over_gen", 100, 0, 2500, 60, -3, +3);
 
     plots.AddHisto1F("Nosel_GenHSCPcharged_Eta", 60, -3, +3);
     plots.AddHisto1F("HSCPsel_GenHSCPcharged_Eta", 60, -3, +3);
-
-    plots.AddHisto1F("Nosel_GenHSCPmatching__PFtype", 500, 0, 500);
 
     plots.AddHisto1F("GenHSCPmatching__PFType", 500, 0, 500);
     plots.AddHisto1F("GenHSCPmatching__HSCP_type", 6, -0.5, 5.5);
@@ -926,8 +879,6 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
     double PFMHTNoMu_down = sqrt(PFMHTNoMu_x_down*PFMHTNoMu_x_down + PFMHTNoMu_y_down*PFMHTNoMu_y_down);
     
     double PUppiMET_NoMu      = sqrt(PUppiMET_x*PUppiMET_x + PUppiMET_y*PUppiMET_y);
-    double PUppiMET_NoMu_up   = sqrt(PUppiMET_x_up*PUppiMET_x_up + PUppiMET_y_up*PUppiMET_y_up);
-    double PUppiMET_NoMu_down = sqrt(PUppiMET_x_down*PUppiMET_x_down + PUppiMET_y_down*PUppiMET_y_down);
 
     
     //----------------------------------
@@ -951,7 +902,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                     (dataset_.find("Stop") != std::string::npos) || 
                     (dataset_.find("Stau") != std::string::npos) ? true : false;
 
-    float AppliedWeight = 1., AppliedWeight_NOTrescaled = 1.;
+    float AppliedWeight = 1.;
     float AppliedWeight_SF_Up = 1., AppliedWeight_SF_Down = 1.;
     float AppliedWeight_PU_Up = 1., AppliedWeight_PU_Down = 1.;
 
@@ -1868,7 +1819,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
             if (trigger) {
                 vcp[s].FillHisto1F(selLabels_[s] + "_ndEdx_StripOnly", NOM_noL1[icand] - NbPixelHit_noL1[icand], AppliedWeight1Dpuppi);
                 vcp[s].FillHisto1F(selLabels_[s] + "_Ptpseudo", Pt_pseudo[icand], AppliedWeight1Dpuppi);
-                vcp[s].FillHisto1F(selLabels_[s] + "_Pt", Pt_pseudo[icand], AppliedWeight1Dpuppi);
+                vcp[s].FillHisto1F(selLabels_[s] + "_pT", Pt_pseudo[icand], AppliedWeight1Dpuppi);
                 vcp[s].FillHisto1F(selLabels_[s] + "_10000oP", 10000./(Pt_pseudo[icand]*cosh(Eta[icand])), AppliedWeight1Dpuppi);
                 vcp[s].FillHisto2F(selLabels_[s] + "_10000oP_vs_Eta", 10000./(Pt_pseudo[icand]*cosh(Eta[icand])), Eta[icand], AppliedWeight1Dpuppi);
                 vcp[s].FillHisto1F(selLabels_[s] + "_eta", Eta[icand], AppliedWeight1Dpuppi);
@@ -1952,177 +1903,172 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                 }
             }
 
-            if(UseFpixel) {
-                double overP = 10000./(Pt_pseudo[icand]*cosh(Eta[icand]));
-                double newWeight = AppliedWeight1Dpuppi;
-                double massForRegions = GetMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], K, C);
+            double overP = 10000./(Pt_pseudo[icand]*cosh(Eta[icand]));
+            double newWeight = AppliedWeight1Dpuppi;
+            double massForRegions = GetMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], K, C);
 
-                //vmrp_regionFpix_all[s].fill(Eta[i], NOM_noL1[i], overP, Pt_pseudo[i], Pterr[i], Ih_Strip[i], GStrip[i], massForRegions, *PV_npvsGood, Fpix[i], newWeight);
+            if(Pt_pseudo[icand] <= ptcut_ && trigger) {
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix4) ) vmrp_regionA_3f4[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix6) ) vmrp_regionA_3f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix8) ) vmrp_regionA_3f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix9) ) vmrp_regionA_3f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix4) && (Fpix[icand] <= fpix5) ) vmrp_regionA_4f5[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix5) && (Fpix[icand] <= fpix6) ) vmrp_regionA_5f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix7) ) vmrp_regionA_6f7[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix9) ) vmrp_regionA_6f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix7) && (Fpix[icand] <= fpix8) ) vmrp_regionA_7f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix9) ) vmrp_regionA_8f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix9) && (Fpix[icand] <= fpix10) ) vmrp_regionA_9f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix99) && (Fpix[icand] <= fpix10) ) vmrp_regionA_99f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix999) && (Fpix[icand] <= fpix10) ) vmrp_regionA_999f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix4) ) vmrp_regionB_3f4[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix6) ) vmrp_regionB_3f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix8) ) vmrp_regionB_3f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix9) ) vmrp_regionB_3f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix4) && (Fpix[icand] <= fpix5) ) vmrp_regionB_4f5[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix5) && (Fpix[icand] <= fpix6) ) vmrp_regionB_5f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix7) ) vmrp_regionB_6f7[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix9) ) vmrp_regionB_6f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix7) && (Fpix[icand] <= fpix8) ) vmrp_regionB_7f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix9) ) vmrp_regionB_8f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix10) ) vmrp_regionB_8f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix9) && (Fpix[icand] <= fpix10) ) vmrp_regionB_9f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix99) && (Fpix[icand] <= fpix10) ) vmrp_regionB_99f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix999) && (Fpix[icand] <= fpix10) ) vmrp_regionB_999f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+            }
+            else if (Pt_pseudo[icand] > ptcut_ && trigger) {
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix4) ) vmrp_regionC_3f4[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix6) ) vmrp_regionC_3f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix8) ) vmrp_regionC_3f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix9) ) vmrp_regionC_3f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix4) && (Fpix[icand] <= fpix5) ) vmrp_regionC_4f5[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix5) && (Fpix[icand] <= fpix6) ) vmrp_regionC_5f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix7) ) vmrp_regionC_6f7[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix9) ) vmrp_regionC_6f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix7) && (Fpix[icand] <= fpix8) ) vmrp_regionC_7f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix9) ) vmrp_regionC_8f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix4) ) vmrp_regionD_3f4[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix8) ) vmrp_regionD_3f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix4) && (Fpix[icand] <= fpix5) ) vmrp_regionD_4f5[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix5) && (Fpix[icand] <= fpix6) ) vmrp_regionD_5f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix7) ) vmrp_regionD_6f7[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix9) ) vmrp_regionD_6f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix7) && (Fpix[icand] <= fpix8) ) vmrp_regionD_7f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix9) ) vmrp_regionD_8f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix10) ) vmrp_regionD_8f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix9) && (Fpix[icand] <= fpix10) ) vmrp_regionD_9f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix99) && (Fpix[icand] <= fpix10) ) vmrp_regionD_99f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+                if( (Fpix[icand] > fpix999) && (Fpix[icand] <= fpix10) ) vmrp_regionD_999f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
 
-                if(Pt_pseudo[icand] <= ptcut_ && trigger) {
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix4) ) vmrp_regionA_3f4[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix6) ) vmrp_regionA_3f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix8) ) vmrp_regionA_3f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix9) ) vmrp_regionA_3f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix4) && (Fpix[icand] <= fpix5) ) vmrp_regionA_4f5[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix5) && (Fpix[icand] <= fpix6) ) vmrp_regionA_5f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix7) ) vmrp_regionA_6f7[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix9) ) vmrp_regionA_6f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix7) && (Fpix[icand] <= fpix8) ) vmrp_regionA_7f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix9) ) vmrp_regionA_8f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix9) && (Fpix[icand] <= fpix10) ) vmrp_regionA_9f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix99) && (Fpix[icand] <= fpix10) ) vmrp_regionA_99f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix999) && (Fpix[icand] <= fpix10) ) vmrp_regionA_999f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix4) ) vmrp_regionB_3f4[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix6) ) vmrp_regionB_3f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix8) ) vmrp_regionB_3f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix9) ) vmrp_regionB_3f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix4) && (Fpix[icand] <= fpix5) ) vmrp_regionB_4f5[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix5) && (Fpix[icand] <= fpix6) ) vmrp_regionB_5f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix7) ) vmrp_regionB_6f7[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix9) ) vmrp_regionB_6f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix7) && (Fpix[icand] <= fpix8) ) vmrp_regionB_7f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix9) ) vmrp_regionB_8f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix10) ) vmrp_regionB_8f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix9) && (Fpix[icand] <= fpix10) ) vmrp_regionB_9f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix99) && (Fpix[icand] <= fpix10) ) vmrp_regionB_99f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix999) && (Fpix[icand] <= fpix10) ) vmrp_regionB_999f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+
+                if (!isSignal && Fpix[icand] > fpix8 && massForRegions >= 1500) {
+                    // une seule fois avant la boucle
+                    cout << "Mass PFid MET Pt_pseudo Pt Eta NbPixHit NOM FOVH HP chi2 dz dxy PFiso TrkIso EoP ptErr/pt2 ptErr/pt Fpix Ih" << endl;
+                    cout << massForRegions << " "
+                            << PF_type[icand] << " "
+                            << RecoPUppiMET[0] << " " 
+                            << Pt_pseudo[icand] << " "
+                            << Pt[icand] << " "
+                            << Eta[icand] << " "
+                            << NbPixelHit_noL1[icand] << " "
+                            << NOM_noL1[icand] << " "
+                            << FracOfValidHit[icand] << " "
+                            << isHighPurityTrack[icand] << " "
+                            << normChi2[icand] << " "
+                            << dz[icand] << " "
+                            << dxy[icand] << " "
+                            << miniRelIsoAll[icand] << " "
+                            << IsoSumPt_dr03[icand] << " "
+                            << EoP[icand] << " "
+                            << ptOverptErrptErr[icand] << " "
+                            << ptOverptErr[icand] << " "
+                            << Fpix[icand] << " "
+                            << Ih_Strip[icand] << endl;
                 }
-                else if (Pt_pseudo[icand] > ptcut_ && trigger) {
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix4) ) vmrp_regionC_3f4[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix6) ) vmrp_regionC_3f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix8) ) vmrp_regionC_3f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix9) ) vmrp_regionC_3f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix4) && (Fpix[icand] <= fpix5) ) vmrp_regionC_4f5[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix5) && (Fpix[icand] <= fpix6) ) vmrp_regionC_5f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix7) ) vmrp_regionC_6f7[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix9) ) vmrp_regionC_6f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix7) && (Fpix[icand] <= fpix8) ) vmrp_regionC_7f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix9) ) vmrp_regionC_8f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix4) ) vmrp_regionD_3f4[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix3) && (Fpix[icand] <= fpix8) ) vmrp_regionD_3f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix4) && (Fpix[icand] <= fpix5) ) vmrp_regionD_4f5[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix5) && (Fpix[icand] <= fpix6) ) vmrp_regionD_5f6[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix7) ) vmrp_regionD_6f7[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix6) && (Fpix[icand] <= fpix9) ) vmrp_regionD_6f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix7) && (Fpix[icand] <= fpix8) ) vmrp_regionD_7f8[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix9) ) vmrp_regionD_8f9[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix8) && (Fpix[icand] <= fpix10) ) vmrp_regionD_8f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix9) && (Fpix[icand] <= fpix10) ) vmrp_regionD_9f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix99) && (Fpix[icand] <= fpix10) ) vmrp_regionD_99f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
-                    if( (Fpix[icand] > fpix999) && (Fpix[icand] <= fpix10) ) vmrp_regionD_999f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+            }
 
-
-                    if ((dataset_.find("Gluino") == std::string::npos || dataset_.find("Stop") != std::string::npos || dataset_.find("Stau") != std::string::npos) && Fpix[icand] > fpix8 && massForRegions >= 1500) {
-                        // une seule fois avant la boucle
-                        cout << "Mass PFid MET Pt_pseudo Pt Eta NbPixHit NOM FOVH HP chi2 dz dxy PFiso TrkIso EoP ptErr/pt2 ptErr/pt Fpix Ih" << endl;
-                        cout << massForRegions << " "
-                             << PF_type[icand] << " "
-                             << RecoPUppiMET[0] << " " 
-                             << Pt_pseudo[icand] << " "
-                             << Pt[icand] << " "
-                             << Eta[icand] << " "
-                             << NbPixelHit_noL1[icand] << " "
-                             << NOM_noL1[icand] << " "
-                             << FracOfValidHit[icand] << " "
-                             << isHighPurityTrack[icand] << " "
-                             << normChi2[icand] << " "
-                             << dz[icand] << " "
-                             << dxy[icand] << " "
-                             << miniRelIsoAll[icand] << " "
-                             << IsoSumPt_dr03[icand] << " "
-                             << EoP[icand] << " "
-                             << ptOverptErrptErr[icand] << " "
-                             << ptOverptErr[icand] << " "
-                             << Fpix[icand] << " "
-                             << Ih_Strip[icand] << endl;
-                    }
-                }
-
-                if (isMC) { 
-                    if (Pt_pseudo[icand] > ptcut_) {
-                        if (trigger && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) {
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_nominal", massForRegions, AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASdata", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024data"), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASbkg", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024bkg"), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASglupion", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024glupion"), AppliedWeight1Dpuppi);
-                            
-                                // PU Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_PUUp", massForRegions, AppliedWeight_PU_Up);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_PUDown", massForRegions, AppliedWeight_PU_Down);
-                            
-                                // SF Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_TriggerSFUp", massForRegions, AppliedWeight1Dpuppi_SF_Up);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_TriggerSFDown", massForRegions, AppliedWeight1Dpuppi_SF_Down);
-
-                                // Mass method Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_KUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K+0.02,C), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_KDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K-0.02,C), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_CUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C+0.04), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
-                        }
+            if (isMC) { 
+                if (Pt_pseudo[icand] > ptcut_) {
+                    if (trigger && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) {
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_nominal", massForRegions, AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASdata", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024data"), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASbkg", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024bkg"), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASglupion", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024glupion"), AppliedWeight1Dpuppi);
                         
-                            // Jet Up/Down
-                        if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
-                        if (trigger_varDOWN && isOkforPUppiMET_down && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_JetDown", massForRegions, AppliedWeight1Dpuppi);
+                            // PU Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_PUUp", massForRegions, AppliedWeight_PU_Up);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_PUDown", massForRegions, AppliedWeight_PU_Down);
+                        
+                            // SF Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_TriggerSFUp", massForRegions, AppliedWeight1Dpuppi_SF_Up);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_TriggerSFDown", massForRegions, AppliedWeight1Dpuppi_SF_Down);
+
+                            // Mass method Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_KUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K+0.02,C), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_KDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K-0.02,C), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_CUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C+0.04), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
                     }
-
-                    if (Pt_pseudo[icand] > ptcut_) {
-                        if (trigger && Fpix[icand] > fpix99 && Fpix[icand] <= fpix10) {
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_nominal", massForRegions, AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_ATLASbkg", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024data"), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_ATLASglupion", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024glupion"), AppliedWeight1Dpuppi);
-                            
-                                // PU Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_PUUp", massForRegions, AppliedWeight_PU_Up);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_PUDown", massForRegions, AppliedWeight_PU_Down);
-                            
-                                // SF Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_TriggerSFUp", massForRegions, AppliedWeight1Dpuppi_SF_Up);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_TriggerSFDown", massForRegions, AppliedWeight1Dpuppi_SF_Down);
-
-                                // Mass method Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_KUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K+0.02,C), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_KDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K-0.02,C), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_CUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C+0.04), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
-                        }
- 
-                            // Jet Up/Down
-                        if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix99 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
-                        if (trigger_varDOWN && isOkforPUppiMET_down && Fpix[icand] > fpix99 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_JetDown", massForRegions, AppliedWeight1Dpuppi);
-                    }
-                    if (Pt_pseudo[icand] > ptcut_) {
-                        if (trigger && Fpix[icand] > fpix8 && Fpix[icand] <= fpix9) {
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_nominal", massForRegions, AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_ATLASbkg", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024data"), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_ATLASglupion", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024glupion"), AppliedWeight1Dpuppi);
-                            
-                                // PU Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_PUUp", massForRegions, AppliedWeight_PU_Up);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_PUDown", massForRegions, AppliedWeight_PU_Down);
-                            
-                                // SF Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_TriggerSFUp", massForRegions, AppliedWeight1Dpuppi_SF_Up);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_TriggerSFDown", massForRegions, AppliedWeight1Dpuppi_SF_Down);
-
-                                // Mass method Up/Down
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_KUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K+0.02,C), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_KDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K-0.02,C), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_CUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C+0.04), AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
-                        }
- 
-                            // Jet Up/Down
-                        if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix8 && Fpix[icand] <= fpix9) vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
-                        if (trigger_varDOWN && isOkforPUppiMET_down && Fpix[icand] > fpix8 && Fpix[icand] <= fpix9) vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_JetDown", massForRegions, AppliedWeight1Dpuppi);
-                    }
-
-
-
+                    
+                        // Jet Up/Down
+                    if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
+                    if (trigger_varDOWN && isOkforPUppiMET_down && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_JetDown", massForRegions, AppliedWeight1Dpuppi);
                 }
+
+                if (Pt_pseudo[icand] > ptcut_) {
+                    if (trigger && Fpix[icand] > fpix99 && Fpix[icand] <= fpix10) {
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_nominal", massForRegions, AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_ATLASbkg", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024data"), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_ATLASglupion", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024glupion"), AppliedWeight1Dpuppi);
+                        
+                            // PU Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_PUUp", massForRegions, AppliedWeight_PU_Up);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_PUDown", massForRegions, AppliedWeight_PU_Down);
+                        
+                            // SF Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_TriggerSFUp", massForRegions, AppliedWeight1Dpuppi_SF_Up);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_TriggerSFDown", massForRegions, AppliedWeight1Dpuppi_SF_Down);
+
+                            // Mass method Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_KUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K+0.02,C), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_KDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K-0.02,C), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_CUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C+0.04), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
+                    }
+
+                        // Jet Up/Down
+                    if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix99 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
+                    if (trigger_varDOWN && isOkforPUppiMET_down && Fpix[icand] > fpix99 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_JetDown", massForRegions, AppliedWeight1Dpuppi);
+                }
+                if (Pt_pseudo[icand] > ptcut_) {
+                    if (trigger && Fpix[icand] > fpix8 && Fpix[icand] <= fpix9) {
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_nominal", massForRegions, AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_ATLASbkg", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024data"), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_ATLASglupion", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024glupion"), AppliedWeight1Dpuppi);
+                        
+                            // PU Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_PUUp", massForRegions, AppliedWeight_PU_Up);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_PUDown", massForRegions, AppliedWeight_PU_Down);
+                        
+                            // SF Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_TriggerSFUp", massForRegions, AppliedWeight1Dpuppi_SF_Up);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_TriggerSFDown", massForRegions, AppliedWeight1Dpuppi_SF_Down);
+
+                            // Mass method Up/Down
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_KUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K+0.02,C), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_KDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K-0.02,C), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_CUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C+0.04), AppliedWeight1Dpuppi);
+                        vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
+                    }
+
+                        // Jet Up/Down
+                    if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix8 && Fpix[icand] <= fpix9) vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
+                    if (trigger_varDOWN && isOkforPUppiMET_down && Fpix[icand] > fpix8 && Fpix[icand] <= fpix9) vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_JetDown", massForRegions, AppliedWeight1Dpuppi);
+                }
+
+
             }
         
         }
@@ -2367,7 +2313,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
 
             if (Ih_Strip[i_track] >= -20./1500*P[i_track] + 20) {
                 vcp_nosel[0].FillHisto2F("dEdX0stripVsP", P[i_track], Ih_Strip[i_track]);
-                if (fabs(Eta[i_track]) < 1) vcp_nosel[0].FillHisto2F("dEdX0stripVsP_eta1", P[i_track], Ih_Strip[i_track]);
+                if (fabs(Eta[i_track]) < 1) vcp_nosel[0].FillHisto2F("dEdX0stripVsP__large", P[i_track], Ih_Strip[i_track]);
             }
         }
 
@@ -2386,63 +2332,59 @@ void HSCPSelector::SlaveTerminate() {
     for(auto obj: vcp) obj.AddToList(fOutput);
     for(auto obj: vcp_nosel) obj.AddToList(fOutput);
 
-    if(UseFpixel){
+    for(auto obj: vmrp_regionA_3f4) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_3f6) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_3f8) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_3f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_4f5) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_5f6) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_6f7) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_6f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_7f8) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_8f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_9f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_99f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionA_999f10) obj.addToList(fOutput);
 
-        //for(auto obj: vmrp_regionFpix_all) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_3f4) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_3f6) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_3f8) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_3f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_4f5) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_5f6) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_6f7) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_6f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_7f8) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_8f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_8f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_9f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_99f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionB_999f10) obj.addToList(fOutput);
 
-        for(auto obj: vmrp_regionA_3f4) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_3f6) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_3f8) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_3f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_4f5) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_5f6) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_6f7) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_6f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_7f8) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_8f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_9f10) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_99f10) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionA_999f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_3f4) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_3f6) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_3f8) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_3f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_4f5) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_5f6) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_6f7) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_6f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_7f8) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionC_8f9) obj.addToList(fOutput);
 
-        for(auto obj: vmrp_regionB_3f4) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_3f6) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_3f8) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_3f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_4f5) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_5f6) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_6f7) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_6f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_7f8) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_8f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_8f10) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_9f10) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_99f10) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionB_999f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_3f4) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_3f8) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_4f5) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_5f6) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_6f7) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_6f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_7f8) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_8f9) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_8f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_9f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_99f10) obj.addToList(fOutput);
+    for(auto obj: vmrp_regionD_999f10) obj.addToList(fOutput);
 
-        for(auto obj: vmrp_regionC_3f4) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_3f6) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_3f8) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_3f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_4f5) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_5f6) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_6f7) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_6f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_7f8) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionC_8f9) obj.addToList(fOutput);
-
-        for(auto obj: vmrp_regionD_3f4) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_3f8) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_4f5) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_5f6) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_6f7) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_6f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_7f8) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_8f9) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_8f10) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_9f10) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_99f10) obj.addToList(fOutput);
-        for(auto obj: vmrp_regionD_999f10) obj.addToList(fOutput);
-    }
 }
 
 void HSCPSelector::Terminate() {

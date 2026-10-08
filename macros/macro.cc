@@ -1,560 +1,196 @@
-{
+// Driver of the analysis: reads the active line of cfg/configFile.txt, builds the TChain
+// of the requested dataset and runs HSCPSelector on it.
+//
+// Run from the macros/ directory:
+//    root -l -b -q macro.cc
+//
+// To add a dataset: add its name and the location of its ntuples in knownInputs() below,
+// and a line in cfg/configFile.txt.
+
+#include <TChain.h>
+#include <TROOT.h>
+#include <TSystem.h>
+
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
+namespace {
+
+const std::string kConfigFile = "../cfg/configFile.txt";               // relative to macros/
+const std::string kProdDir    = "/scratch/ui3_1/gcoulon/HSCP_prod/";   // ntuples and their file lists
+const char* const kTreeName   = "HSCPMiniAODAnalyzer/Events";
+
+// Location of the ntuples of one dataset, relative to kProdDir:
+// either a single ROOT file, or a text file listing one ROOT file per line.
+struct Input {
+    std::string path;
+    bool        isList;
+};
+typedef std::map<std::string, Input> InputMap;
+
+// Signal samples: the dataset <namePrefix><mass> is the ROOT file <filePrefix><mass><fileSuffix>
+void addSignal(InputMap& inputs, const std::string& namePrefix, const std::vector<int>& masses,
+               const std::string& filePrefix, const std::string& fileSuffix) {
+    for (int mass : masses) {
+        const std::string m = std::to_string(mass);
+        inputs[namePrefix + m] = {filePrefix + m + fileSuffix, false};
+    }
+}
+
+// Datasets split in several parts: <namePrefix><parts[i]> is the list <listPrefix><first + i>.txt
+void addLists(InputMap& inputs, const std::string& namePrefix, const std::vector<std::string>& parts,
+              const std::string& listPrefix, int first) {
+    for (size_t i = 0; i < parts.size(); ++i) {
+        inputs[namePrefix + parts[i]] = {listPrefix + std::to_string(first + static_cast<int>(i)) + ".txt", true};
+    }
+}
+
+// All the datasets that can be requested in cfg/configFile.txt, for a given code version.
+InputMap knownInputs(const std::string& version) {
+    InputMap inputs;
+
+    // ---------------- Signal ----------------
+    // Gluino: the pythia and madgraph productions are each tied to their own code versions
+    if (version == "V19p0") {
+        addSignal(inputs, "Gluino_Run3_MET_pythia_", {1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600},
+                  "SIGNAL/Gluino_Run3_pythia/Par-M-", "_Code" + version + "_merged.root");
+    }
+    const std::vector<std::string> madgraphVersions = {"V19p6", "V19p7", "V19p8", "V19p9", "V19p10", "V19p11", "V19p12"};
+    if (std::find(madgraphVersions.begin(), madgraphVersions.end(), version) != madgraphVersions.end()) {
+        addSignal(inputs, "Gluino_Run3_MET_madgraph_", {1100, 1200, 1300, 1400, 1600, 1800, 2000, 2200, 2400, 2600},
+                  "SIGNAL/V19p6/HSCP-Gluino_Par-M-", "_merged.root");
+    }
+    inputs["Gluino_Run2_MET_madgraph_2000"] = {"SIGNAL/Gluino_Run2_madgraph/Gluino_Run2_MET_madgraph_2000.root", false};
+
+    addSignal(inputs, "Stau_Run3_MET_", {247, 308, 432, 557, 651, 745, 871, 1029, 1218, 1409, 1599},
+              "SIGNAL/V20p0/HSCP-Pair-Stau_Par-M-", "_merged.root");
+    addSignal(inputs, "Stop_Run3_MET_madgraph_", {700, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600},
+              "SIGNAL/V21p0/HSCP-Stop_Par-M-", "_merged.root");
+
+    // ---------------- Data: one list per era ----------------
+    const std::vector<std::string> eras = {"C", "D", "E", "F", "G", "H", "I"};
+    addLists(inputs, "JetMET2024", eras, "JetMET2024/V12p31", 0);
+    addLists(inputs, "Mu2024",     eras, "Mu2024/V18p10",     0);
+    addLists(inputs, "MuonEG2024", eras, "MuonEG2024/V17p4",  0);
+
+    // ---------------- Simulated backgrounds ----------------
+    addLists(inputs, "QCD2024_mu_pt",
+             {"15to20", "20to30", "30to50", "50to80", "80to120", "120to170", "170to300",
+              "300to470", "470to600", "600to800", "800to1000", "1000"},
+             "BKG/QCD2024/V16p2", 1);
+    addLists(inputs, "Wjets2024_",
+             {"1J_pt40to100", "1J_pt100to200", "1J_pt200to400", "1J_pt400to600", "1J_pt600",
+              "2J_pt40to100", "2J_pt100to200", "2J_pt200to400", "2J_pt400to600", "2J_pt600"},
+             "BKG/Wjets2024/V14p60", 1);
+    inputs["WjetMuNu2024"]     = {"BKG/Wjets2024/V14p13.txt",      true};
+    inputs["TTbar2024"]        = {"BKG/TTbar2024/V15p9.txt",       true};
+    inputs["TTbarSemiLep2024"] = {"BKG/TTbar1L1Nu2024/V22p0.txt",  true};
+
+    // ---------------- Reduced samples for tests ----------------
+    inputs["TestMET2024"]   = {"JetMET2024/testJetMET.txt",        true};
+    inputs["TestMuon2024"]  = {"Mu2024/testMu2024.txt",            true};
+    inputs["TestMuonEG"]    = {"MuonEG2024/testMuonEG.txt",        true};
+    inputs["TestTTbar2024"] = {"BKG/TTbar2024/testTTbar.txt",      true};
+    inputs["TestWjets"]     = {"BKG/Wjets2024/testWjets.txt",      true};
+    inputs["TestWjetsMuNu"] = {"BKG/Wjets2024/testWjetsMuNu.txt",  true};
+
+    return inputs;
+}
+
+// Add the ntuples of one dataset to the chain. Returns false if its file list cannot be opened.
+bool fillChain(TChain& chain, const Input& input) {
+    const std::string path = kProdDir + input.path;
+    if (!input.isList) {
+        chain.AddFile(path.c_str());
+        return true;
+    }
+
+    std::ifstream list(path);
+    if (!list.is_open()) {
+        std::cerr << "Failed to open file: " << path << std::endl;
+        return false;
+    }
+    std::string line;
+    while (std::getline(list, line)) {
+        if (!line.empty()) chain.AddFile(line.c_str());
+    }
+    return true;
+}
+
+} // namespace
+
+
+void macro() {
     gSystem->Load("../libTools.so");
     ROOT::EnableImplicitMT(4);
 
-    ifstream ifile;
-    ifile.open("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/cfg/configFile.txt");
-    if(!ifile) std::cout << "Error when opening config file " <<  std::endl;
-    std::string line;
-    std::string dataset;
-    std::string version;
-    int etabins, ihbins, pbins, massbins, fpixbins;
-    double ptcut;
+    // ---------------- Configuration ----------------
+    // Lines starting with # are ignored. If several lines are active, the last one is used.
+    std::ifstream config(kConfigFile);
+    if (!config) {
+        std::cerr << "Error when opening config file " << kConfigFile << std::endl;
+        return;
+    }
+
+    double ptcut = 0.;
+    int etabins = 0, ihbins = 0, pbins = 0, massbins = 0, fpixbins = 0;
+    std::string dataset, version;
+
     std::cout << std::endl;
     std::cout << "   Reading config file: " << std::endl;
-    std::cout << endl;
+    std::cout << std::endl;
     std::cout << "pT cut - eta bins - ih bins - p bins - mass bins - FPIXbins -  type - version" << std::endl;
-    while(std::getline(ifile,line))
-    {
-        if(strncmp(line.c_str(),"#",1)==0) continue;
-        std::cout << line << std::endl;
+    std::string line;
+    while (std::getline(config, line)) {
+        if (line.empty() || line[0] == '#') continue;
+
+        double pt;
+        int eta, ih, p, mass, fpix;
+        std::string name, vers;
         std::stringstream ss(line);
-        ss >> ptcut >> etabins >> ihbins >> pbins >> massbins >> fpixbins >> dataset >> version;
+        if (!(ss >> pt >> eta >> ih >> p >> mass >> fpix >> name >> vers)) continue;   // blank or incomplete line
+
+        std::cout << line << std::endl;
+        ptcut = pt; etabins = eta; ihbins = ih; pbins = p; massbins = mass; fpixbins = fpix;
+        dataset = name; version = vers;
     }
-    ifile.close();
     std::cout << std::endl;
 
-    std::vector<std::string> QCDnames = {
-        "QCD2024_mu_pt15to20",
-        "QCD2024_mu_pt20to30",
-        "QCD2024_mu_pt30to50",
-        "QCD2024_mu_pt50to80",
-        "QCD2024_mu_pt80to120",
-        "QCD2024_mu_pt120to170",
-        "QCD2024_mu_pt170to300",
-        "QCD2024_mu_pt300to470",
-        "QCD2024_mu_pt470to600",
-        "QCD2024_mu_pt600to800",
-        "QCD2024_mu_pt800to1000",
-        "QCD2024_mu_pt1000"
-    };
-
-    std::vector<std::string> Wjetsnames = {
-        "Wjets2024_1J_pt40to100",
-        "Wjets2024_1J_pt100to200",
-        "Wjets2024_1J_pt200to400",
-        "Wjets2024_1J_pt400to600",
-        "Wjets2024_1J_pt600",
-        "Wjets2024_2J_pt40to100",
-        "Wjets2024_2J_pt100to200",
-        "Wjets2024_2J_pt200to400",
-        "Wjets2024_2J_pt400to600",
-        "Wjets2024_2J_pt600",
-    };
-
-    std::vector<std::string> JetMETnames = {
-        "JetMET2024C",
-        "JetMET2024D",
-        "JetMET2024E",
-        "JetMET2024F",
-        "JetMET2024G",
-        "JetMET2024H",
-        "JetMET2024I"
-    };
-
-    std::vector<std::string> Munames = {
-        "Mu2024C",
-        "Mu2024D",
-        "Mu2024E",
-        "Mu2024F",
-        "Mu2024G",
-        "Mu2024H",
-        "Mu2024I"
-    };
-
-    std::vector<std::string> MuonEGnames = {
-        "MuonEG2024C",
-        "MuonEG2024D",
-        "MuonEG2024E",
-        "MuonEG2024F",
-        "MuonEG2024G",
-        "MuonEG2024H",
-        "MuonEG2024I",
-    };
-
-    std::vector<TString> GluinonamesPythia = {
-        "Gluino_Run3_MET_pythia_1000",
-        "Gluino_Run3_MET_pythia_1200",
-        "Gluino_Run3_MET_pythia_1400",
-        "Gluino_Run3_MET_pythia_1600",
-        "Gluino_Run3_MET_pythia_1800",
-        "Gluino_Run3_MET_pythia_2000",
-        "Gluino_Run3_MET_pythia_2200",
-        "Gluino_Run3_MET_pythia_2400",
-        "Gluino_Run3_MET_pythia_2600"
-    };
-
-    std::vector<TString> GluinonamesMadgraph = {
-        "Gluino_Run3_MET_madgraph_1100",
-        "Gluino_Run3_MET_madgraph_1200",
-        "Gluino_Run3_MET_madgraph_1300",
-        "Gluino_Run3_MET_madgraph_1400",
-        "Gluino_Run3_MET_madgraph_1600",
-        "Gluino_Run3_MET_madgraph_1800",
-        "Gluino_Run3_MET_madgraph_2000",
-        "Gluino_Run3_MET_madgraph_2200",
-        "Gluino_Run3_MET_madgraph_2400",
-        "Gluino_Run3_MET_madgraph_2600"
-    };
-
-    std::vector<TString> StauRun3Name = {
-        "Stau_Run3_MET_247",
-        "Stau_Run3_MET_308",
-        "Stau_Run3_MET_432",
-        "Stau_Run3_MET_557",
-        "Stau_Run3_MET_651",
-        "Stau_Run3_MET_745",
-        "Stau_Run3_MET_871",
-        "Stau_Run3_MET_1029",
-        "Stau_Run3_MET_1218",
-        "Stau_Run3_MET_1409",
-        "Stau_Run3_MET_1599"
-    };
-
-    std::vector<TString> StauRun3File = {
-        "HSCP-Pair-Stau_Par-M-247_merged.root",
-        "HSCP-Pair-Stau_Par-M-308_merged.root",
-        "HSCP-Pair-Stau_Par-M-432_merged.root",
-        "HSCP-Pair-Stau_Par-M-557_merged.root",
-        "HSCP-Pair-Stau_Par-M-651_merged.root",
-        "HSCP-Pair-Stau_Par-M-745_merged.root",
-        "HSCP-Pair-Stau_Par-M-871_merged.root",
-        "HSCP-Pair-Stau_Par-M-1029_merged.root",
-        "HSCP-Pair-Stau_Par-M-1218_merged.root",
-        "HSCP-Pair-Stau_Par-M-1409_merged.root",
-        "HSCP-Pair-Stau_Par-M-1599_merged.root"
-    };
-
-
-    std::vector<TString> StopRun3Name = {
-        "Stop_Run3_MET_madgraph_700",
-        "Stop_Run3_MET_madgraph_800",
-        "Stop_Run3_MET_madgraph_900",
-        "Stop_Run3_MET_madgraph_1000",
-        "Stop_Run3_MET_madgraph_1200",
-        "Stop_Run3_MET_madgraph_1400",
-        "Stop_Run3_MET_madgraph_1600",
-        "Stop_Run3_MET_madgraph_1800",
-        "Stop_Run3_MET_madgraph_2000",
-        "Stop_Run3_MET_madgraph_2200",
-        "Stop_Run3_MET_madgraph_2400",
-        "Stop_Run3_MET_madgraph_2600"
-    };
-
-    std::vector<TString> StopRun3File = {
-        "HSCP-Stop_Par-M-700_merged.root",
-        "HSCP-Stop_Par-M-800_merged.root",
-        "HSCP-Stop_Par-M-900_merged.root",
-        "HSCP-Stop_Par-M-1000_merged.root",
-        "HSCP-Stop_Par-M-1200_merged.root",
-        "HSCP-Stop_Par-M-1400_merged.root",
-        "HSCP-Stop_Par-M-1600_merged.root",
-        "HSCP-Stop_Par-M-1800_merged.root",
-        "HSCP-Stop_Par-M-2000_merged.root",
-        "HSCP-Stop_Par-M-2200_merged.root",
-        "HSCP-Stop_Par-M-2400_merged.root",
-        "HSCP-Stop_Par-M-2600_merged.root",
-    };
-
-
-    std::vector<TString> GluinoInputnamesPythia = {
-        Form("Par-M-1000_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1200_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1400_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1600_Code%s_merged.root", version.c_str()),
-        Form("Par-M-1800_Code%s_merged.root", version.c_str()),
-        Form("Par-M-2000_Code%s_merged.root", version.c_str()),
-        Form("Par-M-2200_Code%s_merged.root", version.c_str()),
-        Form("Par-M-2400_Code%s_merged.root", version.c_str()),
-        Form("Par-M-2600_Code%s_merged.root", version.c_str())
-    };
-
-    std::vector<TString> GluinoInputnamesMadgraph = {
-        "HSCP-Gluino_Par-M-1100_merged.root",
-        "HSCP-Gluino_Par-M-1200_merged.root",
-        "HSCP-Gluino_Par-M-1300_merged.root",
-        "HSCP-Gluino_Par-M-1400_merged.root",
-        "HSCP-Gluino_Par-M-1600_merged.root",
-        "HSCP-Gluino_Par-M-1800_merged.root",
-        "HSCP-Gluino_Par-M-2000_merged.root",
-        "HSCP-Gluino_Par-M-2200_merged.root",
-        "HSCP-Gluino_Par-M-2400_merged.root",
-        "HSCP-Gluino_Par-M-2600_merged.root",
-    };
-
-
-
-    TChain* chain = nullptr;
-
-    if (dataset.find("Gluino_Run3") != std::string::npos) {
-        if (version=="V19p0") {
-            for (size_t i = 0; i < GluinonamesPythia.size(); ++i) {
-                if (dataset == GluinonamesPythia[i]) {
-                    chain = new TChain("HSCPMiniAODAnalyzer/Events");
-                    chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/Gluino_Run3_pythia/%s", GluinoInputnamesPythia[i].Data()));
-                }
-            }
-        }
-        else if (version=="V19p6" || version=="V19p7" || version=="V19p8" || version=="V19p9" || version=="V19p10" || version=="V19p11" || version=="V19p12") {
-            for (size_t i = 0; i < GluinonamesMadgraph.size(); ++i) {
-                if (dataset == GluinonamesMadgraph[i]) {
-                    chain = new TChain("HSCPMiniAODAnalyzer/Events");
-                    chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/V19p6/%s", GluinoInputnamesMadgraph[i].Data()));
-                }
-            }
-        }
-    }
-
-    else if (dataset.find("Gluino_Run2") != std::string::npos) {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/Gluino_Run2_madgraph/Gluino_Run2_MET_madgraph_2000.root");
-    }
-
-
-    else if (dataset.find("Stau_Run3") != std::string::npos) {
-        for (size_t i = 0; i < StauRun3Name.size(); ++i) {
-            if (dataset == StauRun3Name[i]) {
-                chain = new TChain("HSCPMiniAODAnalyzer/Events");
-                chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/V20p0/%s", StauRun3File[i].Data()));
-            }
-        }
-    }
-
-    else if (dataset.find("Stop_Run3") != std::string::npos) {
-        for (size_t i = 0; i < StopRun3Name.size(); ++i) {
-            if (dataset == StopRun3Name[i]) {
-                chain = new TChain("HSCPMiniAODAnalyzer/Events");
-                chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/V21p0/%s", StopRun3File[i].Data()));
-            }
-        }
-    }
-
-    
-
-
-    else if (dataset.find("JetMET2024") != std::string::npos) {
-        for (size_t i = 0; i < JetMETnames.size(); ++i) {
-            if (dataset == JetMETnames[i]) {
-
-                chain = new TChain("HSCPMiniAODAnalyzer/Events");
-
-                std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/JetMET2024/";
-                std::string fileName = pathData + "V12p31" + std::to_string(i) + ".txt";
-
-                std::ifstream file(fileName);
-                if (!file.is_open()) {
-                    std::cerr << "Failed to open file: " << fileName << std::endl;
-                    break;
-                }
-
-                std::string line;
-                while (std::getline(file, line)) {
-                    if (!line.empty()) chain->AddFile(line.c_str());
-                }
-
-                file.close();
-                break;
-            }
-        }
-    }
-
-    else if (dataset.find("Mu2024") != std::string::npos) {
-        for (size_t i = 0; i < Munames.size(); ++i) {
-            if (dataset == Munames[i]) {
-
-                chain = new TChain("HSCPMiniAODAnalyzer/Events");
-
-                std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/Mu2024/";
-                std::string fileName = pathData + "V18p10" + std::to_string(i) + ".txt";
-
-                std::ifstream file(fileName);
-                if (!file.is_open()) {
-                    std::cerr << "Failed to open file: " << fileName << std::endl;
-                    break;
-                }
-
-                std::string line;
-                while (std::getline(file, line)) {
-                    if (!line.empty()) chain->AddFile(line.c_str());
-                }
-
-                file.close();
-                break;
-            }
-        }
-    }
-
-    else if (dataset.find("MuonEG2024") != std::string::npos) {
-        for (size_t i = 0; i < MuonEGnames.size(); ++i) {
-            if (dataset == MuonEGnames[i]) {
-
-                chain = new TChain("HSCPMiniAODAnalyzer/Events");
-
-                std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/MuonEG2024/";
-                std::string fileName = pathData + "V17p4" + std::to_string(i) + ".txt";
-
-                std::ifstream file(fileName);
-                if (!file.is_open()) {
-                    std::cerr << "Failed to open file: " << fileName << std::endl;
-                    break;
-                }
-
-                std::string line;
-                while (std::getline(file, line)) {
-                    if (!line.empty()) chain->AddFile(line.c_str());
-                }
-
-                file.close();
-                break;
-            }
-        }
-    }
-
-    else if (dataset == "TestMuonEG") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/MuonEG2024/";
-        std::string fileName = pathData + "testMuonEG.txt";
-
-        std::ifstream file(fileName);
-        if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
-
-        std::string line;
-        while (std::getline(file, line)) {
-            if (!line.empty()) chain->AddFile(line.c_str());
-        }
-
-        file.close();
-    }
-
-    else if (dataset == "TestMuon2024") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-            std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/Mu2024/";
-            std::string fileName = pathData + "testMu2024.txt";
-
-            std::ifstream file(fileName);
-            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
-
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty()) chain->AddFile(line.c_str());
-            }
-
-            file.close();
-    }
-
-    else if (dataset == "TestMET2024") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-            std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/JetMET2024/";
-            std::string fileName = pathData + "testJetMET.txt";
-
-            std::ifstream file(fileName);
-            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
-
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty()) chain->AddFile(line.c_str());
-            }
-
-            file.close();
-    }
-    else if (dataset == "TestTTbar2024") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-            std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/TTbar2024/";
-            std::string fileName = pathData + "testTTbar.txt";
-
-            std::ifstream file(fileName);
-            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
-
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty()) chain->AddFile(line.c_str());
-            }
-
-            file.close();
-    }
-    else if (dataset == "TestWjets") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-            std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/Wjets2024/";
-            std::string fileName = pathData + "testWjets.txt";
-
-            std::ifstream file(fileName);
-            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
-
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty()) chain->AddFile(line.c_str());
-            }
-
-            file.close();
-    }
-    else if (dataset == "TestWjetsMuNu") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-            std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/Wjets2024/";
-            std::string fileName = pathData + "testWjetsMuNu.txt";
-
-            std::ifstream file(fileName);
-            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
-
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty()) chain->AddFile(line.c_str());
-            }
-
-            file.close();
-    }
-
-
-    else if(dataset == "TTbar2024") {
-       chain = new TChain("HSCPMiniAODAnalyzer/Events");
-       std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/TTbar2024/";
-       std::string fileNames[] = { (pathData + "V15p9.txt").c_str()};
-       
-       for (const std::string& fileName : fileNames) {
-            std::ifstream file(fileName);
-            if (!file.is_open()) {
-                std::cerr << "Failed to open file: " << fileName << std::endl;
-                continue;
-            }
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty() && line.back() == '\n') {
-                   line.pop_back();
-                }
-                chain->AddFile(line.c_str());
-            }
-            file.close();
-        }
-    }
-
-    else if(dataset == "TTbarSemiLep2024") {
-       chain = new TChain("HSCPMiniAODAnalyzer/Events");
-       std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/TTbar1L1Nu2024/";
-       std::string fileNames[] = { (pathData + "V22p0.txt").c_str()};
-       
-       for (const std::string& fileName : fileNames) {
-            std::ifstream file(fileName);
-            if (!file.is_open()) {
-                std::cerr << "Failed to open file: " << fileName << std::endl;
-                continue;
-            }
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty() && line.back() == '\n') {
-                   line.pop_back();
-                }
-                chain->AddFile(line.c_str());
-            }
-            file.close();
-        }
-    }
-
-    // else if in the dataset names there is "QCD2024"
-    else if (dataset.find("QCD2024") != std::string::npos) {
-        for (size_t i = 0; i < QCDnames.size(); ++i) {
-            if (dataset == QCDnames[i]) {
-
-                chain = new TChain("HSCPMiniAODAnalyzer/Events");
-
-                std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/QCD2024/";
-                std::string fileName = pathData + "V16p2" + std::to_string(i + 1) + ".txt";
-
-                std::ifstream file(fileName);
-                if (!file.is_open()) {
-                    std::cerr << "Failed to open file: " << fileName << std::endl;
-                    break;
-                }
-
-                std::string line;
-                while (std::getline(file, line)) {
-                    if (!line.empty()) chain->AddFile(line.c_str());
-                }
-
-                file.close();
-                break;
-            }
-        }
-    }
-
-    else if (dataset.find("Wjets2024") != std::string::npos) {
-        for (size_t i = 0; i < Wjetsnames.size(); ++i) {
-            if (dataset == Wjetsnames[i]) {
-
-                chain = new TChain("HSCPMiniAODAnalyzer/Events");
-
-                std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/Wjets2024/";
-                std::string fileName = pathData + "V14p60" + std::to_string(i + 1) + ".txt";
-
-                std::ifstream file(fileName);
-                if (!file.is_open()) {
-                    std::cerr << "Failed to open file: " << fileName << std::endl;
-                    break;
-                }
-
-                std::string line;
-                while (std::getline(file, line)) {
-                    if (!line.empty()) chain->AddFile(line.c_str());
-                }
-
-                file.close();
-                break;
-            }
-        }
-    }
-
-    else if (dataset == "WjetMuNu2024") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-            std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/Wjets2024/";
-            std::string fileName = pathData + "V14p13.txt";
-
-            std::ifstream file(fileName);
-            if (!file.is_open())  std::cerr << "Failed to open file: " << fileName << std::endl;
-
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty()) chain->AddFile(line.c_str());
-            }
-
-            file.close();
-    }
-
-
-
-    else {
-        std::cout << "Dataset not recognized. Exiting." << std::endl;
+    if (dataset.empty()) {
+        std::cerr << "No active line in " << kConfigFile << ". Exiting." << std::endl;
         return;
     }
 
-
-    if (!chain) {
-        std::cerr << "ERROR: chain is null before processing!" << std::endl;
+    // ---------------- Input ntuples ----------------
+    const InputMap inputs = knownInputs(version);
+    const InputMap::const_iterator input = inputs.find(dataset);
+    if (input == inputs.end()) {
+        std::cerr << "Dataset " << dataset << " not recognized for version " << version << ". Exiting." << std::endl;
         return;
     }
 
+    TChain chain(kTreeName);
+    if (!fillChain(chain, input->second)) return;
 
-    std::string binning = std::to_string(ptcut) + "," + std::to_string(etabins) + "," + std::to_string(ihbins) + ","
-                        + std::to_string(pbins) + "," + std::to_string(massbins) + "," + std::to_string(fpixbins) + ","
-                        + dataset + "," + version;
+    // ---------------- Run the selector ----------------
+    // Option string decoded in HSCPSelector::Begin and SlaveBegin
+    const std::string binning = std::to_string(ptcut) + "," + std::to_string(etabins) + "," + std::to_string(ihbins) + ","
+                              + std::to_string(pbins) + "," + std::to_string(massbins) + "," + std::to_string(fpixbins) + ","
+                              + dataset + "," + version;
 
     std::cout << "Running over dataset : " << dataset << std::endl;
-    std::cout << "        code version : " << version << std::endl; 
+    std::cout << "        code version : " << version << std::endl;
     std::cout << "Defining regions A,B,C,D with pT cut = " << ptcut << std::endl;
 
     std::cout << "Implicit MT enabled: " << ROOT::IsImplicitMTEnabled() << std::endl;
 
-    chain->SetCacheSize(200 * 1024 * 1024); // 200 MB
-    chain->AddBranchToCache("*", true);
-    
-    chain->Process("HSCPSelector.C+",binning.c_str());
+    chain.SetCacheSize(200 * 1024 * 1024); // 200 MB
+    chain.AddBranchToCache("*", true);
 
-    delete chain;
+    chain.Process("HSCPSelector.C+", binning.c_str());
 }

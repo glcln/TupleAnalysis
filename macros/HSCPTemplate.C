@@ -9,11 +9,7 @@
 
 //K and C values are set based on the config file dataset name (see below)
 float K(2.54), C(3.14); 
-
 float K_bckg2024(2.83894), C_bckg2024(3.01756); //MC background 2024
-
-float K_data2018(2.55), C_data2018(3.14); //Data 2018
-float K_data2017(2.54), C_data2017(3.14); //Data 2017
 float K_data2024(2.8202), C_data2024(2.9784); //Data 2024
 
 // glu pion:
@@ -78,6 +74,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     }
     if (dataset_.find("Gluino") != std::string::npos ||
         dataset_.find("Stau") != std::string::npos ||
+        dataset_.find("Stop") != std::string::npos ||
         dataset_.find("QCD") != std::string::npos || 
         dataset_.find("Wjets") != std::string::npos ||
         dataset_.find("WjetMuNu") != std::string::npos ||
@@ -98,7 +95,6 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         cout << "Initialisation of the regions for selection: " << selLabels_[i] << endl;
 
         //Create names for each plot in each regions (slices in Fpixels)
-        std::string label_FpixAll = regFpixAll + "_" + selLabels_[i]; 
         
         std::string label_FpixA_3f4 = regFpixA_3f4 + "_" + selLabels_[i]; 
         std::string label_FpixA_3f6 = regFpixA_3f6 + "_" + selLabels_[i]; 
@@ -154,8 +150,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         std::string label_FpixD_999f10 = regFpixD_999f10 + "_" + selLabels_[i]; 
 
 
-        //Create objects RegionMassPlot using the names defined above 
-        RegionMassPlot regAll(label_FpixAll.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
+        //Create objects RegionMassPlot using the names defined above
 
         RegionMassPlot regA_3f4(label_FpixA_3f4.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C);
         RegionMassPlot regA_3f6(label_FpixA_3f6.c_str(), etabins_, ihbins_, pbins_, massbins_, fpixbins_, C); 
@@ -1836,7 +1831,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                 if( (Fpix[icand] > fpix999) && (Fpix[icand] <= fpix10) ) vmrp_regionD_999f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
 
 
-                if ((dataset_.find("Gluino") == std::string::npos || dataset_.find("Stop") != std::string::npos || dataset_.find("Stau") != std::string::npos) && Fpix[icand] > fpix8 && massForRegions >= 1500) {
+                if (!isSignal && Fpix[icand] > fpix8 && massForRegions >= 1500) {
                     // une seule fois avant la boucle
                     cout << "Mass PFid MET Pt_pseudo Pt Eta NbPixHit NOM FOVH HP chi2 dz dxy PFiso TrkIso EoP ptErr/pt2 ptErr/pt Fpix Ih" << endl;
                     cout << massForRegions << " "

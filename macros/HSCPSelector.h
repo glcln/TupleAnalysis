@@ -1,7 +1,6 @@
 #ifndef HSCPSelector_h
 #define HSCPSelector_h
 
-#include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
 #include <TSelector.h>
@@ -10,7 +9,6 @@
 #include <TTreeReaderArray.h>
 #include <TEfficiency.h>
 #include <TLorentzVector.h>
-#include <map>
 #include <vector>
 #include <iostream>
 #include <limits>
@@ -27,10 +25,8 @@ using namespace std;
 
 class HSCPSelector : public TSelector {
 public :
-   TTreeReader     fReader;  //!the tree reader
-   TTree          *fChain = 0;   //!pointer to the analyzed TTree or TChain
+   TTreeReader fReader;  //!the tree reader
 
-   TTree *outputTree = 0;
 
    //ADD-HSCP-SELECTION
 bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta2p4(int hscpIndex);
@@ -66,16 +62,11 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    double ptcut_;
    std::string dataset_;
    std::string oFile_;
-   std::string version_;
    std::vector<bool (HSCPSelector::*)(int)> selections_;
    std::vector<string> selLabels_;
    std::vector<CPlots> vcp;
    std::vector<CPlots> vcp_nosel;
 
-   std::vector<unsigned int> OnlyIn_AOD;
-   std::vector<unsigned int> OnlyIn_MiniAOD;
-   bool isAOD = false;
-   bool isMiniAOD = false;
 
    // DATA-MC SF for the signal (derived from the trigg. eff.)
    std::vector <float> SF2D_PseudoMETlovalue, SF2D_PseudoMEThivalue, SF2D_PUppiMETlovalue, SF2D_PUppiMEThivalue, SF2D_Down, SF2D, SF2D_Up;
@@ -108,11 +99,8 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    TTreeReaderArray<float> HLTPFMET = {fReader, "HLTPFMET"};
 
    // EVENT INFO
-   TTreeReaderValue<ULong64_t> Event = {fReader, "event"};
    TTreeReaderValue<uint32_t> Run = {fReader, "run"};
-   TTreeReaderValue<uint32_t> Lumi = {fReader, "luminosityBlock"};
    TTreeReaderValue<uint32_t> PV_npvsGood = {fReader, "PV_npvsGood"};
-   TTreeReaderValue<int> trueNPV = {fReader, "trueNPV"};
    TTreeReaderValue<uint32_t> HSCP_n = {fReader, "HSCP_n"};
    TTreeReaderValue<double> weightPU = {fReader, "weightPU"};
 
@@ -123,21 +111,7 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    // JETS
    TTreeReaderArray<double> Jet_px = {fReader, "puppijet_px"};
    TTreeReaderArray<double> Jet_py = {fReader, "puppijet_py"};
-   TTreeReaderArray<double> Jet_pz = {fReader, "puppijet_pz"};
    TTreeReaderArray<double> Jet_pt = {fReader, "puppijet_pt"};
-   TTreeReaderArray<double> Jet_eta = {fReader, "puppijet_eta"};
-   TTreeReaderArray<double> Jet_phi = {fReader, "puppijet_phi"};
-   TTreeReaderArray<double> Jet_energy = {fReader, "puppijet_energy"};
-   TTreeReaderArray<double> Jet_energy_raw = {fReader, "puppijet_energy_raw"};
-   TTreeReaderArray<double> Jet_mass = {fReader, "puppijet_mass"};
-   TTreeReaderArray<float> Jet_chf = {fReader, "puppijet_chf"};
-   TTreeReaderArray<float> Jet_nhf = {fReader, "puppijet_nhf"};
-   TTreeReaderArray<float> Jet_nemf = {fReader, "puppijet_nemf"};
-   TTreeReaderArray<float> Jet_muf = {fReader, "puppijet_muf"};
-   TTreeReaderArray<float> Jet_cemf = {fReader, "puppijet_cemf"};
-   TTreeReaderArray<int> Jet_chm = {fReader, "puppijet_chm"};
-   TTreeReaderArray<int> Jet_neutralMultiplicity = {fReader, "puppijet_neutralMultiplicity"};
-   TTreeReaderArray<int> Jet_chargedMultiplicity = {fReader, "puppijet_chargedMultiplicity"};
    TTreeReaderArray<bool> Jet_passJetID = {fReader, "puppijet_passJetID"};
    TTreeReaderArray<bool> Jet_IsRejectedbyJVM = {fReader, "puppijet_IsRejectedbyJVM"}; // true=rejected
    TTreeReaderArray<double> Jet_jesUncTotal = {fReader, "puppijet_jesUncTotal"};
@@ -147,7 +121,6 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    TTreeReaderArray<int> PF_type = {fReader, "IsoTrack_pfType"};
    TTreeReaderArray<int> HSCP_type = {fReader, "HSCP_type"};
    TTreeReaderArray<bool> HSCP_hasTrack = {fReader, "HSCP_hasTrack"};
-   TTreeReaderArray<bool> HSCP_hasDeDx = {fReader, "HSCP_hasDeDx"};
    TTreeReaderArray<double> P = {fReader, "IsoTrack_p"};
    TTreeReaderArray<double> Pt = {fReader, "IsoTrack_pt"};
    TTreeReaderArray<double> Pterr = {fReader, "IsoTrack_ptError"};
@@ -171,15 +144,12 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    
    TTreeReaderArray<float> Fpix = {fReader, "DeDx_FiPixelNoL1"};
    TTreeReaderArray<float> GStrip = {fReader, "DeDx_GiStrip"};
-   TTreeReaderArray<float> GStrip_oldCorr = {fReader, "DeDx_GiStrip_oldCorr"};
 
    TTreeReaderArray<float> miniRelIsoAll = {fReader, "IsoTrack_pfMiniRelIsoAll"};
-   TTreeReaderArray<float> miniRelIsoChg = {fReader, "IsoTrack_pfMiniRelIsoChg"};
    TTreeReaderArray<float> IsoSumPt_dr03 = {fReader, "IsoTrack_IsoSumPt_dr03"};
    
    TTreeReaderArray<bool> Flag_allMETFilters = {fReader, "Flag_allMETFilters"};
    TTreeReaderArray<double> RecoPFMET = {fReader, "RecoPFMET"};
-   TTreeReaderArray<double> RecoPFMET_phi = {fReader, "RecoPFMET_phi"};
    TTreeReaderArray<double> PseudoCaloMET = {fReader, "PseudoMET_viaCaloJets"};
    TTreeReaderArray<double> RecoPUppiMET = {fReader, "RecoPuppiMET"};
    TTreeReaderArray<double> RecoPUppiMET_phi = {fReader, "RecoPuppiMET_phi"};
@@ -194,7 +164,6 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    TTreeReaderArray<double> GenPart_pt = {fReader, "GenPart_pt"};
    TTreeReaderArray<double> GenPart_eta = {fReader, "GenPart_eta"};
    TTreeReaderArray<double> GenPart_phi = {fReader, "GenPart_phi"};
-   TTreeReaderArray<double> GenPart_mass = {fReader, "GenPart_mass"};
    TTreeReaderArray<double> GenPart_beta = {fReader, "GenPart_beta"};
    TTreeReaderArray<int> GenPart_pdgId = {fReader, "GenPart_pdgId"};
    TTreeReaderArray<int> GenPart_charge = {fReader, "GenPart_charge"};
@@ -206,10 +175,7 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    TTreeReaderArray<double> muon_pt = {fReader, "muon_pt"};
    TTreeReaderArray<double> muon_eta = {fReader, "muon_eta"};
    TTreeReaderArray<double> muon_phi = {fReader, "muon_phi"};
-   TTreeReaderArray<bool> muon_isLoose = {fReader, "muon_isLoose"};
-   TTreeReaderArray<bool> muon_isMedium = {fReader, "muon_isMedium"};
    TTreeReaderArray<bool> muon_isTight = {fReader, "muon_isTight"};
-   TTreeReaderArray<float> muon_trackIso_dr03 = {fReader, "muon_trackIso_dr03"};
    TTreeReaderArray<float> muon_pfMiniRelIsoAll = {fReader, "muon_pfMiniRelIsoAll"};
    TTreeReaderArray<bool> muon_isPFMuon = {fReader, "muon_isPFMuon"};
 
@@ -218,21 +184,11 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    TTreeReaderArray<double> electron_pt = {fReader, "electron_pt"};
    TTreeReaderArray<double> electron_eta = {fReader, "electron_eta"};
    TTreeReaderArray<double> electron_phi = {fReader, "electron_phi"};
-   TTreeReaderArray<float> electron_isLoose = {fReader, "electron_isLoose"};
-   TTreeReaderArray<float> electron_isMedium = {fReader, "electron_isMedium"};
    TTreeReaderArray<float> electron_isTight = {fReader, "electron_isTight"};
-   TTreeReaderArray<float> electron_trackIso_dr04 = {fReader, "electron_trackIso_dr04"};
    TTreeReaderArray<float> electron_pfMiniRelIsoAll = {fReader, "electron_pfMiniRelIsoAll"};
 
-   // only in AOD : 
-   //TTreeReaderArray<double> RecoCaloMET_phi = {fReader, "RecoCaloMET_phi"};
-   //TTreeReaderArray<double> RecoCaloMET = {fReader, "RecoCaloMET"};
 
-
-   // BACKGROUND ESTIMATION METHOD: HISTOGRAMS
-   bool UseFpixel;
-   
-   float fpix0 = 0.0;
+   // BACKGROUND ESTIMATION METHOD: HISTOGRAMS   
    float fpix3 = 0.3;
    float fpix4 = 0.4;
    float fpix5 = 0.5;
@@ -298,8 +254,6 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    std::string regFpixD_99f10 = "_regionD_99fp10";
    std::string regFpixD_999f10 = "_regionD_999fp10";
 
-  
-   std::vector<RegionMassPlot> vmrp_regionFpix_all;
 
    std::vector<RegionMassPlot> vmrp_regionA_3f4;
    std::vector<RegionMassPlot> vmrp_regionA_3f6;
@@ -360,17 +314,13 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
       fout = 0;
    }
 
-   virtual ~HSCPSelector() 
-   {
-      if(!fout) delete fout;
-   }
+   virtual ~HSCPSelector(){}
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
    virtual void    Init(TTree *tree);
    virtual Bool_t  Notify();
    virtual Bool_t  Process(Long64_t entry);
-   virtual Int_t   GetEntry(Long64_t entry, Int_t getall = 0) { return fChain ? fChain->GetTree()->GetEntry(entry, getall) : 0; }
    virtual void    SetOption(const char *option) { fOption = option; }
    virtual void    SetObject(TObject *obj) { fObject = obj; }
    virtual void    SetInputList(TList *input) { fInput = input; }
