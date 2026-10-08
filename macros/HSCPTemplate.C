@@ -32,9 +32,9 @@ void HSCPSelector::Begin(TTree *tree) {
 
 
     // Fill the SF;    
-    loadSF2D("TriggEff/SF_orMETtrg_PUppiMET_VS_PseudoMET__TriggerEffCalib_table_plain.txt", SF2D_PseudoMETlovalue, SF2D_PseudoMEThivalue, SF2D_PUppiMETlovalue, SF2D_PUppiMEThivalue, SF2D_Down, SF2D, SF2D_Up);
-    loadSF1D("TriggEff/SF_PseudoMET.txt", SF1D_PseudoMETvalue, SF1Dpseudo_Down, SF1Dpseudo, SF1Dpseudo_Up);
-    loadSF1D("TriggEff/SF_PUppiMET.txt", SF1D_PUppiMETvalue, SF1Dpuppi_Down, SF1Dpuppi, SF1Dpuppi_Up);
+    loadSF2D("../inc/SF_orMETtrg_PUppiMET_VS_PseudoMET__TriggerEffCalib_table_plain.txt", SF2D_PseudoMETlovalue, SF2D_PseudoMEThivalue, SF2D_PUppiMETlovalue, SF2D_PUppiMEThivalue, SF2D_Down, SF2D, SF2D_Up);
+    loadSF1D("../inc/SF_PseudoMET.txt", SF1D_PseudoMETvalue, SF1Dpseudo_Down, SF1Dpseudo, SF1Dpseudo_Up);
+    loadSF1D("../inc/SF_PUppiMET.txt", SF1D_PUppiMETvalue, SF1Dpuppi_Down, SF1Dpuppi, SF1Dpuppi_Up);
 
 
     //FILL-SELECTION-VECTOR
