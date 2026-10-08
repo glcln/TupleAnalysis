@@ -22,6 +22,10 @@ float K_data2018(2.55), C_data2018(3.14); //Data 2018
 float K_data2017(2.54), C_data2017(3.14); //Data 2017
 float K_data2024(2.8202), C_data2024(2.9784); //Data 2024
 
+// glu pion:
+//float K_bckg2024(2.07844), C_bckg2024(2.9784);
+//float K_data2024(2.07844), C_data2024(2.9784);
+
 
 //ADD-SELECTION-METHODS
 bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta2p4(int i){
@@ -48,20 +52,76 @@ bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4(int i){
    return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > C) ));
 }
 
-bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p4(int i){
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta2p4(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
       return false;
    }
-   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1.2 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > C) ));
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.1) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > C) ));
 }
 
-bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2(int i){
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta1(int i){
    if (i<0 || i>(int)Pt.GetSize()) {
       cout << i << endl;
       return false;
    }
-   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1.2 && std::abs(Eta[i]) < 2.2) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > C) ));
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) < 1) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.1) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > C) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta1_2p4(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.1) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 1) && (Ih_Strip[i] > C) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta2p4(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 0.5) && (Ih_Strip[i] > C) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta1(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) < 1) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 0.5) && (Ih_Strip[i] > C) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta1_2p4(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.3) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 0.5) && (Ih_Strip[i] > C) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta2p4(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.1) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 0.5) && (Ih_Strip[i] > C) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) < 1) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.1) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 0.5) && (Ih_Strip[i] > C) ));
+}
+
+bool HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2p4(int i){
+   if (i<0 || i>(int)Pt.GetSize()) {
+      cout << i << endl;
+      return false;
+   }
+   return (( (Flag_allMETFilters[0] == true) && (RecoPUppiMET[0] > 150.) && (Pt[i] > 50.0) && (Pt_pseudo[i] > 50.0) && (std::abs(Eta[i]) >= 1 && std::abs(Eta[i]) < 2.4) && (NbPixelHit_noL1[i] >= 2) && (FracOfValidHit[i] > 0.8) && (NOM_noL1[i] >= 10) && (isHighPurityTrack[i] == true) && (normChi2[i] < 5.0) && (std::abs(dz[i]) < 0.1) && (std::abs(dxy[i]) < 0.02) && (miniRelIsoAll[i] < 0.02) && (EoP[i] < 0.1) && (IsoSumPt_dr03[i] < 15) && (ptOverptErrptErr[i] < 0.0008) && (Fpix[i] > 0.3) && (ptOverptErr[i] < 0.5) && (Ih_Strip[i] > C) ));
 }
 
 
@@ -105,11 +165,32 @@ selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1");
 selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4);
 selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1_2p4");
 
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p4);
-selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1p2_2p4");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta2p4);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_EoP_0p1_Eta2p4");
 
-selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2);
-selLabels_.push_back("METanalysis_TestPUppiMETCut_Eta1p2_2p2");
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta1);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_EoP_0p1_Eta1");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta1_2p4);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_EoP_0p1_Eta1_2p4");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta2p4);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta2p4");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta1);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta1");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta1_2p4);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta1_2p4");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta2p4);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta2p4");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1");
+
+selections_.push_back(&HSCPSelector::PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2p4);
+selLabels_.push_back("METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2p4");
 
 
     std::cout << std::endl;
@@ -384,7 +465,12 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto2F(selLabels_[i] + "_if___orMET3a4trg3___PUppiMETNoMu_VS_PseudoMET", 100, 0, 2500, 100, 0, 2500);
         plots.AddHisto2F(selLabels_[i] + "_if___orMET3a4trg4___PUppiMETNoMu_VS_PseudoMET", 100, 0, 2500, 100, 0, 2500);
 
+
+        plots.AddHisto1F(selLabels_[i] + "_PUppiMET__SF", 100, 0, 2500);
         plots.AddHisto1F(selLabels_[i] + "_PUppiMET", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i] + "_PUppiMET__postTrigger__SF", 100, 0, 2500);
+        plots.AddHisto1F(selLabels_[i] + "_PUppiMET__postTrigger", 100, 0, 2500);
+
         plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFMET120_PFMHT120_IDTight___PUppiMET", 100, 0, 2500);
         plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFHT500_PFMET100_PFMHT100_IDTight___PUppiMET", 100, 0, 2500);
         plots.AddHisto1F(selLabels_[i] + "_if___HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60___PUppiMET", 100, 0, 2500);
@@ -509,6 +595,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_JetUp", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_JetDown", 400, 0, 4000);
 
+        plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_ATLASdata", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_ATLASbkg", 400, 0, 4000);
         plots.AddHisto1F(selLabels_[i] + "_9fp10_SignalMass_ATLASglupion", 400, 0, 4000);
 
@@ -675,7 +762,6 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto2F("Nosel_Fpix_vs_IhnearC", 200, C-0.3, C+0.3, 20, 0, 1);
     plots.AddHisto2F("Nosel_pT_vs_Fpixel", 50, 0, 1, 100, 0, 1000);
     plots.AddHisto2F("Nosel_PseudoMET_vs_PFMET", 200, 0, 2000, 200, 0, 2000);
-    plots.AddHisto2F("Nosel_PUppiMET_VS_PseudoMET", 100, 0, 2500, 100, 0, 2500);
     plots.AddHisto2F("Nosel_PUppiMETNoMu_VS_PseudoMET", 100, 0, 2500, 100, 0, 2500);
     plots.AddHisto2F("HSCPPartialsel_PUppiMET_VS_PseudoMET", 100, 0, 2500, 100, 0, 2500);
     plots.AddHisto2F("HSCPPartialsel_PUppiMETNoMu_VS_PseudoMET", 100, 0, 2500, 100, 0, 2500);
@@ -689,17 +775,6 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nosel_PUppiMETdown", 100, 0, 2500);
 
 
-    plots.AddHisto1F("Nosel_electron_pt", 2000, 0, 2000);
-    plots.AddHisto1F("Nosel_electron_eta", 60, -3, +3);
-    plots.AddHisto1F("Nosel_electron_phi", 64, -3.2, 3.2);
-    plots.AddHisto1F("Nosel_electron_trackIso_dr04", 500, 0, 500);
-    plots.AddHisto1F("Nosel_electron_pfMiniRelIsoAll", 500, 0, 500);
-    plots.AddHisto1F("Nosel_muon_pt", 2000, 0, 2000);
-    plots.AddHisto1F("Nosel_muon_eta", 60, -3, +3);
-    plots.AddHisto1F("Nosel_muon_phi", 64, -3.2, 3.2);
-    plots.AddHisto1F("Nosel_muon_trackIso_dr03", 500, 0, 500);
-    plots.AddHisto1F("Nosel_muon_pfMiniRelIsoAll", 500, 0, 500);
-    
     plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__PFmuon", 100, 0, 2500, 100, 0, 2500);
     plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__PFpion", 100, 0, 2500, 100, 0, 2500);
     plots.AddHisto2F("trackPT_vs_trackPseudoTrackPT__HSCPmatched", 100, 0, 5000, 100, 0, 5000);
@@ -719,11 +794,17 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nosel_GenHSCPmatching__PFtype", 500, 0, 500);
 
     plots.AddHisto1F("GenHSCPmatching__PFType", 500, 0, 500);
+    plots.AddHisto1F("GenHSCPmatching__HSCP_type", 6, -0.5, 5.5);
     plots.AddHisto1F("GenHSCPmatching__PFType__if_ORtrigger", 500, 0, 500);
 
     plots.AddHisto1F("Nosel_Gen__PairType", 5, 0, 5);
     plots.AddHisto1F("Nosel_Gen__nHSCP", 10, 0, 10);
     plots.AddHisto1F("Nosel_Gen__nMatchedTrack", 10, 0, 10);
+
+
+    plots.AddHisto1F("Nosel_GenHSCP_beta", 40, 0, 1);
+    plots.AddHisto1F("Nosel_GenHSCP_beta_ifHLTMu50", 40, 0, 1);
+    
     
 
     plots.AddHisto1F("Nosel_Gen__PairType__if_HLT_PFMET120_PFMHT120_IDTight", 5, 0, 5);
@@ -731,6 +812,7 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nosel_Gen__PairType__if_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60", 5, 0, 5);
     plots.AddHisto1F("Nosel_Gen__PairType__if_HLT_MET105_IsoTrk50", 5, 0, 5);
     plots.AddHisto1F("Nosel_Gen__PairType__if_ORtrigger", 5, 0, 5);
+    plots.AddHisto1F("Nosel_Gen__PairType__if_HLT_Mu50", 5, 0, 5);
     plots.AddHisto1F("Nosel_GenHSCPmatching__PairType__1HSCP_if_HLT_PFMET120_PFMHT120_IDTight", 5, 0, 5);
     plots.AddHisto1F("Nosel_GenHSCPmatching__PairType__1HSCP_if_HLT_PFHT500_PFMET100_PFMHT100_IDTight", 5, 0, 5);
     plots.AddHisto1F("Nosel_GenHSCPmatching__PairType__1HSCP_if_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60", 5, 0, 5);
@@ -747,6 +829,11 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
     plots.AddHisto1F("Nosel_GenHSCPmatching__PairType__0HSCP_if_HLT_MET105_IsoTrk50", 5, 0, 5);
     plots.AddHisto1F("Nosel_GenHSCPmatching__PairType__0HSCP_if_ORtrigger", 5, 0, 5);
 
+    plots.AddHisto1F("Nosel_GenHSCPmatching__PairType__0HSCP", 5, 0, 5);
+    plots.AddHisto1F("Nosel_GenHSCPmatching__PairType__1HSCP", 5, 0, 5);
+    plots.AddHisto1F("Nosel_GenHSCPmatching__PairType__2HSCP", 5, 0, 5);
+
+
 
     plots.AddHisto1F("Nosel_PU_up", 100, 0, 100);
     plots.AddHisto1F("Nosel_PU_down", 100, 0, 100);
@@ -756,6 +843,9 @@ void HSCPSelector::SlaveBegin(TTree *tree) {
 
 
     plots.AddHisto2F("dEdX0stripVsP", 100, 0, 4000, 50, 0., 50.);
+    plots.AddHisto2F("dEdX0stripVsP_eta1", 100, 0, 4000, 50, 0., 50.);
+
+    plots.AddHisto2F("Nosel_PUppiMET_VS_PseudoMET", 100, 0, 2500, 100, 0, 2500);
 
     
     
@@ -866,7 +956,9 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
     bool METfilters = false;
 
     bool isMC = false;
-    bool isSignal = (dataset_.find("Gluino") != std::string::npos) ? true : false;
+    bool isSignal = (dataset_.find("Gluino") != std::string::npos) || 
+                    (dataset_.find("Stop") != std::string::npos) || 
+                    (dataset_.find("Stau") != std::string::npos) ? true : false;
 
     float AppliedWeight = 1., AppliedWeight_NOTrescaled = 1.;
     float AppliedWeight_SF_Up = 1., AppliedWeight_SF_Down = 1.;
@@ -882,8 +974,11 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
     else if (dataset_.find("MET") != std::string::npos || 
              dataset_.find("QCD2024") != std::string::npos || 
              dataset_.find("TTbar2024") != std::string::npos ||
+             dataset_.find("TTbarSemiLep2024") != std::string::npos ||
              dataset_.find("Wjets") != std::string::npos ||
              dataset_.find("Gluino") != std::string::npos ||
+             dataset_.find("Stop") != std::string::npos || 
+             dataset_.find("Stau") != std::string::npos ||
              dataset_.find("WjetMuNu") != std::string::npos) {
         
         triggerONLY     = ( *HLT_PFMET120_PFMHT120_IDTight || *HLT_PFHT500_PFMET100_PFMHT100_IDTight ||
@@ -898,8 +993,11 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         METfilters = Flag_allMETFilters[0];
     }
     if (dataset_.find("Gluino") != std::string::npos ||
+        dataset_.find("Stop") != std::string::npos || 
+        dataset_.find("Stau") != std::string::npos ||
         dataset_.find("QCD2024") != std::string::npos || 
         dataset_.find("TTbar2024") != std::string::npos ||
+        dataset_.find("TTbarSemiLep2024") != std::string::npos ||
         dataset_.find("Wjets") != std::string::npos ||
         dataset_.find("WjetMuNu") != std::string::npos) {
         isMC = true;
@@ -979,13 +1077,13 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
 
     singleCut[0] = trigger;
     if (singleCut[0]) {
-        vcp_nosel[0].FillHisto1D("EventCutflow", 1.5, *weightPU);
-        vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", 1.5, *weightPU);
+        vcp_nosel[0].FillHisto1D("EventCutflow", 1.5, AppliedWeight1Dpuppi);
+        vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", 1.5, AppliedWeight1Dpuppi);
     }
     singleCut[1] = singleCut[0] && METfilters;
     if (singleCut[1]) {
-        vcp_nosel[0].FillHisto1D("EventCutflow", 2.5, *weightPU);
-        vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", 2.5, *weightPU);
+        vcp_nosel[0].FillHisto1D("EventCutflow", 2.5, AppliedWeight1Dpuppi);
+        vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", 2.5, AppliedWeight1Dpuppi);
     }
     singleCut[2] = singleCut[1] && RecoPUppiMET[0] > 150.;
     if (singleCut[2]) {
@@ -1016,8 +1114,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         singleCut[3] = singleCut[2] && (Pt_pseudo[i] > 50.) && (Pt[i] > 50.);
         singleCut[4] = singleCut[3] && fabs(Eta[i]) < 2.4;
         singleCut[5] = singleCut[4] && (NbPixelHit_noL1[i] >= 2);
-        singleCut[6] = singleCut[5] && (FracOfValidHit[i] > 0.8);
-        singleCut[7] = singleCut[6] && (NOM_noL1[i] >= 10);
+        singleCut[6] = singleCut[5] && (NOM_noL1[i] >= 10);
+        singleCut[7] = singleCut[6] && (FracOfValidHit[i] > 0.8);
         singleCut[8] = singleCut[7] && isHighPurityTrack[i];
         singleCut[9] = singleCut[8] && (normChi2[i] < 5);
         singleCut[10] = singleCut[9] && (fabs(dz[i]) < 0.1);
@@ -1026,14 +1124,14 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         singleCut[13] = singleCut[12] && (IsoSumPt_dr03[i] < 15);
         singleCut[14] = singleCut[13] && (EoP[i] < 0.3);
         singleCut[15] = singleCut[14] && (ptOverptErrptErr[i] < 0.0008);
-        singleCut[16] = singleCut[15] && (Fpix[i] > 0.3);
-        singleCut[17] = singleCut[16] && (ptOverptErr[i] < 1);
+        singleCut[16] = singleCut[15] && (ptOverptErr[i] < 1);
+        singleCut[17] = singleCut[16] && (Fpix[i] > 0.3);
         singleCut[18] = singleCut[17] && (Ih_Strip[i] > C);
 
             // candidate CUTFLOW
         vcp_nosel[0].FillHisto1D("CandidateCutflow", 0, *weightPU); // All candidates with a track
-        if (singleCut[0]) vcp_nosel[0].FillHisto1D("CandidateCutflow", 1, *weightPU);
-        if (singleCut[1]) vcp_nosel[0].FillHisto1D("CandidateCutflow", 2, *weightPU);
+        if (singleCut[0]) vcp_nosel[0].FillHisto1D("CandidateCutflow", 1, AppliedWeight1Dpuppi);
+        if (singleCut[1]) vcp_nosel[0].FillHisto1D("CandidateCutflow", 2, AppliedWeight1Dpuppi);
         for (unsigned int j = 2; j < singleCut.size(); j++) {
             if (singleCut[j]) vcp_nosel[0].FillHisto1D("CandidateCutflow", j+1, AppliedWeight1Dpuppi);
         }
@@ -1046,8 +1144,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         cuts.push_back([&](int i){ return ((Pt_pseudo[i] > 50.0) && (Pt[i] > 50.0)); });
         cuts.push_back([&](int i){ return fabs(Eta[i]) < 2.4; });
         cuts.push_back([&](int i){ return NbPixelHit_noL1[i] >= 2; });
-        cuts.push_back([&](int i){ return FracOfValidHit[i] > 0.8; });
         cuts.push_back([&](int i){ return NOM_noL1[i] >= 10; });
+        cuts.push_back([&](int i){ return FracOfValidHit[i] > 0.8; });
         cuts.push_back([&](int i){ return isHighPurityTrack[i]; });
         cuts.push_back([&](int i){ return normChi2[i] < 5.0; });
         cuts.push_back([&](int i){ return fabs(dz[i]) < 0.1; });
@@ -1056,8 +1154,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         cuts.push_back([&](int i){ return IsoSumPt_dr03[i] < 15; });
         cuts.push_back([&](int i){ return EoP[i] < 0.3; });
         cuts.push_back([&](int i){ return ptOverptErrptErr[i] < 0.0008; });
-        cuts.push_back([&](int i){ return Fpix[i] > 0.3; });
         cuts.push_back([&](int i){ return ptOverptErr[i] < 1; });
+        cuts.push_back([&](int i){ return Fpix[i] > 0.3; });
         cuts.push_back([&](int i){ return Ih_Strip[i] > C; });
         
 
@@ -1102,15 +1200,14 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         }
 
 
-
         if (passedCuts[0]) vcp_nosel[0].FillHisto1F("Nm1_trigger", trigger, AppliedWeight1Dpuppi);
         if (passedCuts[1]) vcp_nosel[0].FillHisto1F("Nm1_METfilters", METfilters, AppliedWeight1Dpuppi);
         if (passedCuts[2]) vcp_nosel[0].FillHisto1F("Nm1_PUppiMET", RecoPUppiMET[0], AppliedWeight1Dpuppi);
         if (passedCuts[3]) vcp_nosel[0].FillHisto1F("Nm1_Ptpseudo", Pt_pseudo[i], AppliedWeight1Dpuppi);
         if (passedCuts[4]) vcp_nosel[0].FillHisto1F("Nm1_eta", Eta[i], AppliedWeight1Dpuppi);
         if (passedCuts[5]) vcp_nosel[0].FillHisto1F("Nm1_NOPH", NbPixelHit_noL1[i], AppliedWeight1Dpuppi);
-        if (passedCuts[6]) vcp_nosel[0].FillHisto1F("Nm1_FOVH", FracOfValidHit[i], AppliedWeight1Dpuppi);
-        if (passedCuts[7]) vcp_nosel[0].FillHisto1F("Nm1_NOM", NOM_noL1[i], AppliedWeight1Dpuppi);
+        if (passedCuts[6]) vcp_nosel[0].FillHisto1F("Nm1_NOM", NOM_noL1[i], AppliedWeight1Dpuppi);
+        if (passedCuts[7]) vcp_nosel[0].FillHisto1F("Nm1_FOVH", FracOfValidHit[i], AppliedWeight1Dpuppi);
         if (passedCuts[8]) vcp_nosel[0].FillHisto1F("Nm1_HighPurity", isHighPurityTrack[i], AppliedWeight1Dpuppi);
         if (passedCuts[9]) vcp_nosel[0].FillHisto1F("Nm1_Chi2", normChi2[i], AppliedWeight1Dpuppi);
         if (passedCuts[10]) vcp_nosel[0].FillHisto1F("Nm1_dZ", dz[i], AppliedWeight1Dpuppi);
@@ -1119,9 +1216,9 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         if (passedCuts[13]) vcp_nosel[0].FillHisto1F("Nm1_TrkIso", IsoSumPt_dr03[i], AppliedWeight1Dpuppi);
         if (passedCuts[14]) vcp_nosel[0].FillHisto1F("Nm1_EoverP", EoP[i], AppliedWeight1Dpuppi);
         if (passedCuts[15]) vcp_nosel[0].FillHisto1F("Nm1_PtErr_over_PtPt", ptOverptErrptErr[i], AppliedWeight1Dpuppi);
-        if (passedCuts[16] && isMC) vcp_nosel[0].FillHisto1F("Nm1_Fpix", Fpix[i], AppliedWeight1Dpuppi);
-        else if (passedCuts[16] && !isMC && Fpix[i] <= 0.9) vcp_nosel[0].FillHisto1F("Nm1_Fpix", Fpix[i], AppliedWeight1Dpuppi);
-        if (passedCuts[17]) vcp_nosel[0].FillHisto1F("Nm1_PtErr_over_Pt", ptOverptErr[i], AppliedWeight1Dpuppi);
+        if (passedCuts[16]) vcp_nosel[0].FillHisto1F("Nm1_PtErr_over_Pt", ptOverptErr[i], AppliedWeight1Dpuppi);
+        if (passedCuts[17] && isMC) vcp_nosel[0].FillHisto1F("Nm1_Fpix", Fpix[i], AppliedWeight1Dpuppi);
+        else if (passedCuts[17] && !isMC && Fpix[i] <= 0.9) vcp_nosel[0].FillHisto1F("Nm1_Fpix", Fpix[i], AppliedWeight1Dpuppi);
         if (passedCuts[18] && isSignal) vcp_nosel[0].FillHisto1F("Nm1_Ih_StripOnly", Ih_Strip[i], AppliedWeight1Dpuppi);
         else if (passedCuts[18] && !isSignal && Fpix[i] <= 0.9) vcp_nosel[0].FillHisto1F("Nm1_Ih_StripOnly", Ih_Strip[i], AppliedWeight1Dpuppi);
         if (passedCuts[18] && isSignal) vcp_nosel[0].FillHisto1F("Nm1_Ih_StripOnly_rescaled", Ih_Strip[i]*3.2168/3.12692, AppliedWeight1Dpuppi);       // MPV_data/MPV_MC
@@ -1140,7 +1237,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                     vcp_nosel[0].FillHisto1D("EventCutflow__isGen_lastbin", 1, AppliedWeight1Dpuppi);
                 }
             }
-            vcp_nosel[0].FillHisto1F("LastBinEventCutflow___HSCP_type", HSCP_type[i], AppliedWeight1Dpuppi);
+            vcp_nosel[0].FillHisto1F("LastBinEventCutflow___HSCP_type", HSCP_type[i], AppliedWeight1Dpuppi);    // No matching on the track + no PDG id check ! Careful please
             vcp_nosel[0].FillHisto1F("LastBinEventCutflow___PF_type", PF_type[i], AppliedWeight1Dpuppi);
         }
 
@@ -1158,6 +1255,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         if (eventCuts_noTrackCut[j]) vcp_nosel[0].FillHisto1D("EventCutflow_NotrackCut", j+1.5, AppliedWeight1Dpuppi);
     }
 
+
     // N-1 EVENT CUTFLOW histograms
     if (eventPassedNm1[0])  vcp_nosel[0].FillHisto1F("Nm1_event_trigger",          trigger, AppliedWeight1Dpuppi);
     if (eventPassedNm1[1])  vcp_nosel[0].FillHisto1F("Nm1_event_METfilters",       METfilters, AppliedWeight1Dpuppi);
@@ -1165,8 +1263,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
     if (eventPassedNm1[3])  vcp_nosel[0].FillHisto1F("Nm1_event_Ptpseudo",         Pt_pseudo[iCandNm1[3]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[4])  vcp_nosel[0].FillHisto1F("Nm1_event_eta",              Eta[iCandNm1[4]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[5])  vcp_nosel[0].FillHisto1F("Nm1_event_NOPH",             NbPixelHit_noL1[iCandNm1[5]], AppliedWeight1Dpuppi);
-    if (eventPassedNm1[6])  vcp_nosel[0].FillHisto1F("Nm1_event_FOVH",             FracOfValidHit[iCandNm1[6]], AppliedWeight1Dpuppi);
-    if (eventPassedNm1[7])  vcp_nosel[0].FillHisto1F("Nm1_event_NOM",              NOM_noL1[iCandNm1[7]], AppliedWeight1Dpuppi);
+    if (eventPassedNm1[6])  vcp_nosel[0].FillHisto1F("Nm1_event_NOM",              NOM_noL1[iCandNm1[6]], AppliedWeight1Dpuppi);
+    if (eventPassedNm1[7])  vcp_nosel[0].FillHisto1F("Nm1_event_FOVH",             FracOfValidHit[iCandNm1[7]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[8])  vcp_nosel[0].FillHisto1F("Nm1_event_HighPurity",       isHighPurityTrack[iCandNm1[8]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[9])  vcp_nosel[0].FillHisto1F("Nm1_event_Chi2",             normChi2[iCandNm1[9]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[10]) vcp_nosel[0].FillHisto1F("Nm1_event_dZ",               dz[iCandNm1[10]], AppliedWeight1Dpuppi);
@@ -1175,30 +1273,17 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
     if (eventPassedNm1[13]) vcp_nosel[0].FillHisto1F("Nm1_event_TrkIso",           IsoSumPt_dr03[iCandNm1[13]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[14]) vcp_nosel[0].FillHisto1F("Nm1_event_EoverP",           EoP[iCandNm1[14]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[15]) vcp_nosel[0].FillHisto1F("Nm1_event_PtErr_over_PtPt",  ptOverptErrptErr[iCandNm1[15]], AppliedWeight1Dpuppi);
-    if (eventPassedNm1[16] && isMC)  vcp_nosel[0].FillHisto1F("Nm1_event_Fpix",    Fpix[iCandNm1[16]], AppliedWeight1Dpuppi);
-    else if (eventPassedNm1[16] && !isMC && Fpix[iCandNm1[16]] <= 0.9) vcp_nosel[0].FillHisto1F("Nm1_event_Fpix", Fpix[iCandNm1[16]], AppliedWeight1Dpuppi);
-    if (eventPassedNm1[17]) vcp_nosel[0].FillHisto1F("Nm1_event_PtErr_over_Pt",    ptOverptErr[iCandNm1[17]], AppliedWeight1Dpuppi);
+    if (eventPassedNm1[16]) vcp_nosel[0].FillHisto1F("Nm1_event_PtErr_over_Pt",    ptOverptErr[iCandNm1[16]], AppliedWeight1Dpuppi);
+    if (eventPassedNm1[17] && isMC)  vcp_nosel[0].FillHisto1F("Nm1_event_Fpix",    Fpix[iCandNm1[17]], AppliedWeight1Dpuppi);
+    else if (eventPassedNm1[17] && !isMC && Fpix[iCandNm1[17]] <= 0.9) vcp_nosel[0].FillHisto1F("Nm1_event_Fpix", Fpix[iCandNm1[17]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[18] && isSignal) vcp_nosel[0].FillHisto1F("Nm1_event_Ih_StripOnly", Ih_Strip[iCandNm1[18]], AppliedWeight1Dpuppi);
     else if (eventPassedNm1[18] && !isSignal && Fpix[iCandNm1[18]] <= 0.9) vcp_nosel[0].FillHisto1F("Nm1_event_Ih_StripOnly", Ih_Strip[iCandNm1[18]], AppliedWeight1Dpuppi);
     if (eventPassedNm1[18] && isSignal) vcp_nosel[0].FillHisto1F("Nm1_event_Ih_StripOnly_rescaled", Ih_Strip[iCandNm1[18]]*3.2168/3.12692, AppliedWeight1Dpuppi);
     else if (eventPassedNm1[18] && !isSignal && Fpix[iCandNm1[18]] <= 0.9) vcp_nosel[0].FillHisto1F("Nm1_event_Ih_StripOnly_rescaled", Ih_Strip[iCandNm1[18]]*3.2168/3.12692, AppliedWeight1Dpuppi);
 
 
+
     // PseudoCaloMET variable calibration
-    for (unsigned int im = 0; im < muon_pt.GetSize(); im++) {
-        vcp_nosel[0].FillHisto1F("Nosel_muon_pt", muon_pt[im], *weightPU);
-        vcp_nosel[0].FillHisto1F("Nosel_muon_eta", muon_eta[im], *weightPU);
-        vcp_nosel[0].FillHisto1F("Nosel_muon_phi", muon_phi[im], *weightPU);
-        vcp_nosel[0].FillHisto1F("Nosel_muon_trackIso_dr03", muon_trackIso_dr03[im], *weightPU);
-        vcp_nosel[0].FillHisto1F("Nosel_muon_pfMiniRelIsoAll", muon_pfMiniRelIsoAll[im], *weightPU);
-    }
-    for (unsigned int ie = 0; ie < electron_pt.GetSize(); ie++) {
-        vcp_nosel[0].FillHisto1F("Nosel_electron_pt", electron_pt[ie], *weightPU);
-        vcp_nosel[0].FillHisto1F("Nosel_electron_eta", electron_eta[ie], *weightPU);
-        vcp_nosel[0].FillHisto1F("Nosel_electron_phi", electron_phi[ie], *weightPU);
-        vcp_nosel[0].FillHisto1F("Nosel_electron_trackIso_dr04", electron_trackIso_dr04[ie], *weightPU);
-        vcp_nosel[0].FillHisto1F("Nosel_electron_pfMiniRelIsoAll", electron_pfMiniRelIsoAll[ie], *weightPU);
-    }
     for(unsigned int s=0;s<selections_.size();s++) {
         if (selLabels_[s] == "CalibPseudoMET" || selLabels_[s] == "CalibPseudoMET_isRescaled") {
             bool BasicSel = false;
@@ -1349,6 +1434,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                 vcp[s].FillHisto2F(selLabels_[s] + "_PUppiMET_VS_PseudoMET", RecoPUppiMET[0], PseudoCaloMET[0]*isRescaled, weightOnCalib);
                 vcp[s].FillHisto2F(selLabels_[s] + "_PUppiMETNoMu_VS_PseudoMET", PUppiMET_NoMu, PseudoCaloMET[0]*isRescaled, weightOnCalib);
                 vcp[s].FillHisto1F(selLabels_[s] + "_PUppiMET", RecoPUppiMET[0], weightOnCalib);
+                vcp[s].FillHisto1F(selLabels_[s] + "_PUppiMET__SF", RecoPUppiMET[0], AppliedWeight1Dpuppi);
                 vcp[s].FillHisto1F(selLabels_[s] + "_PUppiMETNoMu", PUppiMET_NoMu, weightOnCalib);
                 vcp[s].FillHisto1F(selLabels_[s] + "_PseudoCaloMET", PseudoCaloMET[0]*isRescaled, weightOnCalib);
                 vcp[s].FillHisto1F(selLabels_[s] + "_RecoPFMET", RecoPFMET[0], weightOnCalib);
@@ -1394,6 +1480,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                 }
                 if ((*HLT_PFMET120_PFMHT120_IDTight && PFMHT>120) || (*HLT_PFHT500_PFMET100_PFMHT100_IDTight && PFHT>500 && PFMHT>100)
                     || (*HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60 && PFMHTNoMu>120 && PFHT>60) || *HLT_MET105_IsoTrk50) {
+                    vcp[s].FillHisto1F(selLabels_[s] + "_PUppiMET__postTrigger", RecoPUppiMET[0], weightOnCalib);
+                    vcp[s].FillHisto1F(selLabels_[s] + "_PUppiMET__postTrigger__SF", RecoPUppiMET[0], AppliedWeight1Dpuppi);
                     vcp[s].FillHisto1F(selLabels_[s] + "_if___orMETtrg___PseudoCaloMET", PseudoCaloMET[0]*isRescaled, weightOnCalib);
                     vcp[s].FillHisto1F(selLabels_[s] + "_if___orMETtrg___RecoPFMET", RecoPFMET[0], weightOnCalib);
                     vcp[s].FillHisto1F(selLabels_[s] + "_if___orMETtrg___PUppiMET", RecoPUppiMET[0], weightOnCalib);
@@ -1934,13 +2022,40 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                     if( (Fpix[icand] > fpix9) && (Fpix[icand] <= fpix10) ) vmrp_regionD_9f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
                     if( (Fpix[icand] > fpix99) && (Fpix[icand] <= fpix10) ) vmrp_regionD_99f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
                     if( (Fpix[icand] > fpix999) && (Fpix[icand] <= fpix10) ) vmrp_regionD_999f10[s].fill(Eta[icand], NOM_noL1[icand], overP, Pt_pseudo[icand], Pterr[icand], Ih_Strip[icand], GStrip[icand], massForRegions, *PV_npvsGood, Fpix[icand], newWeight);
+
+
+                    if ((dataset_.find("Gluino") == std::string::npos || dataset_.find("Stop") != std::string::npos || dataset_.find("Stau") != std::string::npos) && Fpix[icand] > fpix8 && massForRegions >= 1500) {
+                        // une seule fois avant la boucle
+                        cout << "Mass PFid MET Pt_pseudo Pt Eta NbPixHit NOM FOVH HP chi2 dz dxy PFiso TrkIso EoP ptErr/pt2 ptErr/pt Fpix Ih" << endl;
+                        cout << massForRegions << " "
+                             << PF_type[icand] << " "
+                             << RecoPUppiMET[0] << " " 
+                             << Pt_pseudo[icand] << " "
+                             << Pt[icand] << " "
+                             << Eta[icand] << " "
+                             << NbPixelHit_noL1[icand] << " "
+                             << NOM_noL1[icand] << " "
+                             << FracOfValidHit[icand] << " "
+                             << isHighPurityTrack[icand] << " "
+                             << normChi2[icand] << " "
+                             << dz[icand] << " "
+                             << dxy[icand] << " "
+                             << miniRelIsoAll[icand] << " "
+                             << IsoSumPt_dr03[icand] << " "
+                             << EoP[icand] << " "
+                             << ptOverptErrptErr[icand] << " "
+                             << ptOverptErr[icand] << " "
+                             << Fpix[icand] << " "
+                             << Ih_Strip[icand] << endl;
+                    }
                 }
 
                 if (isMC) { 
                     if (Pt_pseudo[icand] > ptcut_) {
                         if (trigger && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) {
                             vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_nominal", massForRegions, AppliedWeight1Dpuppi);
-                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASbkg", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024data"), AppliedWeight1Dpuppi);
+                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASdata", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024data"), AppliedWeight1Dpuppi);
+                            vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASbkg", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024bkg"), AppliedWeight1Dpuppi);
                             vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_ATLASglupion", findMass(Pt_pseudo[icand]*cosh(Eta[icand]), Ih_Strip[icand], "2024glupion"), AppliedWeight1Dpuppi);
                             
                                 // PU Up/Down
@@ -1958,10 +2073,6 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                             vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
                         }
                         
-                            // Fpix Up/Down
-                        if (trigger && Fpix[icand]*1.016 > fpix9) vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_FpixUp", massForRegions, AppliedWeight1Dpuppi);    
-                        if (trigger && Fpix[icand]*0.984 > fpix9) vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_FpixDown", massForRegions, AppliedWeight1Dpuppi);
- 
                             // Jet Up/Down
                         if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
                         if (trigger_varDOWN && isOkforPUppiMET_down && Fpix[icand] > fpix9 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_9fp10_SignalMass_JetDown", massForRegions, AppliedWeight1Dpuppi);
@@ -1987,10 +2098,6 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                             vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_CUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C+0.04), AppliedWeight1Dpuppi);
                             vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
                         }
-                        
-                            // Fpix Up/Down
-                        if (trigger && Fpix[icand]*1.016 > fpix99) vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_FpixUp", massForRegions, AppliedWeight1Dpuppi);    
-                        if (trigger && Fpix[icand]*0.984 > fpix99) vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_FpixDown", massForRegions, AppliedWeight1Dpuppi);
  
                             // Jet Up/Down
                         if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix99 && Fpix[icand] <= fpix10) vcp[s].FillHisto1F(selLabels_[s] + "_99fp10_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
@@ -2016,10 +2123,6 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
                             vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_CUp", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C+0.04), AppliedWeight1Dpuppi);
                             vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_CDown", GetMass(Pt_pseudo[icand]*cosh(Eta[icand]),Ih_Strip[icand],K,C-0.04), AppliedWeight1Dpuppi);
                         }
-                        
-                            // Fpix Up/Down
-                        if (trigger && Fpix[icand]*1.016 > fpix8) vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_FpixUp", massForRegions, AppliedWeight1Dpuppi);    
-                        if (trigger && Fpix[icand]*0.984 > fpix8) vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_FpixDown", massForRegions, AppliedWeight1Dpuppi);
  
                             // Jet Up/Down
                         if (trigger_varUP && isOkforPUppiMET_up && Fpix[icand] > fpix8 && Fpix[icand] <= fpix9) vcp[s].FillHisto1F(selLabels_[s] + "_8fp9_SignalMass_JetUp", massForRegions, AppliedWeight1Dpuppi);
@@ -2060,6 +2163,16 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         else                        pairType = 3; // neutre-neutre
     }
 
+
+    // trigger eff vs beta + beta dists:
+    if (nHSCP==2) {
+        vcp_nosel[0].FillHisto1F("Nosel_GenHSCP_beta", (GenPart_beta[0] + GenPart_beta[1])/2, *weightPU);
+        if (*HLT_Mu50) vcp_nosel[0].FillHisto1F("Nosel_GenHSCP_beta_ifHLTMu50", (GenPart_beta[0] + GenPart_beta[1])/2, *weightPU);
+    }
+
+
+
+
     // Raw
     vcp_nosel[0].FillHisto1F("Nosel_Gen__PairType", pairType, *weightPU);
     vcp_nosel[0].FillHisto1F("Nosel_Gen__nHSCP", nHSCP, *weightPU);
@@ -2083,6 +2196,9 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         vcp_nosel[0].FillHisto1F("PUppiMET__postTrigger", RecoPUppiMET[0], *weightPU);
         vcp_nosel[0].FillHisto1F("PUppiMET__postTrigger__SF", RecoPUppiMET[0], AppliedWeight1Dpuppi);
     }
+    if (*HLT_Mu50) {
+        vcp_nosel[0].FillHisto1F("Nosel_Gen__PairType__if_HLT_Mu50", pairType, *weightPU);
+    }
 
 
     i_track = 0;
@@ -2099,6 +2215,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
 
                     vcp_nosel[0].FillHisto2F("trackPT_vs_trackPseudoTrackPT__HSCPmatched", Pt[i_track], Pt_pseudo[i_track], *weightPU);
                     vcp_nosel[0].FillHisto1F("GenHSCPmatching__PFType", PF_type[i_track], *weightPU);
+                    vcp_nosel[0].FillHisto1F("GenHSCPmatching__HSCP_type", HSCP_type[i_track], *weightPU);
                     if (trigger) vcp_nosel[0].FillHisto1F("GenHSCPmatching__PFType__if_ORtrigger", PF_type[i_track], *weightPU);
 
                 }
@@ -2111,6 +2228,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
 
     // Post trigger + 1 matched HSCP
     if (countMatching==1) {
+        vcp_nosel[0].FillHisto1F("Nosel_GenHSCPmatching__PairType__1HSCP", pairType, *weightPU);
+
         if (*HLT_PFMET120_PFMHT120_IDTight && PFMHT>120) {
             vcp_nosel[0].FillHisto1F("Nosel_GenHSCPmatching__PairType__1HSCP_if_HLT_PFMET120_PFMHT120_IDTight", pairType, *weightPU);
         }
@@ -2129,6 +2248,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
     }
     // Post trigger + 2 matched HSCP
     else if (countMatching==2) {
+        vcp_nosel[0].FillHisto1F("Nosel_GenHSCPmatching__PairType__2HSCP", pairType, *weightPU);
+
         if (*HLT_PFMET120_PFMHT120_IDTight && PFMHT>120) {
             vcp_nosel[0].FillHisto1F("Nosel_GenHSCPmatching__PairType__2HSCP_if_HLT_PFMET120_PFMHT120_IDTight", pairType, *weightPU);
         }
@@ -2146,6 +2267,8 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
         }
     }
     else if (countMatching==0) {
+        vcp_nosel[0].FillHisto1F("Nosel_GenHSCPmatching__PairType__0HSCP", pairType, *weightPU);
+
         if (*HLT_PFMET120_PFMHT120_IDTight && PFMHT>120) {
             vcp_nosel[0].FillHisto1F("Nosel_GenHSCPmatching__PairType__0HSCP_if_HLT_PFMET120_PFMHT120_IDTight", pairType, *weightPU);
         }
@@ -2253,6 +2376,7 @@ Bool_t HSCPSelector::Process(Long64_t entry) {
 
             if (Ih_Strip[i_track] >= -20./1500*P[i_track] + 20) {
                 vcp_nosel[0].FillHisto2F("dEdX0stripVsP", P[i_track], Ih_Strip[i_track]);
+                if (fabs(Eta[i_track]) < 1) vcp_nosel[0].FillHisto2F("dEdX0stripVsP_eta1", P[i_track], Ih_Strip[i_track]);
             }
         }
 

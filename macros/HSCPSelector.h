@@ -39,9 +39,23 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1(int hscpIndex);
 
 bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1_2p4(int hscpIndex);
 
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p4(int hscpIndex);
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta2p4(int hscpIndex);
 
-bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2(int hscpIndex);
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta1(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_EoP_0p1_Eta1_2p4(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta2p4(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta1(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_Eta1_2p4(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta2p4(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1(int hscpIndex);
+
+bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2p4(int hscpIndex);
 
 
    int etabins_;
@@ -188,6 +202,7 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2(int hscpIndex);
    TTreeReaderArray<double> GenPart_eta = {fReader, "GenPart_eta"};
    TTreeReaderArray<double> GenPart_phi = {fReader, "GenPart_phi"};
    TTreeReaderArray<double> GenPart_mass = {fReader, "GenPart_mass"};
+   TTreeReaderArray<double> GenPart_beta = {fReader, "GenPart_beta"};
    TTreeReaderArray<int> GenPart_pdgId = {fReader, "GenPart_pdgId"};
    TTreeReaderArray<int> GenPart_charge = {fReader, "GenPart_charge"};
 
@@ -203,7 +218,7 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_Eta1p2_2p2(int hscpIndex);
    TTreeReaderArray<bool> muon_isTight = {fReader, "muon_isTight"};
    TTreeReaderArray<float> muon_trackIso_dr03 = {fReader, "muon_trackIso_dr03"};
    TTreeReaderArray<float> muon_pfMiniRelIsoAll = {fReader, "muon_pfMiniRelIsoAll"};
-   TTreeReaderArray<bool> muon_isPFMuon = {fReader, "muon_isPFMuon"};   
+   TTreeReaderArray<bool> muon_isPFMuon = {fReader, "muon_isPFMuon"};
 
 
    // electron info

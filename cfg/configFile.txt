@@ -1,12 +1,14 @@
 #pT cut - eta bins - ih bins - p bins - mass bins - FPIXbins   -        type               -  version
 
-#70         96        400      1000       400         20        JetMET2024C                  V12p320
-#70         96        400      1000       400         20        JetMET2024D                  V12p321
-70         96        400      1000       400         20        JetMET2024E                  V12p322
-#70         96        400      1000       400         20        JetMET2024F                  V12p323
-#70         96        400      1000       400         20        JetMET2024G                  V12p324
-#70         96        400      1000       400         20        JetMET2024H                  V12p325
-#70         96        400      1000       400         20        JetMET2024I                  V12p326
+#                   DATA
+
+#70         96        400      1000       400         20        JetMET2024C                  V12p350
+#70         96        400      1000       400         20        JetMET2024D                  V12p351
+#70         96        400      1000       400         20        JetMET2024E                  V12p352
+#70         96        400      1000       400         20        JetMET2024F                  V12p353
+#70         96        400      1000       400         20        JetMET2024G                  V12p354
+#70         96        400      1000       400         20        JetMET2024H                  V12p355
+#70         96        400      1000       400         20        JetMET2024I                  V12p356
 
 #70         96        400      1000       400         20        Mu2024C                      V18p100
 #70         96        400      1000       400         20        Mu2024D                      V18p101
@@ -24,20 +26,23 @@
 #70         96        400      1000       400         20        MuonEG2024H                  V17p45
 #70         96        400      1000       400         20        MuonEG2024I                  V17p46
 
-#70         96        400      1000       400         20        TTbar2024                    V15p9
+#                   MC
 
-#70         96        400      1000       400         20        QCD2024_mu_pt15to20          V16p21
-#70         96        400      1000       400         20        QCD2024_mu_pt20to30          V16p22
-#70         96        400      1000       400         20        QCD2024_mu_pt30to50          V16p23
-#70         96        400      1000       400         20        QCD2024_mu_pt50to80          V16p24
-#70         96        400      1000       400         20        QCD2024_mu_pt80to120         V16p25
-#70         96        400      1000       400         20        QCD2024_mu_pt120to170        V16p26
-#70         96        400      1000       400         20        QCD2024_mu_pt170to300        V16p27
-#70         96        400      1000       400         20        QCD2024_mu_pt300to470        V16p28
-#70         96        400      1000       400         20        QCD2024_mu_pt470to600        V16p29
-#70         96        400      1000       400         20        QCD2024_mu_pt600to800        V16p210
-#70         96        400      1000       400         20        QCD2024_mu_pt800to1000       V16p211
-#70         96        400      1000       400         20        QCD2024_mu_pt1000            V16p212
+#70         96        400      1000       400         20        TTbar2024                    V15p10
+#70         96        400      1000       400         20        TTbarSemiLep2024             V22p1
+
+#70         96        400      1000       400         20        QCD2024_mu_pt15to20          V16p31
+#70         96        400      1000       400         20        QCD2024_mu_pt20to30          V16p32
+#70         96        400      1000       400         20        QCD2024_mu_pt30to50          V16p33
+#70         96        400      1000       400         20        QCD2024_mu_pt50to80          V16p34
+#70         96        400      1000       400         20        QCD2024_mu_pt80to120         V16p35
+#70         96        400      1000       400         20        QCD2024_mu_pt120to170        V16p36
+#70         96        400      1000       400         20        QCD2024_mu_pt170to300        V16p37
+#70         96        400      1000       400         20        QCD2024_mu_pt300to470        V16p38
+#70         96        400      1000       400         20        QCD2024_mu_pt470to600        V16p39
+#70         96        400      1000       400         20        QCD2024_mu_pt600to800        V16p310
+#70         96        400      1000       400         20        QCD2024_mu_pt800to1000       V16p311
+#70         96        400      1000       400         20        QCD2024_mu_pt1000            V16p312
 
 #70         96        400      1000       400         20        Wjets2024_1J_pt40to100       V14p601
 #70         96        400      1000       400         20        Wjets2024_1J_pt100to200      V14p602 
@@ -50,7 +55,9 @@
 #70         96        400      1000       400         20        Wjets2024_2J_pt400to600      V14p609
 #70         96        400      1000       400         20        Wjets2024_2J_pt600           V14p6010 
 
-#70         96        400      1000       400         20        WjetMuNu2024                 V14p13
+#70         96        400      1000       400         20        WjetMuNu2024                 V14p14
+
+#                   SIGNAL
 
 #70         96        400      1000       400         20        Gluino_Run3_MET_pythia_1000         V19p0
 #70         96        400      1000       400         20        Gluino_Run3_MET_pythia_1200         V19p0
@@ -62,16 +69,18 @@
 #70         96        400      1000       400         20        Gluino_Run3_MET_pythia_2400         V19p0
 #70         96        400      1000       400         20        Gluino_Run3_MET_pythia_2600         V19p0
 
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1100       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1200       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1300       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1400       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1600       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1800       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_2000       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_2200       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_2400       V19p8
-#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_2600       V19p8
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1100       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1200       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1300       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1400       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1600       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_1800       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_2000       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_2200       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_2400       V19p12
+#70         96        400      1000       400         20        Gluino_Run3_MET_madgraph_2600       V19p12
+
+#70         96        400      1000       400         20        Gluino_Run2_MET_madgraph_2000       V13p2
 
 #70         96        400      1000       400         20        Stop_Run3_MET_madgraph_700          V21p0
 #70         96        400      1000       400         20        Stop_Run3_MET_madgraph_800          V21p0
@@ -86,8 +95,6 @@
 #70         96        400      1000       400         20        Stop_Run3_MET_madgraph_2400         V21p0
 #70         96        400      1000       400         20        Stop_Run3_MET_madgraph_2600         V21p0
 
-#70         96        400      1000       400         20        Gluino_Run2_MET_madgraph_2000       V13p2
-
 #70         96        400      1000       400         20        Stau_Run3_MET_247       V20p0
 #70         96        400      1000       400         20        Stau_Run3_MET_308       V20p0
 #70         96        400      1000       400         20        Stau_Run3_MET_432       V20p0
@@ -100,8 +107,10 @@
 #70         96        400      1000       400         20        Stau_Run3_MET_1409       V20p0
 #70         96        400      1000       400         20        Stau_Run3_MET_1599       V20p0
 
+#                   TESTS
+
 #70         96        400      1000       400         20        TestMuon2024            V18p1
-#70         96        400      1000       400         20        TestMET2024             V12p32
+#70         96        400      1000       400         20        TestMET2024             V12p35
 #70         96        400      1000       400         20        TestWjets               V14p6
 #70         96        400      1000       400         20        TestTTbar2024           V15p5
 #70         96        400      1000       400         20        TestMuonEG              V17p0

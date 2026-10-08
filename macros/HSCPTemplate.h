@@ -178,6 +178,7 @@ public :
    TTreeReaderArray<double> GenPart_eta = {fReader, "GenPart_eta"};
    TTreeReaderArray<double> GenPart_phi = {fReader, "GenPart_phi"};
    TTreeReaderArray<double> GenPart_mass = {fReader, "GenPart_mass"};
+   TTreeReaderArray<double> GenPart_beta = {fReader, "GenPart_beta"};
    TTreeReaderArray<int> GenPart_pdgId = {fReader, "GenPart_pdgId"};
    TTreeReaderArray<int> GenPart_charge = {fReader, "GenPart_charge"};
 
@@ -193,7 +194,7 @@ public :
    TTreeReaderArray<bool> muon_isTight = {fReader, "muon_isTight"};
    TTreeReaderArray<float> muon_trackIso_dr03 = {fReader, "muon_trackIso_dr03"};
    TTreeReaderArray<float> muon_pfMiniRelIsoAll = {fReader, "muon_pfMiniRelIsoAll"};
-   TTreeReaderArray<bool> muon_isPFMuon = {fReader, "muon_isPFMuon"};   
+   TTreeReaderArray<bool> muon_isPFMuon = {fReader, "muon_isPFMuon"};
 
 
    // electron info

@@ -3,7 +3,6 @@
     ROOT::EnableImplicitMT(4);
 
     ifstream ifile;
-    // /opt/sbg/cms/safe1/cms/gcoulon
     ifile.open("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/TupleAnalysis/cfg/configFile.txt");
     if(!ifile) std::cout << "Error when opening config file " <<  std::endl;
     std::string line;
@@ -138,18 +137,18 @@
 
 
     std::vector<TString> StopRun3Name = {
-        "Stop_Run3_MET_700",
-        "Stop_Run3_MET_800",
-        "Stop_Run3_MET_900",
-        "Stop_Run3_MET_1000",
-        "Stop_Run3_MET_1200",
-        "Stop_Run3_MET_1400",
-        "Stop_Run3_MET_1600",
-        "Stop_Run3_MET_1800",
-        "Stop_Run3_MET_2000",
-        "Stop_Run3_MET_2200",
-        "Stop_Run3_MET_2400",
-        "Stop_Run3_MET_2600"
+        "Stop_Run3_MET_madgraph_700",
+        "Stop_Run3_MET_madgraph_800",
+        "Stop_Run3_MET_madgraph_900",
+        "Stop_Run3_MET_madgraph_1000",
+        "Stop_Run3_MET_madgraph_1200",
+        "Stop_Run3_MET_madgraph_1400",
+        "Stop_Run3_MET_madgraph_1600",
+        "Stop_Run3_MET_madgraph_1800",
+        "Stop_Run3_MET_madgraph_2000",
+        "Stop_Run3_MET_madgraph_2200",
+        "Stop_Run3_MET_madgraph_2400",
+        "Stop_Run3_MET_madgraph_2600"
     };
 
     std::vector<TString> StopRun3File = {
@@ -196,64 +195,8 @@
 
 
     TChain* chain;
-    if(dataset == "Gluino2000_miniAOD_Mu50") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/output_SameminiAOD.root");
-    }
-    else if (dataset == "Gluino2000_AOD_Mu50") {
-        chain = new TChain("HSCPFullAODAnalyzer/Events");
-        chain->AddFile("/safe/ui3_1/cms/gcoulon/CMSSW_15_0_13_patch1/src/output_SameAOD.root");
-    }
 
-    if (dataset == "DataMET_2024_test_miniAOD") {
-       chain = new TChain("HSCPMiniAODAnalyzer/Events");
-       std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/V12p20/";
-       std::string fileNames[] = { (pathData + "V12p20.txt").c_str()};
-       
-       for (const std::string& fileName : fileNames) {
-            std::ifstream file(fileName);
-            if (!file.is_open()) {
-                std::cerr << "Failed to open file: " << fileName << std::endl;
-                continue;
-            }
-            std::string line;
-            while (std::getline(file, line)) {
-                if (!line.empty() && line.back() == '\n') {
-                   line.pop_back();
-                }
-                chain->AddFile(line.c_str());
-            }
-            file.close();
-        }
-    }
-    
-
-    else if(dataset == "Gluino2000_Run2_METtrgEff_AOD") {
-        chain = new TChain("HSCPFullAODAnalyzer/Events");
-        chain->AddFile("/scratch/ui3_1/gcoulon/HSCP_prod/V13p0/Gluino2000_Run2_vcorr_AOD.root");
-    }
-    else if(dataset == "Gluino2000_Run2_METtrgEff") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/scratch/ui3_1/gcoulon/HSCP_prod/V13p0/Gluino2000_Run2_vcorr.root");
-    }
-
-    else if(dataset == "Gluino2000_Run2_MET_AOD") {
-        chain = new TChain("HSCPFullAODAnalyzer/Events");
-        chain->AddFile("/scratch/ui3_1/gcoulon/HSCP_prod/V13p0/Gluino2000_Run2_vcorr_AOD.root");
-    }
-    
-    
-    else if (dataset == "Gluino2000_AOD_FULL_Mu50") {
-        chain = new TChain("HSCPFullAODAnalyzer/Events");
-        chain->AddFile("/scratch/ui3_1/gcoulon/HSCP_prod/V13p0/Gluino2000_Run2_vcorr_AOD.root");
-    }
-    else if (dataset == "Gluino2000_miniAOD_FULL_Mu50") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/scratch/ui3_1/gcoulon/HSCP_prod/V13p0/Gluino2000_Run2_vcorr.root");
-    }
-
-
-    else if (dataset.find("Gluino_Run3") != std::string::npos) {
+    if (dataset.find("Gluino_Run3") != std::string::npos) {
         if (version=="V19p0") {
             for (size_t i = 0; i < GluinonamesPythia.size(); ++i) {
                 if (dataset == GluinonamesPythia[i]) {
@@ -262,7 +205,7 @@
                 }
             }
         }
-        else if (version=="V19p6" || version=="V19p7" || version=="V19p8") {
+        else if (version=="V19p6" || version=="V19p7" || version=="V19p8" || version=="V19p9" || version=="V19p10" || version=="V19p11" || version=="V19p12") {
             for (size_t i = 0; i < GluinonamesMadgraph.size(); ++i) {
                 if (dataset == GluinonamesMadgraph[i]) {
                     chain = new TChain("HSCPMiniAODAnalyzer/Events");
@@ -277,11 +220,12 @@
         chain->AddFile("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/Gluino_Run2_madgraph/Gluino_Run2_MET_madgraph_2000.root");
     }
 
+
     else if (dataset.find("Stau_Run3") != std::string::npos) {
         for (size_t i = 0; i < StauRun3Name.size(); ++i) {
             if (dataset == StauRun3Name[i]) {
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
-                chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/%s/%s", version.c_str(), StauRun3File[i].Data()));
+                chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/V20p0/%s", StauRun3File[i].Data()));
             }
         }
     }
@@ -290,7 +234,7 @@
         for (size_t i = 0; i < StopRun3Name.size(); ++i) {
             if (dataset == StopRun3Name[i]) {
                 chain = new TChain("HSCPMiniAODAnalyzer/Events");
-                chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/%s/%s", version.c_str(), StopRun3Name[i].Data()));
+                chain->AddFile(Form("/scratch/ui3_1/gcoulon/HSCP_prod/SIGNAL/V21p0/%s", StopRun3File[i].Data()));
             }
         }
     }
@@ -470,16 +414,10 @@
     }
 
 
-
-    else if(dataset == "Gluino2000_Run2_MET") {
-        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-        chain->AddFile("/scratch/ui3_1/gcoulon/HSCP_prod/GluinoRun2corr/Gluino2000_Run2_vcorr.root");
-    }
-
-    else if(dataset == "GluinoRun2_miniAOD_FULL") {
+    else if(dataset == "TTbar2024") {
        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-       std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/GluinoRun2corr/";
-       std::string fileNames[] = { (pathData + "V13p0.txt").c_str()};
+       std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/TTbar2024/";
+       std::string fileNames[] = { (pathData + "V15p9.txt").c_str()};
        
        for (const std::string& fileName : fileNames) {
             std::ifstream file(fileName);
@@ -498,11 +436,10 @@
         }
     }
 
-
-    else if(dataset == "TTbar2024") {
+    else if(dataset == "TTbarSemiLep2024") {
        chain = new TChain("HSCPMiniAODAnalyzer/Events");
-       std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/TTbar2024/";
-       std::string fileNames[] = { (pathData + "V15p9.txt").c_str()};
+       std::string pathData = "/scratch/ui3_1/gcoulon/HSCP_prod/BKG/TTbar1L1Nu2024/";
+       std::string fileNames[] = { (pathData + "V22p0.txt").c_str()};
        
        for (const std::string& fileName : fileNames) {
             std::ifstream file(fileName);
