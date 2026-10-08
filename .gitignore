@@ -1,6 +1,17 @@
+# ROOT files, wherever they are
 *.root
-output/*
-outputDisplay/*
-macros/HSCPSelector_C*
-macros/*.root
+
+# Build products
 libTools.so
+macros/HSCPSelector_C*
+__pycache__/
+*.pyc
+
+# output/ and outputDisplay/ are part of the repository, their content is not.
+# Each directory to keep holds an empty .gitkeep file.
+output/**
+!output/**/
+!output/**/.gitkeep
+outputDisplay/**
+!outputDisplay/**/
+!outputDisplay/**/.gitkeep

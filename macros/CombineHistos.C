@@ -4864,7 +4864,7 @@ void TriggerEffCalib__Signal(const char *labelSIGNAL, const char *inputfileSIGNA
         return;
     }
 
-    TFile *ofile = new TFile(Form("TriggEff/TriggerEffCalib__Signal_%s.root", ofilename), "RECREATE");
+    TFile *ofile = new TFile(Form("../outputDisplay/TriggEff/TriggerEffCalib__Signal_%s.root", ofilename), "RECREATE");
 
     // ------------------------------------------------------------------
     // configuration
@@ -5031,9 +5031,9 @@ void TriggerEffCalib__Signal(const char *labelSIGNAL, const char *inputfileSIGNA
             latex1->Draw();
 
             // ---- saving ----
-            c->SaveAs(Form("TriggEff/c_%s___%s__SIGNAL__%s.pdf",
+            c->SaveAs(Form("../outputDisplay/TriggEff/c_%s___%s__SIGNAL__%s.pdf",
                            trg.c_str(), obs.tag.c_str(), ofilename));
-            c->SaveAs(Form("TriggEff/c_%s___%s__SIGNAL__%s.C",
+            c->SaveAs(Form("../outputDisplay/TriggEff/c_%s___%s__SIGNAL__%s.C",
                            trg.c_str(), obs.tag.c_str(), ofilename));
 
             ofile->cd();
@@ -5044,7 +5044,7 @@ void TriggerEffCalib__Signal(const char *labelSIGNAL, const char *inputfileSIGNA
     // ------------------------------------------------------------------
     // write LaTeX table
     // ------------------------------------------------------------------
-    std::ofstream tex(Form("TriggEff/TriggerEff_table_%s.txt", ofilename));
+    std::ofstream tex(Form("../outputDisplay/TriggEff/TriggerEff_table_%s.txt", ofilename));
     tex << "\\begin{table}[htbp]\n  \\centering\n"
         << "  \\caption{Integrated trigger efficiency (signal). "
         << "The last column gives the efficiency after a lower cut on the observable "
@@ -5158,7 +5158,7 @@ void TriggerEffCalib__Signal__2D(const char *labelSIGNAL, const char *inputfileS
             c->cd(); latex1->Draw();
 
             // ---- saving ----
-            c->SaveAs(Form("TriggEff/c_%s_%s_SIGNAL__%s.pdf",
+            c->SaveAs(Form("../outputDisplay/TriggEff/c_%s_%s_SIGNAL__%s.pdf",
                            trg.c_str(), obsName.c_str(), SignalLabel));
         }
     }
@@ -5242,8 +5242,8 @@ void TriggerEffCalib (const char *labelData, const char *labelMC,
     latex1->SetTextSize(0.04);
 
     // fichiers SF par bin pour orMETtrg (PseudoCaloMET et PUppiMET)
-    std::ofstream sfPseudo(Form("TriggEff/SF_orMETtrg_PseudoCaloMET_%s.txt", ofilename));
-    std::ofstream sfPUppi (Form("TriggEff/SF_orMETtrg_PUppiMET_%s.txt",      ofilename));
+    std::ofstream sfPseudo(Form("../outputDisplay/TriggEff/SF_orMETtrg_PseudoCaloMET_%s.txt", ofilename));
+    std::ofstream sfPUppi (Form("../outputDisplay/TriggEff/SF_orMETtrg_PUppiMET_%s.txt",      ofilename));
 
     std::ostringstream texBody;
 
@@ -5394,7 +5394,7 @@ void TriggerEffCalib (const char *labelData, const char *labelMC,
             TCanvas *cRatio = DrawWithRatio(eff_DATA, eff_MC, c,
                                             ratioTag.c_str(), "DATA/MC",
                                             obs.xtitle.c_str(), 0, xUp);
-            cRatio->SaveAs(Form("TriggEff/cRatio_%s_%s.pdf",
+            cRatio->SaveAs(Form("../outputDisplay/TriggEff/cRatio_%s_%s.pdf",
                                 ratioTag.c_str(), ofilename));
 
             // ---- "bis" pass: refresh canvas then redraw (fixes rendering) ----
@@ -5404,9 +5404,9 @@ void TriggerEffCalib (const char *labelData, const char *labelMC,
             TCanvas *cRatio_bis = DrawWithRatio(eff_DATA, eff_MC, c,
                                                 ratioTag.c_str(), "DATA/MC",
                                                 obs.xtitle.c_str(), 0, xUp);
-            cRatio_bis->SaveAs(Form("TriggEff/cRatio_%s_%s_bis.pdf",
+            cRatio_bis->SaveAs(Form("../outputDisplay/TriggEff/cRatio_%s_%s_bis.pdf",
                                     ratioTag.c_str(), ofilename));
-            cRatio_bis->SaveAs(Form("TriggEff/cRatio_%s_%s_bis.C",
+            cRatio_bis->SaveAs(Form("../outputDisplay/TriggEff/cRatio_%s_%s_bis.C",
                                     ratioTag.c_str(), ofilename));
         }
     }
@@ -5414,7 +5414,7 @@ void TriggerEffCalib (const char *labelData, const char *labelMC,
     sfPseudo.close();
     sfPUppi.close();
 
-    std::ofstream tex(Form("TriggEff/TriggerEff_table_%s.txt", ofilename));
+    std::ofstream tex(Form("../outputDisplay/TriggEff/TriggerEff_table_%s.txt", ofilename));
     tex << "\\begin{table}[htbp]\n  \\centering\n"
         << "  \\caption{Integrated trigger efficiency, data vs.\\ MC. "
         << "The last three columns give the efficiencies and scale factor after a lower cut "
@@ -5583,9 +5583,9 @@ void TriggerEffCalib__2D(const char *labelData, const char *labelMC,
                                             "COLZ", 0, 1200, 0, 1200, 0, 1);
             c_SF_fine->cd(); latex1->Draw();
  
-            c_MC_fine->SaveAs(Form("TriggEff/c_%s_%s_MC_fineBin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
-            c_DATA_fine->SaveAs(Form("TriggEff/c_%s_%s_DATA_fineBin__%s.pdf", trg.c_str(), obsName.c_str(), ofilename));
-            c_SF_fine->SaveAs(Form("TriggEff/c_%s_%s_SF_fineBin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
+            c_MC_fine->SaveAs(Form("../outputDisplay/TriggEff/c_%s_%s_MC_fineBin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
+            c_DATA_fine->SaveAs(Form("../outputDisplay/TriggEff/c_%s_%s_DATA_fineBin__%s.pdf", trg.c_str(), obsName.c_str(), ofilename));
+            c_SF_fine->SaveAs(Form("../outputDisplay/TriggEff/c_%s_%s_SF_fineBin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
  
             // ==========================================================
             // drawing + saving : rebinned
@@ -5603,9 +5603,9 @@ void TriggerEffCalib__2D(const char *labelData, const char *labelMC,
                                           "TEXT", 0, 1200, 0, 1200, 0, 1);
             c_SF_rb->cd(); latex1->Draw();
  
-            c_MC_rb->SaveAs(Form("TriggEff/c_%s_%s_MC_rebin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
-            c_DATA_rb->SaveAs(Form("TriggEff/c_%s_%s_DATA_rebin__%s.pdf", trg.c_str(), obsName.c_str(), ofilename));
-            c_SF_rb->SaveAs(Form("TriggEff/c_%s_%s_SF_rebin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
+            c_MC_rb->SaveAs(Form("../outputDisplay/TriggEff/c_%s_%s_MC_rebin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
+            c_DATA_rb->SaveAs(Form("../outputDisplay/TriggEff/c_%s_%s_DATA_rebin__%s.pdf", trg.c_str(), obsName.c_str(), ofilename));
+            c_SF_rb->SaveAs(Form("../outputDisplay/TriggEff/c_%s_%s_SF_rebin__%s.pdf",     trg.c_str(), obsName.c_str(), ofilename));
         }
     }
  
@@ -5934,12 +5934,12 @@ void SignalEffVsMass(const char *ofilename = "EffVsMass") {
         tex->Draw();
         if (isel==2) tex2->Draw();
 
-        c->SaveAs(Form("TriggEff/c_EffVsMass_%s__%s.pdf", sel.c_str(), ofilename));
+        c->SaveAs(Form("../outputDisplay/TriggEff/c_EffVsMass_%s__%s.pdf", sel.c_str(), ofilename));
 
         latex1->SetTitle("#it{Private work (CMS simulation)}");
         c->Modified();
         c->Update();
-        c->SaveAs(Form("TriggEff/c_EffVsMass_%s__%s_bis.pdf", sel.c_str(), ofilename));
+        c->SaveAs(Form("../outputDisplay/TriggEff/c_EffVsMass_%s__%s_bis.pdf", sel.c_str(), ofilename));
         latex1->SetTitle("#scale[1.3]{#bf{CMS}}#it{Simulation Work in progress}");
     }
 
@@ -6088,7 +6088,7 @@ void DisplayTriggerEff(const TString& inputFile = "../output/Gluino_V19/Gluino_R
 
     c->cd();
     c->Update();
-    c->SaveAs(Form("TriggEff/METdist%s.pdf", (sig) ? "_SIGNAL" : "_DATA"));
+    c->SaveAs(Form("../outputDisplay/TriggEff/METdist%s.pdf", (sig) ? "_SIGNAL" : "_DATA"));
 }
 
 
@@ -6281,11 +6281,11 @@ void PairTypeStages_SingleMass(int mass = 2000,
     mtext->Draw();
 
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/c_PairTypeStages_m%d__%s.pdf", mass, ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/c_PairTypeStages_m%d__%s.pdf", mass, ofilename));
 
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/c_PairTypeStages_m%d__%s_bis.pdf", mass, ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/c_PairTypeStages_m%d__%s_bis.pdf", mass, ofilename));
 
     return;
 }
@@ -6439,11 +6439,11 @@ void PFType_ProportionAndTrigEff(const char *ofilename = "PFTypeProp") {
     latex1->Draw();
 
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/c_PFTypeProp__%s.pdf", ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/c_PFTypeProp__%s.pdf", ofilename));
 
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/c_PFTypeProp__%s_bis.pdf", ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/c_PFTypeProp__%s_bis.pdf", ofilename));
 
     return;
 }
@@ -6589,11 +6589,11 @@ void TriggerEfficiency_ByMass(const char *ofilename = "TriggerEff") {
     latex1->Draw();
 
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/c_TriggerEfficiency__%s.pdf", ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/c_TriggerEfficiency__%s.pdf", ofilename));
 
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/c_TriggerEfficiency__%s_bis.pdf", ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/c_TriggerEfficiency__%s_bis.pdf", ofilename));
 
     return;
 }
@@ -6726,11 +6726,11 @@ void PairTypeStages_SingleMass__Notrigger(int mass = 2000,
     mtext->Draw();
 
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/PairTypeStages_SingleMass__Notrigger_%d__%s.pdf", mass, ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/PairTypeStages_SingleMass__Notrigger_%d__%s.pdf", mass, ofilename));
 
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/PairTypeStages_SingleMass__Notrigger_%d__%s_bis.pdf", mass, ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/PairTypeStages_SingleMass__Notrigger_%d__%s_bis.pdf", mass, ofilename));
 
     return;
 }
@@ -6861,11 +6861,11 @@ void PairTypeStages_SingleMass__Trigger(int mass = 2000,
     mtext->Draw();
 
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/PairTypeStages_SingleMass__Trigger_%d__%s.pdf", mass, ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/PairTypeStages_SingleMass__Trigger_%d__%s.pdf", mass, ofilename));
 
     latex1->SetTitle("#it{Private work (CMS simulation)}");
     c->Modified(); c->Update();
-    c->SaveAs(Form("TriggEff/PairTypeStages_SingleMass__Trigger_%d__%s_bis.pdf", mass, ofilename));
+    c->SaveAs(Form("../outputDisplay/TriggEff/PairTypeStages_SingleMass__Trigger_%d__%s_bis.pdf", mass, ofilename));
 
     return;
 }
@@ -8790,7 +8790,7 @@ void TriggerEfficiency_VsBeta(const char *ofilename = "TriggEffBeta") {
     line50->Draw("same");
 
     c1->Modified(); c1->Update();
-    c1->SaveAs(Form("TriggEff/c_BetaDistribution__%s.pdf", ofilename));
+    c1->SaveAs(Form("../outputDisplay/TriggEff/c_BetaDistribution__%s.pdf", ofilename));
 
     // ================= Canvas 2 : efficacite =================
     TCanvas *c2 = new TCanvas("c_TriggerEfficiencyBeta", "c_TriggerEfficiencyBeta", 800, 600);
@@ -8809,16 +8809,16 @@ void TriggerEfficiency_VsBeta(const char *ofilename = "TriggEffBeta") {
     latex1->Draw();
 
     c2->Modified(); c2->Update();
-    c2->SaveAs(Form("TriggEff/c_TriggerEfficiencyBeta__%s.pdf", ofilename));
+    c2->SaveAs(Form("../outputDisplay/TriggEff/c_TriggerEfficiencyBeta__%s.pdf", ofilename));
 
     // ================= versions "Private work" =================
     latex1->SetTitle("#it{Private work (CMS simulation)}");
 
     c1->Modified(); c1->Update();
-    c1->SaveAs(Form("TriggEff/c_BetaDistribution__%s_bis.pdf", ofilename));
+    c1->SaveAs(Form("../outputDisplay/TriggEff/c_BetaDistribution__%s_bis.pdf", ofilename));
 
     c2->Modified(); c2->Update();
-    c2->SaveAs(Form("TriggEff/c_TriggerEfficiencyBeta__%s_bis.pdf", ofilename));
+    c2->SaveAs(Form("../outputDisplay/TriggEff/c_TriggerEfficiencyBeta__%s_bis.pdf", ofilename));
 
     return;
 }
@@ -10342,8 +10342,8 @@ void CombineHistos()
     // DisplayTriggerEff("../output/Gluino_V19/Gluino_Run3_MET_madgraph_2000_V19p8.root", true);
     // DisplayTriggerEff("../output/Mu2024_V18/Mu2024_V18p1.root", false);
 
-    // ExtractSF("TriggEff/SF_PseudoMET.txt",
-    //         "TriggEff/SF_PseudoMET_tex.txt",
+    // ExtractSF("../outputDisplay/TriggEff/SF_PseudoMET.txt",
+    //         "../outputDisplay/TriggEff/SF_PseudoMET_tex.txt",
     //         "TriggerEffCalib_PseudoCaloMET",
     //         "TriggerEffCalib_if___orMETtrg___PseudoCaloMET",
     //         "TriggerEffCalib_PseudoCaloMET",
@@ -10351,8 +10351,8 @@ void CombineHistos()
     //         "../output/Mu2024_V18/Mu2024_V18p1.root",
     //         "../output/Wjets2024_V14/WjetMuNu2024_V14p12.root");
 
-    // ExtractSF("TriggEff/SF_PUppiMET.txt",
-    //         "TriggEff/SF_PUppiMET_tex.txt",
+    // ExtractSF("../outputDisplay/TriggEff/SF_PUppiMET.txt",
+    //         "../outputDisplay/TriggEff/SF_PUppiMET_tex.txt",
     //         "TriggerEffCalib_PUppiMET",
     //         "TriggerEffCalib_if___orMETtrg___PUppiMET",
     //         "TriggerEffCalib_PUppiMET",

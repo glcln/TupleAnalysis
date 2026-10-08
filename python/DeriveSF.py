@@ -52,7 +52,7 @@ LABEL_DATA = "TriggerEffCalib"
 LABEL_MC   = "TriggerEffCalib"
 
 OFILENAME  = "TriggerEffCalib"
-OUTDIR     = "TriggEff"
+OUTDIR     = "../outputDisplay/TriggEff"
 
 OBS = "PUppiMET_VS_PseudoMET"
 TRIGGERS = ["orMETtrg"]
