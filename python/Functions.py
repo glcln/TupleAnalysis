@@ -1,3 +1,9 @@
+# Code generators used by CreateSelector.py.
+#
+# Each row of cfg/HSCPpreSelections.csv holds a selection label (first column) and the
+# C++ boolean expression defining it (second column), written with the TTreeReader
+# members of HSCPSelector and the candidate index i. A row whose label starts with #
+# is skipped.
 
 # check if a line or a work is commented
 # meaning starting by a #
@@ -9,7 +15,7 @@ def IsCommented(label):
 def HSCPSelectorProto(label):
     #content for header file
     hcontent = "bool PassHSCPpresel_"+label+"(int hscpIndex);\n"
-    return hcontent 
+    return hcontent
 
 # Generate a data function implementation used for HSPC selection in the HSCPSelector class
 # A label should be associated to the selection
@@ -17,18 +23,18 @@ def HSCPSelectorProto(label):
 def HSCPSelectorImpl(label, instruction):
     #content for C file
     content = "bool HSCPSelector::PassHSCPpresel_"+label+"(int i){\n"
-    
-    if (label == "CalibPseudoMET"): 
+
+    if (label == "CalibPseudoMET"):
         content+= "   if (i < 0) {\n"
         content+= "      cout << i << endl;\n"
         content+= "      return false;\n"
         content+= "   }\n"
-    else: 
+    else:
         content+= "   if (i<0 || i>(int)Pt.GetSize()) {\n"
         content+= "      cout << i << endl;\n"
         content+= "      return false;\n"
         content+= "   }\n"
-    
+
     content+= "   return "+instruction+";\n"
     content+= "}\n"
     return content
@@ -36,47 +42,31 @@ def HSCPSelectorImpl(label, instruction):
 # Generation lines of code to add the method and the label into vectors
 def HSCPSelectorAddLabelsAndPointers2Vector(label):
    content = "selections_.push_back(&HSCPSelector::PassHSCPpresel_"+label+");\n"
-   content+= "selLabels_.push_back(\""+label+"\");\n" 
+   content+= "selLabels_.push_back(\""+label+"\");\n"
    return content
 
 
-def Code_AddPlot(df):
-    code = ""
-    for index, row in df.iterrows():
-        if IsCommented(row[0]): 
-            continue
-        code+="plots.AddHisto1D(selLabels_[i]+\""+row['label']+"\","+str(row['nbins'])+","+str(row['min'])+","+str(row['max'])+");\n"
-    return code
-
-def Code_FillPlot(df):
-    code = ""
-    for index, row in df.iterrows():
-        if IsCommented(row[0]): 
-            continue
-        code+="vcp[s].FillHisto1D(selLabels_[s]+\""+row['label']+"\","+row['variable']+"[i]);\n"
-    return code
-
-
-# The 3 functions below generate the codes for all preselection found in a pandas dataframe called pd
+# The 3 functions below generate the codes for all preselection found in a pandas dataframe called df
+# (row.iloc[0] is the label, row.iloc[1] the C++ expression)
 
 def Code_HSCPSelectorProto(df):
     code = ""
     for index, row in df.iterrows():
-        if IsCommented(row[0]): 
+        if IsCommented(row.iloc[0]):
             continue
-        code+=HSCPSelectorProto(row[0])+"\n"
+        code+=HSCPSelectorProto(row.iloc[0])+"\n"
     return code
 
 def Code_HSCPSelectorImpl(df):
     code = ""
     for index, row in df.iterrows():
-        if IsCommented(row[0]): continue
-        code+=HSCPSelectorImpl(row[0],row[1])+"\n"
+        if IsCommented(row.iloc[0]): continue
+        code+=HSCPSelectorImpl(row.iloc[0],row.iloc[1])+"\n"
     return code
 
 def Code_HSCPSelectorAddLabelsAndPointers2Vector(df):
     code = ""
     for index, row in df.iterrows():
-        if IsCommented(row[0]): continue
-        code+=HSCPSelectorAddLabelsAndPointers2Vector(row[0])+"\n"
+        if IsCommented(row.iloc[0]): continue
+        code+=HSCPSelectorAddLabelsAndPointers2Vector(row.iloc[0])+"\n"
     return code

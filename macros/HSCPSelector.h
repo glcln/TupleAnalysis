@@ -245,8 +245,6 @@ bool PassHSCPpresel_METanalysis_TestPUppiMETCut_SigmaPtoverPt_0p5_EoP_0p1_Eta1_2
    float fpix10 = 1.0;
 
 
-   std::string regFpixAll = "_regionAll";
-
    std::string regFpixA_3f4 = "_regionA_3fp4";
    std::string regFpixA_3f6 = "_regionA_3fp6";
    std::string regFpixA_3f8 = "_regionA_3fp8";

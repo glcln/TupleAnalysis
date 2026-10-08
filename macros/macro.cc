@@ -194,7 +194,7 @@
 
 
 
-    TChain* chain;
+    TChain* chain = nullptr;
 
     if (dataset.find("Gluino_Run3") != std::string::npos) {
         if (version=="V19p0") {

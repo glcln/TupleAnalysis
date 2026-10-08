@@ -1,4 +1,15 @@
-import os
+# Generate macros/HSCPSelector.h and macros/HSCPSelector.C from the templates
+# macros/HSCPTemplate.h and macros/HSCPTemplate.C.
+#
+# The templates are copied line by line. After each marker line, the code generated
+# from the preselections listed in cfg/HSCPpreSelections.csv is inserted:
+#   ADD-HSCP-SELECTION     (HSCPTemplate.h)  declarations of the PassHSCPpresel_<label> methods
+#   ADD-SELECTION-METHODS  (HSCPTemplate.C)  their implementations
+#   FILL-SELECTION-VECTOR  (HSCPTemplate.C)  registration of each method and of its label
+#
+# Must be run from the python/ directory (the paths below are relative):
+#   cd python && python3 CreateSelector.py
+
 from Functions import *
 import pandas as pd
 
@@ -43,15 +54,6 @@ for line in c_temp:
     if line.find("FILL-SELECTION-VECTOR")>0:
         content = Code_HSCPSelectorAddLabelsAndPointers2Vector(df_HSCPsel)
         c_out.write(content)
-    #add code to add a plot
-    if line.find("ADD-CPLOTS")>0:
-        c_out.write(content)
-    #add code to fill a plot
-    if line.find("FILL-CPLOTS")>0:
-        c_out.write(content)
 
 c_out.close()
 c_temp.close()
-
-#
-#
