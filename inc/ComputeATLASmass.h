@@ -1,7 +1,6 @@
 #include <cmath>
-#include <cstdlib>
-#include <ctime>
 #include <iostream>
+#include <string>
 #include <TMatrixDSym.h>
 #include <TMatrixDSymEigen.h>
 #include <TVectorD.h>
@@ -10,7 +9,6 @@
 using namespace std;
 
 #define TOLERANCE 1e-6
-#define MAX_ITER 1000
 #define MIN 0.3
 #define MAX 10000
 
@@ -127,8 +125,14 @@ BetaGammaMinResult findBetaGammaWithCovariance(double Ih, const double *FitParam
 
     double min_up  = R.bg_nominal;
     double min_down = R.bg_nominal;
-    double *p_up_end = p_nom;
-    double *p_down_end = p_nom;
+    // Parameters of the variations defining the envelope, initialised to the nominal ones.
+    // They must be independent copies: pointing to p_nom would overwrite the nominal parameters.
+    double p_up_end[6];
+    double p_down_end[6];
+    for (int i=0; i<6; i++) {
+        p_up_end[i]   = p_nom[i];
+        p_down_end[i] = p_nom[i];
+    }
 
     // --- Loop over each eigen-direction --------------------------------------
     for (int k=0; k<5; k++)
@@ -181,41 +185,6 @@ BetaGammaMinResult findBetaGammaWithCovariance(double Ih, const double *FitParam
     }
 
     return R;
-}
-
-
-// -----------------------------------------------------------------------------
-// Find zero of the function using Bisection Method
-// -----------------------------------------------------------------------------
-double ZeroBisectionMethod(double a, double b, const double *params) {
-    TF1 f("f", AtlasFunction, a, b, 6);
-    for (int i = 0; i < 6; i++)
-        f.FixParameter(i, params[i]);
-
-    double fa = f.Eval(a);
-    double fb = f.Eval(b);
-
-    if (fa * fb >= 0) return -1;
-
-    int iter = 0;
-    double c;
-
-    while ((b - a) > TOLERANCE && iter < MAX_ITER) {
-        c = (a + b) / 2;
-        double fc = f.Eval(c);
-        if (fc == 0.0)
-            return c;
-        else if (fa * fc < 0) {
-            b = c;
-            fb = fc;
-        } else {
-            a = c;
-            fa = fc;
-        }
-        iter++;
-    }
-
-    return (a + b) / 2;
 }
 
 
@@ -341,8 +310,7 @@ double findMass(const double p,
                 const double Ih,
                 const std::string year,
                 bool up=false, 
-                bool down=false, 
-                bool nomsup=false) {
+                bool down=false) {
     TMatrixDSym CovMatrix = TMatrixDSym(5);
     double *params = nullptr;
     if (year == "2024data") {
@@ -365,8 +333,6 @@ double findMass(const double p,
     BetaGammaMinResult R = findBetaGammaWithCovariance(Ih, params, CovMatrix);
     if (R.bg_nominal < 0 || R.bg_up < 0 || R.bg_down < 0) return -1;   // Ih < min value, no solution
 
-    //double First_bg = ZeroBisectionMethod(MIN, bgmin, params);
-
     if (up) {           // For the upper band
         double First_bg_up = ZeroBrentMethod(MIN, R.bg_up, TOLERANCE, R.params_up);
         return p / First_bg_up;
@@ -374,10 +340,6 @@ double findMass(const double p,
     else if (down) {    // For the lower band
         double First_bg_down = ZeroBrentMethod(MIN, R.bg_down, TOLERANCE, R.params_down);
         return p / First_bg_down;
-    }
-    else if (nomsup) {
-        double First_bg_sup = ZeroBrentMethod(R.bg_nominal, MAX, TOLERANCE, R.params_up);
-        return p / First_bg_sup;    // always First_bg_sup == MAX -> never extra solution
     }
     
     // Use the parameters associated with the nominal minimum

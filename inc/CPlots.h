@@ -1,60 +1,38 @@
 #ifndef CPlots_h
 #define CPlots_h
 
-#include <TH1D.h>
-#include <TH2D.h>
-#include <TH3F.h>
+#include <TH1.h>
+#include <TH2.h>
 #include <TList.h>
-#include <TFile.h>
-#include <TProfile.h>
 #include <map>
+#include <string>
 
 
 /**
- The class CPlots is used to create, store & fill many histograms.
- The current version contains TH1D but should be extended to TH2D and TProfile.
- It use std::map as container in order is add histo with the method AddHisto1D.
- Several labels are provide to indentify:
-  - the selection
-  - the region (A,B,C,D or "")
-  - the Ias quantile (associated with the definition of the regions)
-  - more info could be provided such as "all", "highestIas", etc ... to describe what contain the histos
-  Orderd usage of methods:
-   - SetLabels should be called before adding histos
-   - AddHisto before any loop (in initialization)
-   - FillHisto within the loop(s)
-   - Write after the loop(s). Plots will be stored in a directory with the name of the selection
+ The class CPlots is used to create, store & fill many histograms (TH1D, TH1F, TH2F),
+ addressed by their name through std::map containers.
+ Ordered usage of methods:
+   - AddHisto* before any loop (in initialization). A name already booked is ignored.
+   - FillHisto* within the loop(s). Returns false if no histogram has this name.
+   - AddToList after the loop(s), to hand the histograms over to an output list.
+ The histograms are never deleted by CPlots, and copies of a CPlots share the same histograms.
  **/
 
-class CPlots: public TObject{
+class CPlots{
     public:
         CPlots(){}
-       
-        //CPlots(const CPlots &c);
         ~CPlots();
-        void SetLabels(std::string selection, std::string region="", std::string IasQuantile="", std::string moreinfo="");
         void AddHisto1F(std::string name, int nbins, float xmin, float xmax, std::string title = "");
         void AddHisto2F(std::string name, int nbinsx, float xmin, float xmax,int nbinsy,float ymin, float ymax,std::string title = "");
         void AddHisto1D(std::string name, int nbins, float xmin, float xmax, std::string title = "");
-        void AddHisto2D(std::string name, int nbinsx, float xmin, float xmax,int nbinsy,float ymin, float ymax,std::string title = "");
-        TH1D* GetHisto1D(std::string name);
-        //TH1D GetHisto1D(std::string name);
         bool FillHisto1D(std::string name, float value, float weight = 1);
-        bool FillHisto2D(std::string name, float xvalue,float yvalue, float weight = 1);
         bool FillHisto1F(std::string name, float value, float weight = 1);
         bool FillHisto2F(std::string name, float xvalue,float yvalue, float weight = 1);
-        using TObject::Write;
-        bool Write(TFile* ofile);
         bool AddToList(TList* list);	
 
     private:
-        std::string selection_;
-        std::string region_;
-        std::string IasQuantile_;
-        std::string moreinfo_;
         std::map<std::string,TH1D*> mh1D_;
         std::map<std::string,TH1F*> mh1F_;
-        std::map<std::string,TH2D*> mh2D_;
         std::map<std::string,TH2F*> mh2F_;
 };
 

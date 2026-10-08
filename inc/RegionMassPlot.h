@@ -2,18 +2,12 @@
 #define RegionMassPlot_h
 
 
-#include <TROOT.h>
-#include <TChain.h>
-#include <TFile.h>
 #include <TH1F.h>
 #include <TH2F.h>
-#include <TH3F.h>
-#include <TProfile.h>
-#include <TCanvas.h>
-#include <TMath.h>
-#include <iostream>
+#include <TList.h>
+#include <string>
 
-#include "PlotTools.h"
+// Not needed by this class: HSCPSelector.h gets GetMass and loadSF1D/2D through this include.
 #include "MassTools.h"
 
 class RegionMassPlot{
@@ -23,23 +17,15 @@ class RegionMassPlot{
         ~RegionMassPlot();
        
         //Methods
-	void initHisto();
         void initHisto(int& etabins,int& ihbins,int& pbins,int& massbins,int& fpixbins, float& C_parameter);
         void fill(float eta, float nhits, float p, float pt, float pterr, float ih, float ias, float m, float npv, float fpix, float w);
-        void OneOverPreweighting(TH2F* ih_p_1, TH1F* p2);
-        void fillMassFrom1DTemplatesEtaBinning(float weight_);
-        void plotMass();
-        void write();
         void addToList(TList* list);	
 
 	//Data members
 	std::string suffix_;
        
 	//Plots binning
-	int nbins;
-        float* xbins;
         int np;
-        double* xp;
         float plow;
         float pup;
         int npt;
@@ -62,7 +48,6 @@ class RegionMassPlot{
         float fpixup;
         
         //List of all histos 
-	TCanvas* c;
         TH2F* ih_pt;
         TH2F* ias_pt;
         TH2F* ih_ias;
@@ -89,19 +74,6 @@ class RegionMassPlot{
         TH2F* mass_p;
         TH2F* mass_ih;
 	TH1F* mass;
-        TH1F* massFrom1DTemplates;
-        TH1F* massFrom1DTemplatesEtaBinning;
-        TH1F* pred_mass;
-        TH2F* eta_p_rebinned;
-
-        //vector histogram
-        TH1F* errMass;
-        TH2F* Mass_errMass;
-        TH2F* cross1Dtemplates;
-        TH1F* ih_used;
-        TH2F* mapM800;
-        TH1F* momentumDistribM1000;
-        TH1F* dedxDistribM1000;
 };
 
 #endif

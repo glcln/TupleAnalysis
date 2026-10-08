@@ -1,52 +1,15 @@
 #include "MassTools.h"
-#include "PlotTools.h"
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 
 using namespace std;
-
-
-
 
 
 float GetMass(float p, float ih, float k, float c)
 {
     return (ih-c)<0?-1:sqrt((ih-c)/k)*p;
-}
-
-
-float deltaR(float eta1, float phi1, float eta2, float phi2) {
-    float deta = eta1 - eta2;
-    float dphi = phi1 - phi2;
-    while (dphi > M_PI)
-        dphi -= 2 * M_PI;
-    while (dphi <= -M_PI)
-        dphi += 2 * M_PI;
-    return sqrt(deta * deta + dphi * dphi);
-}
-
-void loadSF(const std::string& filepath,
-            bool SFisUp,
-            bool SFisDown,
-            std::vector<float>& SF_PseudoMETvalue,
-            std::vector<float>& SF_triggerEff) {
-                
-    SF_PseudoMETvalue.clear();
-    SF_triggerEff.clear();
-
-    std::ifstream file(filepath);
-    if (!file.is_open())
-        throw std::runtime_error("Cannot open file: " + filepath);
-
-    float pseudoMET, sfDown, sf, sfUp;
-    cout << "Loading SF from file: " << filepath << endl;
-    while (file >> pseudoMET >> sfDown >> sf >> sfUp) {
-        SF_PseudoMETvalue.push_back(pseudoMET);
-
-        if      (SFisUp)   SF_triggerEff.push_back(sfUp);
-        else if (SFisDown) SF_triggerEff.push_back(sfDown);
-        else               SF_triggerEff.push_back(sf);
-    }
-
-    return;
 }
 
 
@@ -83,8 +46,6 @@ void loadSF2D(const std::string& filepath,
         SF.push_back(sf);
         SF_Up.push_back(sfUp);
     }
-
-    return;
 }
 
 void loadSF1D(const std::string& filepath,
@@ -111,6 +72,4 @@ void loadSF1D(const std::string& filepath,
         SF.push_back(sf);
         SF_Up.push_back(sfUp);
     }
-
-    return;
 }
